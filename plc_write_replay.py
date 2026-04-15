@@ -221,15 +221,25 @@ class PLCWriteReplayClient(PLCUploadClient):
                     self._sock.sendall(frame_bytes)
                     success, response = self.await_response(timeout)
                     if success:
+                        ft = struct.unpack('<H', response.get('frame_type', b'\x00\x00'))[0]
+                        print(f"  [CONN] OK (response frame_type=0x{ft:02x}, "
+                              f"{len(response.get('raw', b''))}B)")
                         stats['sent'] += 1
                         stats['success'] += 1
                         time.sleep(0.3)  # Stabilize session
                     else:
+                        err = response.get('error', 'unknown') if isinstance(response, dict) else str(response)
+                        print(f"  [CONN] FAILED: {err}")
+                        if isinstance(response, dict) and 'response' in response:
+                            resp = response['response']
+                            ft = struct.unpack('<H', resp.get('frame_type', b'\x00\x00'))[0] if resp.get('frame_type') else 0
+                            print(f"         PLC responded with frame_type=0x{ft:02x}, "
+                                  f"raw hex[:40]={resp.get('raw_hex','')[:40]}")
                         stats['errors'] += 1
                         stats['sent'] += 1
                         return False, stats
                 except Exception as e:
-                    print(f"EXCEPTION: {e}")
+                    print(f"  [CONN] EXCEPTION: {type(e).__name__}: {e}")
                     stats['errors'] += 1
                     stats['sent'] += 1
                     return False, stats
@@ -280,7 +290,14 @@ class PLCWriteReplayClient(PLCUploadClient):
                     stats['success'] += 1
                     stats['sent'] += 1
                 else:
-                    print(f"NO RESPONSE")
+                    err = response.get('error', 'unknown') if isinstance(response, dict) else str(response)
+                    print(f"FAILED: {err}")
+                    if isinstance(response, dict) and 'response' in response:
+                        resp = response['response']
+                        rft = struct.unpack('<H', resp.get('frame_type', b'\x00\x00'))[0] if resp.get('frame_type') else 0
+                        print(f"         PLC responded frame_type=0x{rft:02x} "
+                              f"status=0x{resp.get('status', 0):02x} "
+                              f"raw_hex[:40]={resp.get('raw_hex','')[:40]}")
                     stats['errors'] += 1
                     stats['sent'] += 1
 
