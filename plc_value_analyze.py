@@ -222,7 +222,7 @@ def main():
     # Save output
     out_path = Path(args.out)
     try:
-        with open(out_path, 'w') as f:
+        with open(out_path, 'w', encoding='utf-8') as f:
             json.dump(output, f, indent=2, ensure_ascii=False)
         print(f"✓ Saved to {out_path}")
     except Exception as e:
