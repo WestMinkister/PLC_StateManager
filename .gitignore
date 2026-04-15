@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 snapshots/*.bin
 snapshots/*.json
+tests/__pycache__/

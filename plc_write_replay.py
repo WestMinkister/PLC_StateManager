@@ -470,6 +470,8 @@ def main():
                         help='Delay between frames (seconds)')
     parser.add_argument('--response-timeout', type=float, default=3.0,
                         help='Response timeout (seconds)')
+    parser.add_argument('--port', type=int, default=DEFAULT_PORT,
+                        help=f'PLC port (default: {DEFAULT_PORT})')
     parser.add_argument('--frames', type=str, default='write_replay_frames.json',
                         help='Input replay frames JSON')
     parser.add_argument('--snapshot-dir', type=str, default='snapshots',
@@ -553,8 +555,8 @@ def main():
             print(f"✓ Saved: {pre_path}")
 
         # Replay
-        print(f"\n[REPLAY] Connecting to {ip}:{DEFAULT_PORT}...")
-        client = PLCWriteReplayClient(ip, timeout=args.response_timeout)
+        print(f"\n[REPLAY] Connecting to {ip}:{args.port}...")
+        client = PLCWriteReplayClient(ip, plc_port=args.port, timeout=args.response_timeout)
         try:
             client.connect()
         except Exception as e:
