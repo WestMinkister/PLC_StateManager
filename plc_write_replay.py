@@ -166,13 +166,17 @@ class PLCWriteReplayClient(PLCUploadClient):
                 return False, {'error': 'BCC invalid', 'response': parsed}
 
             ft = struct.unpack('<H', parsed.get('frame_type', b'\x00\x00'))[0]
-            if ft != 0x0F:
-                return False, {'error': f'Wrong frame type 0x{ft:02x}', 'response': parsed}
+            # Accept 0x0F (command response) and 0x0A (connection ACK).
+            # CONN frames receive 0x0A response; write-window frames receive 0x0F.
+            if ft not in (0x0F, 0x0A):
+                return False, {'error': f'Unexpected frame type 0x{ft:02x}', 'response': parsed}
 
-            # Status check: compare against expected (if available)
-            actual_status = parsed.get('status')
-            if expected_status is not None and actual_status != expected_status:
-                return False, {'error': f'Status mismatch: expected 0x{expected_status:02x}, got 0x{actual_status:02x}', 'response': parsed}
+            # Status check only for 0x0F command responses (CONN has no status byte at [24]).
+            # Compare against captured expected_status when available.
+            if ft == 0x0F:
+                actual_status = parsed.get('status')
+                if expected_status is not None and actual_status != expected_status:
+                    return False, {'error': f'Status mismatch: expected 0x{expected_status:02x}, got 0x{actual_status:02x}', 'response': parsed}
 
             return True, parsed
 
