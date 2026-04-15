@@ -456,7 +456,7 @@ def print_confirmation_block(target_ip, frames_count, demo_kit_ok=False):
     print("=" * 70)
 
     prompt = f"\nType '{target_ip}' to confirm live write, or Ctrl-C to abort: "
-    user_input = input(prompt).strip()
+    user_input = input(prompt).strip().rstrip('.,;:')
 
     if user_input != target_ip:
         print("Abort: input does not match target IP")
@@ -495,6 +495,15 @@ def main():
                         help='Snapshot directory')
 
     args = parser.parse_args()
+
+    # Normalize IP arguments: strip whitespace and trailing dots/punctuation
+    # (e.g. if user copy-pasted "192.168.250.110." from documentation)
+    def _clean_ip(ip):
+        return ip.strip().rstrip('.,;:') if ip else ip
+    if args.replay:
+        args.replay = _clean_ip(args.replay)
+    if args.preflight_only:
+        args.preflight_only = _clean_ip(args.preflight_only)
 
     # Load frames
     # If --frames not specified, use bundled write_replay_frames.json
