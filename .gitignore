@@ -3,3 +3,4 @@ __pycache__/
 snapshots/*.bin
 snapshots/*.json
 tests/__pycache__/
+.DS_Store

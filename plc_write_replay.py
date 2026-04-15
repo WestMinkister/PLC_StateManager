@@ -361,14 +361,22 @@ class PLCWriteReplayClient(PLCUploadClient):
         return True, stats
 
 
-def snapshot_program(ip, label, snapshot_dir='snapshots'):
+def snapshot_program(ip, label, snapshot_dir='snapshots', plc_port=DEFAULT_PORT):
     """Take a snapshot of PLC program via upload.
 
     Uses upload_replay_frames.json to read the program, decodes Z responses,
-    saves raw bytes to snapshots/{label}_{timestamp}.bin
+    saves raw bytes to snapshots/{label}_{timestamp}.bin and
+    response list to snapshots/{label}_{timestamp}.json
+
+    Args:
+        ip: PLC IP address
+        label: snapshot label (e.g., 'pre', 'post')
+        snapshot_dir: directory to save snapshots
+        plc_port: PLC port (default: DEFAULT_PORT=2002)
 
     Returns:
-        Path object of snapshot file, or None on error
+        Tuple of (bin_path, json_path) or (None, None) on error
+        For backward compatibility, first value can be unpacked as single return
     """
     upload_json_path = resource_path('upload_replay_frames.json')
     if not os.path.exists(upload_json_path):
@@ -376,7 +384,7 @@ def snapshot_program(ip, label, snapshot_dir='snapshots'):
         print(f"  Tried: {upload_json_path}")
         print(f"  _MEIPASS: {getattr(sys, '_MEIPASS', 'not set')}")
         print(f"  CWD: {os.getcwd()}")
-        return None
+        return None, None
 
     with open(upload_json_path) as f:
         upload_frames = json.load(f)
@@ -384,16 +392,18 @@ def snapshot_program(ip, label, snapshot_dir='snapshots'):
     os.makedirs(snapshot_dir, exist_ok=True)
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    filename = f"{label}_{timestamp}.bin"
-    filepath = os.path.join(snapshot_dir, filename)
+    bin_filename = f"{label}_{timestamp}.bin"
+    json_filename = f"{label}_{timestamp}.json"
+    bin_filepath = os.path.join(snapshot_dir, bin_filename)
+    json_filepath = os.path.join(snapshot_dir, json_filename)
 
-    print(f"  Connecting to {ip}:{DEFAULT_PORT}...")
-    client = PLCUploadClient(ip)
+    print(f"  Connecting to {ip}:{plc_port}...")
+    client = PLCUploadClient(ip, plc_port=plc_port)
     try:
         client.connect()
     except Exception as e:
         print(f"  Error: {e}")
-        return None
+        return None, None
 
     print(f"  Replaying upload frames (Z commands)...")
     success, errors = client.replay_frames(upload_frames, delay=0.05)
@@ -401,43 +411,72 @@ def snapshot_program(ip, label, snapshot_dir='snapshots'):
 
     if success == 0:
         print(f"  No successful responses")
-        return None
+        return None, None
 
-    # Collect Z response payloads
+    # Collect Z response payloads and build serializable response list
     all_binary = b''
+    responses_serializable = []
+
     for response in client.responses:
-        if response.get('command_char') == 'Z' and response.get('status') == 0x06:
-            payload_hex = response.get('payload_hex', '')
-            sub_cmd = response.get('sub_cmd')
+        cmd_char = response.get('command_char')
+        payload_hex = response.get('payload_hex', '')
+        sub_cmd = response.get('sub_cmd')
+
+        # Serialize response for semantic diff
+        # Only include fields required by build_program_state()
+        serialized = {
+            'command_char': cmd_char,
+            'payload_hex': payload_hex,
+            'sub_cmd': sub_cmd,
+        }
+        responses_serializable.append(serialized)
+
+        # Accumulate Z response binary data
+        if cmd_char == 'Z' and response.get('status') == 0x06:
             if payload_hex:
                 binary = double_decode_ascii_hex(payload_hex, sub_cmd_byte=sub_cmd)
                 if binary:
                     all_binary += binary
 
-    # Save
+    # Save binary
     if not all_binary:
         print(f"  No valid Z response data")
-        return None
+        return None, None
 
-    with open(filepath, 'wb') as f:
+    with open(bin_filepath, 'wb') as f:
         f.write(all_binary)
 
-    print(f"  Saved snapshot: {filepath} ({len(all_binary)} bytes)")
-    return Path(filepath)
+    print(f"  Saved snapshot: {bin_filepath} ({len(all_binary)} bytes)")
+
+    # Save response list as JSON
+    with open(json_filepath, 'w') as f:
+        json.dump(responses_serializable, f, indent=2)
+
+    print(f"  Saved responses: {json_filepath}")
+
+    return Path(bin_filepath), Path(json_filepath)
 
 
-def diff_snapshots(pre_path, post_path):
-    """Compare pre and post snapshots.
+def diff_snapshots(pre_bin, post_bin, pre_json=None, post_json=None):
+    """Compare pre and post snapshots at byte and semantic levels.
+
+    Args:
+        pre_bin: Path to pre-snapshot .bin file
+        post_bin: Path to post-snapshot .bin file
+        pre_json: Optional Path to pre-snapshot .json file (responses list)
+        post_json: Optional Path to post-snapshot .json file (responses list)
 
     Returns:
-        dict with: size_pre, size_post, first_diff_offset, changed_byte_count, hex_preview
+        dict with:
+            byte_diff: {size_pre, size_post, first_diff_offset, changed_byte_count, hex_preview}
+            semantic_diff: None if JSON not available, else {programs_added, programs_removed, ...}
     """
-    with open(pre_path, 'rb') as f:
+    with open(pre_bin, 'rb') as f:
         pre = f.read()
-    with open(post_path, 'rb') as f:
+    with open(post_bin, 'rb') as f:
         post = f.read()
 
-    result = {
+    byte_diff = {
         'size_pre': len(pre),
         'size_post': len(post),
         'first_diff_offset': None,
@@ -449,24 +488,49 @@ def diff_snapshots(pre_path, post_path):
     min_len = min(len(pre), len(post))
     for i in range(min_len):
         if pre[i] != post[i]:
-            result['first_diff_offset'] = i
+            byte_diff['first_diff_offset'] = i
             break
 
     # Count differences
     changed = sum(1 for i in range(min_len) if pre[i] != post[i])
     if len(pre) != len(post):
         changed += abs(len(pre) - len(post))
-    result['changed_byte_count'] = changed
+    byte_diff['changed_byte_count'] = changed
 
     # Hex preview around first diff
-    if result['first_diff_offset'] is not None:
-        offset = result['first_diff_offset']
+    if byte_diff['first_diff_offset'] is not None:
+        offset = byte_diff['first_diff_offset']
         start = max(0, offset - 8)
         end = min(min_len, offset + 16)
         preview = post[start:end]
-        result['hex_preview'] = preview.hex().upper()
+        byte_diff['hex_preview'] = preview.hex().upper()
 
-    return result
+    # Attempt semantic diff if JSON files available
+    semantic_diff = None
+    if pre_json and post_json:
+        try:
+            pre_json_path = Path(pre_json) if not isinstance(pre_json, Path) else pre_json
+            post_json_path = Path(post_json) if not isinstance(post_json, Path) else post_json
+
+            if pre_json_path.exists() and post_json_path.exists():
+                from plc_upload_decode import build_program_state, diff_program_state
+
+                with open(pre_json_path) as f:
+                    pre_responses = json.load(f)
+                with open(post_json_path) as f:
+                    post_responses = json.load(f)
+
+                pre_state = build_program_state(pre_responses)
+                post_state = build_program_state(post_responses)
+                semantic_diff = diff_program_state(pre_state, post_state)
+        except Exception as e:
+            print(f"  ⚠ Semantic diff failed: {e}")
+            semantic_diff = None
+
+    return {
+        'byte_diff': byte_diff,
+        'semantic_diff': semantic_diff,
+    }
 
 
 def print_confirmation_block(target_ip, frames_count, demo_kit_ok=False):
@@ -583,9 +647,9 @@ def main():
     elif args.preflight_only:
         ip = args.preflight_only
         print(f"=== PRE-FLIGHT SNAPSHOT ===\n")
-        pre_path = snapshot_program(ip, 'pre', args.snapshot_dir)
-        if pre_path:
-            print(f"✓ Pre-flight snapshot: {pre_path}")
+        pre_bin, pre_json = snapshot_program(ip, 'pre', args.snapshot_dir, args.port)
+        if pre_bin:
+            print(f"✓ Pre-flight snapshot: {pre_bin}")
         else:
             print("✗ Pre-flight snapshot failed")
             sys.exit(1)
@@ -607,14 +671,15 @@ def main():
             sys.exit(1)
 
         # Pre-flight snapshot
-        pre_path = None
+        pre_bin = None
+        pre_json = None
         if not args.no_preflight:
             print("\n[PREFLIGHT] Taking pre-flight snapshot...")
-            pre_path = snapshot_program(ip, 'pre', args.snapshot_dir)
-            if not pre_path:
+            pre_bin, pre_json = snapshot_program(ip, 'pre', args.snapshot_dir, args.port)
+            if not pre_bin:
                 print("✗ Pre-flight snapshot failed, aborting")
                 sys.exit(1)
-            print(f"✓ Saved: {pre_path}")
+            print(f"✓ Saved: {pre_bin}")
 
         # Replay
         print(f"\n[REPLAY] Connecting to {ip}:{args.port}...")
@@ -644,30 +709,59 @@ def main():
             sys.exit(1)
 
         # Post-flight snapshot
-        post_path = None
+        post_bin = None
+        post_json = None
         if not args.no_postflight:
             print(f"\n[POSTFLIGHT] Taking post-flight snapshot...")
-            post_path = snapshot_program(ip, 'post', args.snapshot_dir)
-            if post_path:
-                print(f"✓ Saved: {post_path}")
+            post_bin, post_json = snapshot_program(ip, 'post', args.snapshot_dir, args.port)
+            if post_bin:
+                print(f"✓ Saved: {post_bin}")
 
                 # Diff
-                if pre_path:
+                if pre_bin:
                     print(f"\n[DIFF] Comparing pre ↔ post...")
-                    diff = diff_snapshots(pre_path, post_path)
-                    print(f"  Pre size:        {diff['size_pre']} bytes")
-                    print(f"  Post size:       {diff['size_post']} bytes")
-                    print(f"  Changed bytes:   {diff['changed_byte_count']}")
+                    result = diff_snapshots(pre_bin, post_bin, pre_json, post_json)
+                    diff = result['byte_diff']
+                    semantic = result['semantic_diff']
+
+                    # Print byte-level diff summary
+                    print(f"\n===== DIFF SUMMARY =====")
+                    print(f"Byte level:")
+                    print(f"  size:          {diff['size_pre']} → {diff['size_post']}", end='')
+                    if diff['size_pre'] == diff['size_post']:
+                        print(" (변화 없음)")
+                    else:
+                        delta = diff['size_post'] - diff['size_pre']
+                        print(f" ({delta:+d})")
+                    print(f"  changed bytes: {diff['changed_byte_count']}")
                     if diff['first_diff_offset'] is not None:
-                        print(f"  First diff @:    0x{diff['first_diff_offset']:04x}")
-                        print(f"  Hex preview:     {diff['hex_preview']}")
+                        print(f"  first diff @:  0x{diff['first_diff_offset']:04x}")
+                        print(f"  hex preview:   {diff['hex_preview']}")
+
+                    # Print semantic-level diff summary
+                    if semantic is not None:
+                        print(f"\nSemantic level:")
+                        try:
+                            from plc_upload_decode import print_diff
+                            print_diff(semantic)
+                        except Exception as e:
+                            print(f"  ⚠ Failed to print semantic diff: {e}")
+                    else:
+                        print(f"\nSemantic level:")
+                        print(f"  (이전 스냅샷에 JSON 없음 — byte diff만 수행)")
+
+                    print(f"=========================")
 
                     # Save diff JSON
                     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                     diff_path = os.path.join(args.snapshot_dir, f"{timestamp}_diff.json")
+                    diff_to_save = {
+                        'byte_diff': diff,
+                        'semantic_diff': semantic,
+                    }
                     with open(diff_path, 'w') as f:
-                        json.dump(diff, f, indent=2)
-                    print(f"  Saved diff:      {diff_path}")
+                        json.dump(diff_to_save, f, indent=2, ensure_ascii=False)
+                    print(f"  Saved diff:    {diff_path}")
 
                     if diff['changed_byte_count'] > 0:
                         print(f"\n✓✓✓ F5 write successful — program changed!")

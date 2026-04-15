@@ -38,6 +38,12 @@ jobs:
           --hidden-import plc_upload_analyze
           plc_write_analyze.py
 
+      - name: Build PLC_SemanticDiff (콘솔)
+        run: >
+          pyinstaller --onefile --console --name PLC_SemanticDiff --noconfirm
+          --hidden-import plc_upload_decode
+          plc_semantic_diff.py
+
       - name: Upload PLC_WriteReplay
         uses: actions/upload-artifact@v4
         with:
@@ -49,3 +55,9 @@ jobs:
         with:
           name: PLC_WriteAnalyze-Windows
           path: dist/PLC_WriteAnalyze.exe
+
+      - name: Upload PLC_SemanticDiff
+        uses: actions/upload-artifact@v4
+        with:
+          name: PLC_SemanticDiff-Windows
+          path: dist/PLC_SemanticDiff.exe
