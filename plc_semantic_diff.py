@@ -96,9 +96,9 @@ def main():
         sys.exit(1)
 
     try:
-        with open(path_a) as f:
+        with open(path_a, encoding='utf-8') as f:
             snapshot_a = json.load(f)
-        with open(path_b) as f:
+        with open(path_b, encoding='utf-8') as f:
             snapshot_b = json.load(f)
     except json.JSONDecodeError as e:
         print(f"Error: invalid JSON: {e}")
@@ -130,7 +130,7 @@ def main():
     if args.json_out:
         output_path = Path(args.json_out)
         try:
-            with open(output_path, 'w') as f:
+            with open(output_path, 'w', encoding='utf-8') as f:
                 json.dump(diff, f, indent=2, ensure_ascii=False)
             print(f"✓ Saved structured diff to {output_path}")
         except Exception as e:

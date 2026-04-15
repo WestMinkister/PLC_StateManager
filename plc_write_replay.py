@@ -386,7 +386,7 @@ def snapshot_program(ip, label, snapshot_dir='snapshots', plc_port=DEFAULT_PORT)
         print(f"  CWD: {os.getcwd()}")
         return None, None
 
-    with open(upload_json_path) as f:
+    with open(upload_json_path, encoding='utf-8') as f:
         upload_frames = json.load(f)
 
     os.makedirs(snapshot_dir, exist_ok=True)
@@ -449,7 +449,7 @@ def snapshot_program(ip, label, snapshot_dir='snapshots', plc_port=DEFAULT_PORT)
     print(f"  Saved snapshot: {bin_filepath} ({len(all_binary)} bytes)")
 
     # Save response list as JSON
-    with open(json_filepath, 'w') as f:
+    with open(json_filepath, 'w', encoding='utf-8') as f:
         json.dump(responses_serializable, f, indent=2)
 
     print(f"  Saved responses: {json_filepath}")
@@ -515,9 +515,9 @@ def diff_snapshots(pre_bin, post_bin, pre_json=None, post_json=None):
             if pre_json_path.exists() and post_json_path.exists():
                 from plc_upload_decode import build_program_state, diff_program_state
 
-                with open(pre_json_path) as f:
+                with open(pre_json_path, encoding='utf-8') as f:
                     pre_responses = json.load(f)
-                with open(post_json_path) as f:
+                with open(post_json_path, encoding='utf-8') as f:
                     post_responses = json.load(f)
 
                 pre_state = build_program_state(pre_responses)
@@ -611,7 +611,7 @@ def main():
             print(f"  (Custom path via --frames: {args.frames})")
         sys.exit(1)
 
-    with open(frames_path) as f:
+    with open(frames_path, encoding='utf-8') as f:
         frames = json.load(f)
 
     # Dispatch
@@ -759,7 +759,7 @@ def main():
                         'byte_diff': diff,
                         'semantic_diff': semantic,
                     }
-                    with open(diff_path, 'w') as f:
+                    with open(diff_path, 'w', encoding='utf-8') as f:
                         json.dump(diff_to_save, f, indent=2, ensure_ascii=False)
                     print(f"  Saved diff:    {diff_path}")
 

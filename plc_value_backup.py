@@ -88,7 +88,7 @@ class PLCValueBackupClient:
 
 def load_value_read_frames(frames_file):
     """Load value_read_frames.json and extract R/0xE0 request payloads."""
-    with open(frames_file) as f:
+    with open(frames_file, encoding='utf-8') as f:
         data = json.load(f)
 
     variables = data['variables']
@@ -275,7 +275,7 @@ def main():
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        with open(out_path, 'w') as f:
+        with open(out_path, 'w', encoding='utf-8') as f:
             json.dump(output, f, indent=2, ensure_ascii=False)
         print(f"✓ Saved snapshot to {out_path}")
         print(f"  Samples: {len(samples)}, Latest values: {len(output['values_latest'])}")
