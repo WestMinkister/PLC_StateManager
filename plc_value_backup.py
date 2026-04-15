@@ -23,6 +23,17 @@ from datetime import datetime
 # Add src directory to path for imports
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, script_dir)
+if hasattr(sys, '_MEIPASS') and sys._MEIPASS not in sys.path:
+    sys.path.insert(0, sys._MEIPASS)
+
+
+def resource_path(relative_path: str) -> str:
+    """Resolve a resource file path, handling PyInstaller --onefile bundles.
+
+    PyInstaller extracts --add-data files to sys._MEIPASS. When running from
+    source, fall back to the script's directory."""
+    base = getattr(sys, '_MEIPASS', script_dir)
+    return os.path.join(base, relative_path)
 
 try:
     from plc_upload_test import build_frame, parse_response
@@ -139,17 +150,26 @@ def main():
                         help='PLC IP address for live read')
     parser.add_argument('--samples', type=int, default=1,
                         help='Number of read passes (default: 1)')
-    parser.add_argument('--frames', type=str, default='value_read_frames.json',
-                        help='Input frames file (default: value_read_frames.json)')
+    parser.add_argument('--frames', type=str, default=None,
+                        help='Input frames file (default: bundled value_read_frames.json)')
     parser.add_argument('--out', type=str, default='snapshots/values.json',
                         help='Output snapshot file')
 
     args = parser.parse_args()
 
-    # Load frames
-    frames_file = Path(args.frames)
+    # Load frames — use resource_path for bundled default, explicit path as-is
+    if args.frames:
+        frames_file = Path(args.frames)
+    else:
+        frames_file = Path(resource_path('value_read_frames.json'))
+
     if not frames_file.exists():
-        print(f"Error: {frames_file} not found")
+        print(f"Error: value_read_frames.json not found")
+        print(f"  Tried: {frames_file}")
+        print(f"  _MEIPASS: {getattr(sys, '_MEIPASS', 'not set')}")
+        print(f"  CWD: {os.getcwd()}")
+        if args.frames:
+            print(f"  (Custom path via --frames: {args.frames})")
         sys.exit(1)
 
     try:
