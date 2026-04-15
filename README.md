@@ -193,9 +193,110 @@ I/O changes: 2 inputs, 1 output
 - **파라미터화 쓰기 미지원**: 임의 접점값 지정 쓰기는 Milestone 3에서 추가
 - **텍스트 래더 복원 미지원**: 원본 래더 코드 재구성 불가
 
+## Milestone 3 — 변수 값 백업 (Phase 1)
+
+### 필요성
+
+Milestone 1은 F5 런중수정(프로그램 변경), Milestone 2는 의미적 diff(무엇이 바뀌었나)를 제공했습니다. 그러나 사용자 요구사항 분석 결과, **실제 운영 현장에서는 변수 값도 함께 기록해야 한다**는 지적이 있었습니다. 예를 들어 생산 라인에서 카운터(%MW1000), 상태 플래그(%MW152) 등이 언제 어떻게 변했는지 추적하려면 값 백업이 필수입니다. Milestone 3에서는 R/0xE0 (읽기) 명령어를 활용하여 변수 값을 주기적으로 백업하는 기능을 추가합니다.
+
+### Phase 1 범위
+
+이번 Phase 1은 **캡처 파일 기반 고정 변수** 집합에 제한됩니다:
+- 입력 소스: MW152 캡처 파일에서 추출한 10개 변수의 R/0xE0 요청
+- 출력: 각 샘플 시점의 값 스냅샷 (JSON)
+- 제약사항: 파라미터화 불가 (5개 변수만 고정)
+
+### 구성 파일
+
+- **plc_value_analyze.py** — pcapng 캡처에서 R/0xE0 요청/응답 쌍 추출, 변수 주소 목록 생성, `value_read_frames.json` 저장
+- **plc_value_backup.py** — `value_read_frames.json`의 요청을 PLC에 재전송, 응답 디코딩, 타임스탬프 포함 스냅샷 저장
+- **plc_semantic_diff.py 확장** — `--values` 플래그로 값 비교 모드 추가 (값 추가/제거/변경 건수 및 상세 목록)
+- **.github/workflows/build-exe.yml 수정** — `PLC_ValueBackup.exe` 빌드 및 업로드 단계 추가
+- **value_read_frames.json** — 변수 메타데이터 및 프레임 쌍 (자동 생성)
+- **snapshots/values_<ts>.json** — 값 백업 스냅샷 (자동 생성)
+
+### 사용법
+
+#### 오프라인 분석
+
+```bash
+# 캡처에서 변수 목록 추출
+python3 plc_value_analyze.py --verbose
+
+# 출력: value_read_frames.json (5개 변수, 8개 R/0xE0 쌍)
+```
+
+#### Pre-flight (드라이런)
+
+```bash
+# 프레임 검증만
+python3 plc_value_backup.py --dry-run
+
+# 출력: "Would send 8 R/0xE0 request(s)"
+```
+
+#### 라이브 읽기
+
+```bash
+# 한 번 읽기
+python3 plc_value_backup.py --read 192.168.250.110
+
+# N회 반복 읽기
+python3 plc_value_backup.py --read 192.168.250.110 --samples 10
+
+# 출력: snapshots/values_2026-04-16T....json
+```
+
+#### 값 비교
+
+```bash
+# 두 스냅샷 비교 (값 모드)
+python3 plc_semantic_diff.py --values values_1.json values_2.json
+
+# 출력:
+# 값 추가: 0개
+# 값 제거: 0개
+# 값 변경: 2개
+# [MB_0x7000] 48 → 52
+# [MB_0x1700] 16 → 24
+```
+
+### 스냅샷 형식
+
+```json
+{
+  "timestamp": "2026-04-16T12:34:56.789123",
+  "plc_ip": "192.168.250.110",
+  "sample_count": 1,
+  "variable_count": 5,
+  "variables": [
+    {"marker_hex": "4d420200", "offset": 6000, "offset_hex": "0x1770"},
+    ...
+  ],
+  "samples": [
+    [48, 16, 0, 4101, 25]
+  ],
+  "values_latest": {
+    "4d420200_0x1770": 48,
+    "4d420200_0x0130": 16
+  }
+}
+```
+
+### 로드맵
+
+**Phase 2 (Milestone 3.x):**
+- 변수 주소 파라미터화 (CLI `--offsets` 또는 JSON 입력)
+- 읽기 주기 설정 (e.g., `--interval 1s` for 1초마다)
+- 타임시리즈 포맷 확장 (CSV/SQLite)
+
+**Phase 3 (Milestone 4):**
+- 쓰기 명령어 (W/0xE1) 지원
+- 단일 변수 값 변경 기능
+
 ## 다음 마일스톤
 
-- Milestone 3: 임의 접점 쓰기 (파라미터화) + 상세 래더 정보
-- Milestone 4: 정지모드 쓰기 (X 프레임 확장)
+- Milestone 3.x: 변수 파라미터화 + 읽기 주기 설정
+- Milestone 4: 변수 값 쓰기 (W/0xE1)
 - Milestone 5: Invoke ID 자동 재작성
 - Milestone 6: `plc_state_manager.py` 본체 (단일 진입점, 상태 캐싱)
