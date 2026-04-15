@@ -101,7 +101,7 @@ class PLCWriteReplayClient(PLCUploadClient):
         # Call parent's send_frame (which does not override for write-mode check)
         return super().send_frame(frame_bytes)
 
-    def await_response(self, timeout=None, expected_response_hex=None):
+    def await_response(self, timeout=None, expected_response_hex=None, strict_frame_type=True):
         """Receive next response from PLC.
 
         Validates:
@@ -166,9 +166,13 @@ class PLCWriteReplayClient(PLCUploadClient):
                 return False, {'error': 'BCC invalid', 'response': parsed}
 
             ft = struct.unpack('<H', parsed.get('frame_type', b'\x00\x00'))[0]
-            # Accept 0x0F (command response) and 0x0A (connection ACK).
-            # CONN frames receive 0x0A response; write-window frames receive 0x0F.
-            if ft not in (0x0F, 0x0A):
+            # Reject 0x0E (PC→PLC command) from PLC — that would be a protocol violation.
+            # Otherwise: strict mode requires 0x0F/0x0A; non-strict (CONN) accepts anything
+            # else with valid BCC, since PLC firmware variants return different CONN codes
+            # (observed: 0x0D on some XGI units).
+            if ft == 0x0E:
+                return False, {'error': f'PLC sent command-direction frame 0x{ft:02x}', 'response': parsed}
+            if strict_frame_type and ft not in (0x0F, 0x0A):
                 return False, {'error': f'Unexpected frame type 0x{ft:02x}', 'response': parsed}
 
             # Status check only for 0x0F command responses (CONN has no status byte at [24]).
@@ -219,7 +223,8 @@ class PLCWriteReplayClient(PLCUploadClient):
                 print(f"\n  [CONN] Sending connection frame...")
                 try:
                     self._sock.sendall(frame_bytes)
-                    success, response = self.await_response(timeout)
+                    # CONN uses non-strict frame-type check (firmware variants return 0x0A/0x0D/etc).
+                    success, response = self.await_response(timeout, strict_frame_type=False)
                     if success:
                         ft = struct.unpack('<H', response.get('frame_type', b'\x00\x00'))[0]
                         print(f"  [CONN] OK (response frame_type=0x{ft:02x}, "
