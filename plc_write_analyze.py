@@ -22,6 +22,15 @@ import argparse
 from plc_upload_analyze import parse_pcapng_packets, parse_lgis_header, extract_frames
 
 
+def resource_path(relative_path: str) -> str:
+    """Resolve a resource file path, handling PyInstaller --onefile bundles.
+
+    PyInstaller extracts --add-data files to sys._MEIPASS. When running from
+    source, fall back to the script's directory."""
+    base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, relative_path)
+
+
 DEFAULT_PCAPNG = os.path.join(os.path.dirname(__file__), 'docs',
     'pkt_monitor_0410_런중수정시작_두프로그램접점을F5로바꿔서런중수정쓰기_런중수정종료.pcapng')
 
@@ -119,7 +128,7 @@ def _borrow_frame_from_upload(frame_role: str) -> dict | None:
 
     Prints warning if borrowed.
     """
-    upload_path = os.path.join(os.path.dirname(__file__), 'upload_replay_frames.json')
+    upload_path = resource_path('upload_replay_frames.json')
 
     if not os.path.exists(upload_path):
         return None

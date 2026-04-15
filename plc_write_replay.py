@@ -27,8 +27,22 @@ import argparse
 from datetime import datetime
 from pathlib import Path
 
+
+def resource_path(relative_path: str) -> str:
+    """Resolve a resource file path, handling PyInstaller --onefile bundles.
+
+    PyInstaller extracts --add-data files to sys._MEIPASS. When running from
+    source, fall back to the script's directory."""
+    base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, relative_path)
+
+
 # Import from existing modules
-sys.path.insert(0, os.path.dirname(__file__))
+# Insert both the script directory and _MEIPASS (if present) to find hidden imports
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, script_dir)
+if hasattr(sys, '_MEIPASS') and sys._MEIPASS not in sys.path:
+    sys.path.insert(0, sys._MEIPASS)
 from plc_upload_test import (
     PLCUploadClient, build_frame, parse_response,
     SIGNATURE, FRAME_TYPE_RSP, FRAME_TYPE_CMD, FRAME_TYPE_CONN, FRAME_TYPE_DISC,
@@ -330,9 +344,12 @@ def snapshot_program(ip, label, snapshot_dir='snapshots'):
     Returns:
         Path object of snapshot file, or None on error
     """
-    upload_json_path = os.path.join(os.path.dirname(__file__), 'upload_replay_frames.json')
+    upload_json_path = resource_path('upload_replay_frames.json')
     if not os.path.exists(upload_json_path):
-        print(f"Error: {upload_json_path} not found")
+        print(f"Error: upload_replay_frames.json not found")
+        print(f"  Tried: {upload_json_path}")
+        print(f"  _MEIPASS: {getattr(sys, '_MEIPASS', 'not set')}")
+        print(f"  CWD: {os.getcwd()}")
         return None
 
     with open(upload_json_path) as f:
@@ -472,17 +489,27 @@ def main():
                         help='Response timeout (seconds)')
     parser.add_argument('--port', type=int, default=DEFAULT_PORT,
                         help=f'PLC port (default: {DEFAULT_PORT})')
-    parser.add_argument('--frames', type=str, default='write_replay_frames.json',
-                        help='Input replay frames JSON')
+    parser.add_argument('--frames', type=str, default=None,
+                        help='Input replay frames JSON (default: bundled write_replay_frames.json)')
     parser.add_argument('--snapshot-dir', type=str, default='snapshots',
                         help='Snapshot directory')
 
     args = parser.parse_args()
 
     # Load frames
-    frames_path = args.frames
+    # If --frames not specified, use bundled write_replay_frames.json
+    if args.frames:
+        frames_path = args.frames
+    else:
+        frames_path = resource_path('write_replay_frames.json')
+
     if not os.path.exists(frames_path):
-        print(f"Error: {frames_path} not found")
+        print(f"Error: write_replay_frames.json not found")
+        print(f"  Tried: {frames_path}")
+        print(f"  _MEIPASS: {getattr(sys, '_MEIPASS', 'not set')}")
+        print(f"  CWD: {os.getcwd()}")
+        if args.frames:
+            print(f"  (Custom path via --frames: {args.frames})")
         sys.exit(1)
 
     with open(frames_path) as f:
