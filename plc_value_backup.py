@@ -10,12 +10,11 @@ Usage:
     python plc_value_backup.py --read IP --samples N       # N회 반복 읽기
     python plc_value_backup.py --read IP --frames PATH --out PATH
 """
-import socket
-import struct
 import json
 import sys
 import os
 import time
+import struct
 import argparse
 from pathlib import Path
 from datetime import datetime
@@ -36,54 +35,10 @@ def resource_path(relative_path: str) -> str:
     return os.path.join(base, relative_path)
 
 try:
-    from plc_upload_test import build_frame, parse_response
+    from plc_upload_test import PLCUploadClient, DEFAULT_PORT
 except ImportError as e:
     print(f"Error: failed to import plc_upload_test: {e}")
     sys.exit(1)
-
-
-class PLCValueBackupClient:
-    """Connect to PLC and replay value read commands."""
-
-    DEFAULT_PORT = 2002
-
-    def __init__(self, plc_ip, port=DEFAULT_PORT, timeout=5):
-        self.plc_ip = plc_ip
-        self.port = port
-        self.timeout = timeout
-        self.sock = None
-
-    def connect(self):
-        """Establish TCP connection to PLC."""
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.settimeout(self.timeout)
-        try:
-            self.sock.connect((self.plc_ip, self.port))
-        except socket.error as e:
-            raise RuntimeError(f"Failed to connect to {self.plc_ip}:{self.port}: {e}")
-
-    def close(self):
-        """Close connection."""
-        if self.sock:
-            self.sock.close()
-            self.sock = None
-
-    def send_raw_frame(self, frame_bytes):
-        """Send raw frame bytes and receive response."""
-        if not self.sock:
-            raise RuntimeError("Not connected")
-
-        try:
-            self.sock.sendall(frame_bytes)
-            response = self.sock.recv(4096)
-            return response
-        except socket.error as e:
-            raise RuntimeError(f"Socket error: {e}")
-
-    def send_command(self, command_byte, payload):
-        """Build and send a command frame."""
-        frame = build_frame(command_byte, payload)
-        return self.send_raw_frame(frame)
 
 
 def load_value_read_frames(frames_file):
@@ -152,6 +107,8 @@ def main():
                         help='Number of read passes (default: 1)')
     parser.add_argument('--frames', type=str, default=None,
                         help='Input frames file (default: bundled value_read_frames.json)')
+    parser.add_argument('--port', type=int, default=DEFAULT_PORT,
+                        help=f'PLC port (default: {DEFAULT_PORT})')
     parser.add_argument('--out', type=str, default='snapshots/values.json',
                         help='Output snapshot file')
 
@@ -202,55 +159,97 @@ def main():
         print("Error: Use --dry-run or --read IP")
         sys.exit(1)
 
-    print(f"\n=== Connecting to PLC {args.read} ===")
-    client = PLCValueBackupClient(args.read)
+    # Load CONN/DISC frames from upload_replay_frames.json
+    upload_json = resource_path('upload_replay_frames.json')
+    if not os.path.exists(upload_json):
+        print(f"Error: upload_replay_frames.json not found at {upload_json}")
+        sys.exit(1)
+
+    try:
+        with open(upload_json, encoding='utf-8') as f:
+            upload_frames = json.load(f)
+    except Exception as e:
+        print(f"Error loading upload_replay_frames.json: {e}")
+        sys.exit(1)
+
+    # Find CONN and DISC frames
+    conn_frame = next((f for f in upload_frames if f.get('frame_type') == 0x0A), None)
+    disc_frame = next((f for f in upload_frames if f.get('frame_type') == 0x12), None)
+    if not conn_frame or not disc_frame:
+        print("Error: CONN/DISC frame not found in upload_replay_frames.json")
+        sys.exit(1)
+
+    print(f"\n=== Connecting to PLC {args.read}:{args.port} ===")
+    client = PLCUploadClient(args.read, args.port, timeout=5.0)
 
     try:
         client.connect()
-        print(f"✓ Connected to {args.read}:{client.DEFAULT_PORT}")
-    except RuntimeError as e:
+    except Exception as e:
         print(f"✗ Connection failed: {e}")
         sys.exit(1)
 
     # Collect samples
     samples = []
     try:
+        # CONN frame to establish session
+        print("  [SESSION] Sending CONN frame...")
+        conn_bytes = bytes.fromhex(conn_frame['frame_hex'])
+        resp = client.send_frame(conn_bytes)
+        if not resp:
+            print("  ✗ CONN response not received — session establishment failed")
+            sys.exit(1)
+        resp_len = len(resp.get('raw', b''))
+        print(f"  ✓ CONN OK ({resp_len}B response)")
+        time.sleep(0.3)
+
+        # R/0xE0 batch reads
         for sample_num in range(args.samples):
-            print(f"\nSample {sample_num + 1}/{args.samples}...")
+            if args.samples > 1:
+                print(f"\n  Sample {sample_num + 1}/{args.samples}...")
             sample_values = []
 
-            # Send each request
+            # Send each R/0xE0 request
             for pair_idx, pair in enumerate(pairs):
-                req_payload_hex = pair['request_payload_hex']
+                # Get full frame (request_frame_hex includes the entire LGIS-GLOFA frame)
+                req_frame_hex = pair.get('request_frame_hex') or pair.get('request_payload_hex')
+                if not req_frame_hex:
+                    print(f"  [R batch {pair_idx+1}/{len(pairs)}] NO FRAME DATA")
+                    continue
 
                 try:
-                    # Convert ASCII hex payload to bytes for sending
-                    req_bytes_ascii = bytes.fromhex(req_payload_hex)
-                    req_hex_str = req_bytes_ascii.decode('ascii')
-                    req_bytes = bytes.fromhex(req_hex_str)
-
-                    # Send R command (0x52) with sub 0xE0
-                    response = client.send_command(0x52, bytes([0xE0]) + req_bytes)
-
-                    # Parse response
-                    rsp_analysis = parse_response(response)
-                    if rsp_analysis and 'cmd_payload_hex' in rsp_analysis:
-                        rsp_payload = rsp_analysis['cmd_payload_hex']
-                        decoded = decode_response_payload(rsp_payload)
-                        sample_values.extend(decoded['values'])
-                        print(f"  Pair {pair_idx}: {len(decoded['values'])} values")
+                    # If we only have payload_hex, build full frame (R command 0x52, sub 0xE0)
+                    if 'request_frame_hex' not in pair and 'request_payload_hex' in pair:
+                        # Convert ASCII hex payload to binary
+                        req_payload_ascii = bytes.fromhex(pair['request_payload_hex'])
+                        req_payload_hex = req_payload_ascii.decode('ascii')
+                        req_payload_bytes = bytes.fromhex(req_payload_hex)
+                        # For now, send raw bytes as-is (will timeout if not a full frame)
+                        req_bytes = req_payload_bytes
                     else:
-                        print(f"  Pair {pair_idx}: No valid response")
+                        # request_frame_hex is already full frame
+                        req_bytes = bytes.fromhex(req_frame_hex)
+
+                    resp = client.send_frame(req_bytes)
+                    if resp and resp.get('payload_hex'):
+                        decoded = decode_response_payload(resp['payload_hex'])
+                        sample_values.extend(decoded['values'])
+                        print(f"  [R batch {pair_idx+1}/{len(pairs)}] {len(decoded['values'])} values")
+                    else:
+                        print(f"  [R batch {pair_idx+1}/{len(pairs)}] NO RESPONSE")
 
                 except Exception as e:
-                    print(f"  Pair {pair_idx}: Error - {e}")
+                    print(f"  [R batch {pair_idx+1}/{len(pairs)}] Error: {e}")
 
             if sample_values:
                 samples.append(sample_values)
 
+        # DISC frame to close session
+        print("\n  [SESSION] Sending DISC frame...")
+        disc_bytes = bytes.fromhex(disc_frame['frame_hex'])
+        client.send_frame(disc_bytes)
+
     finally:
-        client.close()
-        print(f"\n✓ Disconnected")
+        client.disconnect()
 
     # Build output snapshot
     output = {

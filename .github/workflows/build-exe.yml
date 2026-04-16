@@ -54,6 +54,7 @@ jobs:
         run: >
           pyinstaller --onefile --console --name PLC_ValueBackup --noconfirm
           --add-data "value_read_frames.json;."
+          --add-data "upload_replay_frames.json;."
           --hidden-import plc_upload_test
           plc_value_backup.py
 
