@@ -202,6 +202,56 @@ def main():
         print(f"  ✓ CONN OK ({resp_len}B response)")
         time.sleep(0.3)
 
+        # === PRIMING STEP: Preflight session setup ===
+        # Load all 0x0E command frames from upload_replay_frames.json and send them
+        # This primes the PLC state so it will answer R/0xE0 bulk-read requests
+        priming_frames = [f for f in upload_frames if f.get('frame_type') == 0x0e]
+        if priming_frames:
+            print(f"  [PRIMING] Sending preflight session setup ({len(priming_frames)} frames)...")
+            priming_success = 0
+            priming_errors = 0
+            consecutive_errors = 0
+            PRIMING_DELAY = 0.05  # Match existing upload flow delay
+            PRIMING_BATCH_REPORT = 30  # Report progress every 30 frames
+
+            for idx, frame_data in enumerate(priming_frames):
+                frame_hex = frame_data.get('frame_hex')
+                if not frame_hex:
+                    continue
+
+                try:
+                    frame_bytes = bytes.fromhex(frame_hex)
+                    resp = client.send_frame(frame_bytes)
+
+                    if resp:
+                        priming_success += 1
+                        consecutive_errors = 0
+                    else:
+                        priming_errors += 1
+                        consecutive_errors += 1
+
+                    # Report progress every PRIMING_BATCH_REPORT frames
+                    if (idx + 1) % PRIMING_BATCH_REPORT == 0:
+                        print(f"  [PRIMING] {idx + 1}/{len(priming_frames)} frames...")
+
+                    # Safety: abort after 10 consecutive errors (normally all succeed)
+                    if consecutive_errors >= 10:
+                        print(f"  ✗ PRIMING aborted: {consecutive_errors} consecutive errors")
+                        break
+
+                    if PRIMING_DELAY > 0:
+                        time.sleep(PRIMING_DELAY)
+
+                except Exception as e:
+                    priming_errors += 1
+                    consecutive_errors += 1
+                    if consecutive_errors >= 10:
+                        break
+
+            print(f"  [PRIMING] ✓ {priming_success} successful / {priming_errors} errors")
+        else:
+            print(f"  [PRIMING] No command frames found in upload_replay_frames.json")
+
         # R/0xE0 batch reads
         for sample_num in range(args.samples):
             if args.samples > 1:
