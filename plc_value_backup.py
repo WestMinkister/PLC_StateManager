@@ -8,7 +8,8 @@ Usage:
     python plc_value_backup.py --dry-run                   # value_read_frames.json 분석만
     python plc_value_backup.py --read IP                   # 한 번 읽기
     python plc_value_backup.py --read IP --samples N       # N회 반복 읽기
-    python plc_value_backup.py --read IP --frames PATH --out PATH
+    python plc_value_backup.py --read IP --port PORT       # 커스텀 포트
+    python plc_value_backup.py --read IP --out PATH        # 출력 경로 지정
 """
 import json
 import sys
@@ -39,20 +40,6 @@ try:
 except ImportError as e:
     print(f"Error: failed to import plc_upload_test: {e}")
     sys.exit(1)
-
-
-def load_value_read_frames(frames_file):
-    """Load value_read_frames.json and extract R/0xE0 request payloads."""
-    with open(frames_file, encoding='utf-8') as f:
-        data = json.load(f)
-
-    variables = data['variables']
-    requests = [p for p in data['pairs']]
-
-    return {
-        'variables': variables,
-        'pairs': requests
-    }
 
 
 def decode_response_payload(response_payload_hex_ascii):
@@ -97,7 +84,7 @@ def decode_response_payload(response_payload_hex_ascii):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Backup PLC variable values by replaying R/0xE0 commands'
+        description='Backup PLC variable values by replaying R/0xE0 commands with monitor mode entry'
     )
     parser.add_argument('--dry-run', action='store_true',
                         help='Analyze frames only (no network)')
@@ -105,8 +92,6 @@ def main():
                         help='PLC IP address for live read')
     parser.add_argument('--samples', type=int, default=1,
                         help='Number of read passes (default: 1)')
-    parser.add_argument('--frames', type=str, default=None,
-                        help='Input frames file (default: bundled value_read_frames.json)')
     parser.add_argument('--port', type=int, default=DEFAULT_PORT,
                         help=f'PLC port (default: {DEFAULT_PORT})')
     parser.add_argument('--out', type=str, default='snapshots/values.json',
@@ -114,35 +99,38 @@ def main():
 
     args = parser.parse_args()
 
-    # Load frames — use resource_path for bundled default, explicit path as-is
-    if args.frames:
-        frames_file = Path(args.frames)
-    else:
-        frames_file = Path(resource_path('value_read_frames.json'))
-
+    # Load value_read_frames.json
+    frames_file = Path(resource_path('value_read_frames.json'))
     if not frames_file.exists():
         print(f"Error: value_read_frames.json not found")
         print(f"  Tried: {frames_file}")
         print(f"  _MEIPASS: {getattr(sys, '_MEIPASS', 'not set')}")
         print(f"  CWD: {os.getcwd()}")
-        if args.frames:
-            print(f"  (Custom path via --frames: {args.frames})")
         sys.exit(1)
 
     try:
-        frames_data = load_value_read_frames(frames_file)
+        with open(frames_file, encoding='utf-8') as f:
+            frames_data = json.load(f)
     except Exception as e:
         print(f"Error loading frames: {e}")
         sys.exit(1)
 
-    variables = frames_data['variables']
-    pairs = frames_data['pairs']
+    variables = frames_data.get('variables', [])
+    monitor_entries = frames_data.get('monitor_entry_frames', [])
+    conn_frame_hex = frames_data.get('conn_frame_hex')
+    j_heartbeat_hex = frames_data.get('j_heartbeat_frame_hex')
+    read_request_hex = frames_data.get('read_request_frame_hex')
+    disc_frame_hex = frames_data.get('disc_frame_hex')
 
-    if not pairs:
-        print("Error: No R/0xE0 pairs in frames file")
+    if not all([conn_frame_hex, monitor_entries, read_request_hex, variables]):
+        print("Error: value_read_frames.json missing required fields")
+        print(f"  conn: {conn_frame_hex is not None}")
+        print(f"  monitor_entries: {len(monitor_entries)} frames")
+        print(f"  read_request: {read_request_hex is not None}")
+        print(f"  variables: {len(variables)} vars")
         sys.exit(1)
 
-    print(f"Loaded {len(variables)} variables from {len(pairs)} pairs")
+    print(f"Loaded {len(variables)} variables, {len(monitor_entries)} monitor entry frames")
     var_str = ', '.join(f"0x{v['offset']:04x}" for v in variables[:5])
     var_str += "..." if len(variables) > 5 else ""
     print(f"Variables: {var_str}")
@@ -150,33 +138,26 @@ def main():
     # Dry-run mode
     if args.dry_run:
         print("\n=== Dry-run mode (no network) ===")
-        print(f"Would send {len(pairs)} R/0xE0 request(s)")
-        print(f"Sample request payload: {pairs[0]['request_payload_hex'][:100]}...")
+        print(f"CONN frame: {conn_frame_hex[:40]}...")
+        print(f"Monitor entry frames:")
+        for entry in monitor_entries:
+            print(f"  {entry['cmd']}/{entry['sub_cmd']}: {entry['note']}")
+        print(f"J heartbeat: {j_heartbeat_hex[:40] if j_heartbeat_hex else '(not set)'}...")
+        print(f"R/0xE0 template: {read_request_hex[:40]}...")
+        print(f"DISC frame: {disc_frame_hex[:40] if disc_frame_hex else '(not set)'}...")
+        print(f"\nWould send:")
+        print(f"  1. CONN frame")
+        if j_heartbeat_hex:
+            print(f"  2. J heartbeat (optional priming)")
+        print(f"  3. Monitor entry frames (Z/0x8D + Z/0x8E)")
+        print(f"  4. {args.samples} R/0xE0 read(s)")
+        if disc_frame_hex:
+            print(f"  5. DISC frame")
         return
 
     # Live read mode
     if not args.read:
         print("Error: Use --dry-run or --read IP")
-        sys.exit(1)
-
-    # Load CONN/DISC frames from upload_replay_frames.json
-    upload_json = resource_path('upload_replay_frames.json')
-    if not os.path.exists(upload_json):
-        print(f"Error: upload_replay_frames.json not found at {upload_json}")
-        sys.exit(1)
-
-    try:
-        with open(upload_json, encoding='utf-8') as f:
-            upload_frames = json.load(f)
-    except Exception as e:
-        print(f"Error loading upload_replay_frames.json: {e}")
-        sys.exit(1)
-
-    # Find CONN and DISC frames
-    conn_frame = next((f for f in upload_frames if f.get('frame_type') == 0x0A), None)
-    disc_frame = next((f for f in upload_frames if f.get('frame_type') == 0x12), None)
-    if not conn_frame or not disc_frame:
-        print("Error: CONN/DISC frame not found in upload_replay_frames.json")
         sys.exit(1)
 
     print(f"\n=== Connecting to PLC {args.read}:{args.port} ===")
@@ -191,112 +172,83 @@ def main():
     # Collect samples
     samples = []
     try:
-        # CONN frame to establish session
+        # 1. CONN frame
         print("  [SESSION] Sending CONN frame...")
-        conn_bytes = bytes.fromhex(conn_frame['frame_hex'])
+        conn_bytes = bytes.fromhex(conn_frame_hex)
         resp = client.send_frame(conn_bytes)
         if not resp:
-            print("  ✗ CONN response not received — session establishment failed")
+            print("  ✗ CONN response not received")
             sys.exit(1)
         resp_len = len(resp.get('raw', b''))
         print(f"  ✓ CONN OK ({resp_len}B response)")
         time.sleep(0.3)
 
-        # === PRIMING STEP: Preflight session setup ===
-        # Load all 0x0E command frames from upload_replay_frames.json and send them
-        # This primes the PLC state so it will answer R/0xE0 bulk-read requests
-        priming_frames = [f for f in upload_frames if f.get('frame_type') == 0x0e]
-        if priming_frames:
-            print(f"  [PRIMING] Sending preflight session setup ({len(priming_frames)} frames)...")
-            priming_success = 0
-            priming_errors = 0
-            consecutive_errors = 0
-            PRIMING_DELAY = 0.05  # Match existing upload flow delay
-            PRIMING_BATCH_REPORT = 30  # Report progress every 30 frames
+        # 2. J heartbeat (optional priming)
+        if j_heartbeat_hex:
+            print("  [PRIMING] Sending J heartbeat...")
+            j_bytes = bytes.fromhex(j_heartbeat_hex)
+            resp = client.send_frame(j_bytes)
+            if resp:
+                print(f"  ✓ J/0x34 OK")
+            else:
+                print(f"  ⚠ J/0x34 NO RESPONSE (continuing anyway)")
+            time.sleep(0.05)
 
-            for idx, frame_data in enumerate(priming_frames):
-                frame_hex = frame_data.get('frame_hex')
-                if not frame_hex:
-                    continue
+        # 3. Monitor mode entry: Z/0x8D + Z/0x8E
+        print("  [MONITOR] Entering monitor mode...")
+        for entry in monitor_entries:
+            frame_hex = entry.get('frame_hex')
+            cmd = entry.get('cmd')
+            sub_cmd = entry.get('sub_cmd')
+            note = entry.get('note', '')
 
-                try:
-                    frame_bytes = bytes.fromhex(frame_hex)
-                    resp = client.send_frame(frame_bytes)
+            if not frame_hex:
+                print(f"  ⚠ {cmd}/{sub_cmd}: NO FRAME HEX")
+                continue
 
-                    if resp:
-                        priming_success += 1
-                        consecutive_errors = 0
-                    else:
-                        priming_errors += 1
-                        consecutive_errors += 1
+            try:
+                frame_bytes = bytes.fromhex(frame_hex)
+                resp = client.send_frame(frame_bytes)
+                status = "OK" if resp else "NO RESPONSE"
+                print(f"  {cmd}/{sub_cmd}: {status} ({note})")
+                time.sleep(0.05)
+            except Exception as e:
+                print(f"  ✗ {cmd}/{sub_cmd}: {e}")
 
-                    # Report progress every PRIMING_BATCH_REPORT frames
-                    if (idx + 1) % PRIMING_BATCH_REPORT == 0:
-                        print(f"  [PRIMING] {idx + 1}/{len(priming_frames)} frames...")
-
-                    # Safety: abort after 10 consecutive errors (normally all succeed)
-                    if consecutive_errors >= 10:
-                        print(f"  ✗ PRIMING aborted: {consecutive_errors} consecutive errors")
-                        break
-
-                    if PRIMING_DELAY > 0:
-                        time.sleep(PRIMING_DELAY)
-
-                except Exception as e:
-                    priming_errors += 1
-                    consecutive_errors += 1
-                    if consecutive_errors >= 10:
-                        break
-
-            print(f"  [PRIMING] ✓ {priming_success} successful / {priming_errors} errors")
-        else:
-            print(f"  [PRIMING] No command frames found in upload_replay_frames.json")
-
-        # R/0xE0 batch reads
+        # 4. R/0xE0 polling
+        print(f"  [READ] Starting R/0xE0 polls...")
         for sample_num in range(args.samples):
             if args.samples > 1:
                 print(f"\n  Sample {sample_num + 1}/{args.samples}...")
-            sample_values = []
 
-            # Send each R/0xE0 request
-            for pair_idx, pair in enumerate(pairs):
-                # Get full frame (request_frame_hex includes the entire LGIS-GLOFA frame)
-                req_frame_hex = pair.get('request_frame_hex') or pair.get('request_payload_hex')
-                if not req_frame_hex:
-                    print(f"  [R batch {pair_idx+1}/{len(pairs)}] NO FRAME DATA")
-                    continue
+            try:
+                req_bytes = bytes.fromhex(read_request_hex)
+                resp = client.send_frame(req_bytes)
 
-                try:
-                    # If we only have payload_hex, build full frame (R command 0x52, sub 0xE0)
-                    if 'request_frame_hex' not in pair and 'request_payload_hex' in pair:
-                        # Convert ASCII hex payload to binary
-                        req_payload_ascii = bytes.fromhex(pair['request_payload_hex'])
-                        req_payload_hex = req_payload_ascii.decode('ascii')
-                        req_payload_bytes = bytes.fromhex(req_payload_hex)
-                        # For now, send raw bytes as-is (will timeout if not a full frame)
-                        req_bytes = req_payload_bytes
-                    else:
-                        # request_frame_hex is already full frame
-                        req_bytes = bytes.fromhex(req_frame_hex)
+                if resp and resp.get('payload_hex'):
+                    decoded = decode_response_payload(resp['payload_hex'])
+                    sample_values = decoded.get('values', [])
+                    samples.append(sample_values)
+                    vals_preview = sample_values[:3]
+                    print(f"    ✓ READ OK: {len(sample_values)} values {vals_preview}...")
+                else:
+                    print(f"    ✗ READ NO RESPONSE")
 
-                    resp = client.send_frame(req_bytes)
-                    if resp and resp.get('payload_hex'):
-                        decoded = decode_response_payload(resp['payload_hex'])
-                        sample_values.extend(decoded['values'])
-                        print(f"  [R batch {pair_idx+1}/{len(pairs)}] {len(decoded['values'])} values")
-                    else:
-                        print(f"  [R batch {pair_idx+1}/{len(pairs)}] NO RESPONSE")
+            except Exception as e:
+                print(f"    ✗ READ ERROR: {e}")
 
-                except Exception as e:
-                    print(f"  [R batch {pair_idx+1}/{len(pairs)}] Error: {e}")
+            if args.samples > 1 and sample_num < args.samples - 1:
+                time.sleep(0.5)  # polling interval between samples
 
-            if sample_values:
-                samples.append(sample_values)
-
-        # DISC frame to close session
-        print("\n  [SESSION] Sending DISC frame...")
-        disc_bytes = bytes.fromhex(disc_frame['frame_hex'])
-        client.send_frame(disc_bytes)
+        # 5. DISC frame
+        if disc_frame_hex:
+            print("  [SESSION] Sending DISC frame...")
+            try:
+                disc_bytes = bytes.fromhex(disc_frame_hex)
+                client.send_frame(disc_bytes)
+                print(f"  ✓ DISC OK")
+            except Exception as e:
+                print(f"  ⚠ DISC error: {e}")
 
     finally:
         client.disconnect()
@@ -326,7 +278,7 @@ def main():
     try:
         with open(out_path, 'w', encoding='utf-8') as f:
             json.dump(output, f, indent=2, ensure_ascii=False)
-        print(f"✓ Saved snapshot to {out_path}")
+        print(f"\n✓ Saved snapshot to {out_path}")
         print(f"  Samples: {len(samples)}, Latest values: {len(output['values_latest'])}")
     except Exception as e:
         print(f"Error saving snapshot: {e}")
