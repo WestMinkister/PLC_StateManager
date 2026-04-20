@@ -225,12 +225,22 @@ def main():
                 req_bytes = bytes.fromhex(read_request_hex)
                 resp = client.send_frame(req_bytes)
 
-                if resp and resp.get('payload_hex'):
-                    decoded = decode_response_payload(resp['payload_hex'])
-                    sample_values = decoded.get('values', [])
-                    samples.append(sample_values)
-                    vals_preview = sample_values[:3]
-                    print(f"    ✓ READ OK: {len(sample_values)} values {vals_preview}...")
+                if resp and resp.get('raw'):
+                    # R/0xE0 응답은 byte[26:]부터 payload (sub_cmd echo 없음).
+                    # parse_response가 byte[26]을 sub_cmd로 잘못 소비하므로
+                    # raw 바이트에서 직접 추출.
+                    raw = resp['raw']
+                    sig_pos = raw.find(b'LGIS-GLOFA')
+                    if sig_pos >= 0 and len(raw) > sig_pos + 26:
+                        payload_bytes = raw[sig_pos + 26:]
+                        payload_hex = payload_bytes.hex()
+                        decoded = decode_response_payload(payload_hex)
+                        sample_values = decoded.get('values', [])
+                        samples.append(sample_values)
+                        vals_preview = sample_values[:5]
+                        print(f"    ✓ READ OK: {len(sample_values)} values {vals_preview}")
+                    else:
+                        print(f"    ✗ READ: response too short ({len(raw)}B)")
                 else:
                     print(f"    ✗ READ NO RESPONSE")
 
