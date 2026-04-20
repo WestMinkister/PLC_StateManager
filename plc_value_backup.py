@@ -68,17 +68,25 @@ def decode_response_payload(response_payload_hex_ascii):
     except (ValueError, UnicodeDecodeError) as e:
         return {'error': str(e), 'raw_hex': response_payload_hex_ascii, 'values': []}
 
-    # Parse as LE16 words
+    # R/0xE0 응답 구조 (0420 캡처 분석 확정):
+    #   decoded_bytes = [값 워드 × N] + [3바이트 프로토콜 메타데이터]
+    #   메타데이터는 매 응답 변동 (카운터/체크섬) — 값이 아님
+    #   0420 캡처 36개 응답 비교로 확인: 접점 토글 시 앞 워드만 변경, 뒤 3바이트는 항상 변동
+    TRAILER_SIZE = 3
+    value_bytes = response_bytes[:-TRAILER_SIZE] if len(response_bytes) > TRAILER_SIZE else response_bytes
+    trailer_hex = response_bytes[-TRAILER_SIZE:].hex() if len(response_bytes) > TRAILER_SIZE else ''
+
     values = []
     pos = 0
-    while pos + 2 <= len(response_bytes):
-        word = struct.unpack('<H', response_bytes[pos:pos+2])[0]
+    while pos + 2 <= len(value_bytes):
+        word = struct.unpack('<H', value_bytes[pos:pos+2])[0]
         values.append(word)
         pos += 2
 
     return {
         'raw_hex': response_hex,
-        'values': values
+        'values': values,
+        'trailer_hex': trailer_hex,
     }
 
 
@@ -229,48 +237,12 @@ def main():
                     raw = resp['raw']
                     sig_pos = raw.find(b'LGIS-GLOFA')
                     if sig_pos >= 0 and len(raw) > sig_pos + 26:
-                        # DEBUG: 응답 구조 전체 출력 (프로토콜 분석용)
-                        total_len = len(raw) - sig_pos
-                        status = raw[sig_pos + 24] if len(raw) > sig_pos + 24 else '?'
-                        cmd_echo = raw[sig_pos + 25] if len(raw) > sig_pos + 25 else '?'
-                        cmd_data_len_bytes = raw[sig_pos + 22:sig_pos + 24]
-                        cmd_data_len = int.from_bytes(cmd_data_len_bytes, 'little') if len(cmd_data_len_bytes) == 2 else '?'
-
-                        print(f"    [DEBUG] Response: {total_len}B total, "
-                              f"status=0x{status:02x}, cmd_echo=0x{cmd_echo:02x}, "
-                              f"cmd_data_len={cmd_data_len}")
-
-                        # byte[24:] 전체를 hex로 출력 (최대 120 chars)
-                        all_after_header = raw[sig_pos + 24:]
-                        print(f"    [DEBUG] Bytes[24:]: {all_after_header.hex()[:120]}")
-
-                        # byte[26:] = payload 부분
                         payload_bytes = raw[sig_pos + 26:]
-                        print(f"    [DEBUG] Bytes[26:] ({len(payload_bytes)}B): "
-                              f"{payload_bytes.hex()[:120]}")
-
-                        # ASCII 해석 시도
-                        try:
-                            ascii_str = payload_bytes.decode('ascii', errors='replace')
-                            print(f"    [DEBUG] ASCII decode: {ascii_str[:60]}")
-                        except Exception:
-                            pass
-
-                        # 방법 A: double-decode (ASCII hex → binary → LE16)
-                        decoded_a = decode_response_payload(payload_bytes.hex())
-                        # 방법 B: raw binary 직접 LE16 파싱 (double-decode 스킵)
-                        values_b = []
-                        for i in range(0, len(payload_bytes) - 1, 2):
-                            w = int.from_bytes(payload_bytes[i:i+2], 'little')
-                            values_b.append(w)
-
-                        print(f"    [DEBUG] Method A (double-decode): {decoded_a.get('values', [])}")
-                        print(f"    [DEBUG] Method B (raw LE16):      {values_b}")
-
-                        # 기존 로직 (method A) 유지
-                        sample_values = decoded_a.get('values', [])
+                        payload_hex = payload_bytes.hex()
+                        decoded = decode_response_payload(payload_hex)
+                        sample_values = decoded.get('values', [])
                         samples.append(sample_values)
-                        print(f"    ✓ READ: {len(sample_values)} values (Method A)")
+                        print(f"    ✓ READ OK: {len(sample_values)} values {sample_values}")
                     else:
                         print(f"    ✗ READ: response too short ({len(raw)}B)")
                 else:
