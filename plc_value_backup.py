@@ -17,6 +17,7 @@ import os
 import time
 import struct
 import argparse
+import re
 from pathlib import Path
 from datetime import datetime
 
@@ -40,6 +41,26 @@ try:
 except ImportError as e:
     print(f"Error: failed to import plc_upload_test: {e}")
     sys.exit(1)
+
+
+def extract_mw_addresses_from_state(state):
+    """Extract unique MW word numbers from ProgramState symbols.
+
+    Args:
+        state: ProgramState object from plc_upload_decode.build_program_state()
+
+    Returns:
+        Sorted list of unique MW word numbers (e.g., [152, 200, 1000, 1002, 3000])
+    """
+    mw_set = set()
+    for sym in state.all_symbols:
+        # SymbolEntry has .address property like "%MW152.0" or "%MW3000.2"
+        addr = sym.address if hasattr(sym, 'address') else sym.get('address', '')
+        # Match %MW<number> or %MW<number>.<bit>
+        match = re.match(r'%MW(\d+)', addr)
+        if match:
+            mw_set.add(int(match.group(1)))
+    return sorted(mw_set)
 
 
 def build_r_e0_request(mw_addresses):
@@ -160,6 +181,10 @@ def main():
                         help='Output snapshot file')
     parser.add_argument('--mw', nargs='+', type=int, metavar='ADDR',
                         help='MW addresses to read (e.g., --mw 152 3000 1002)')
+    parser.add_argument('--auto', action='store_true',
+                        help='Auto-discover all MW addresses from PLC program and read values')
+    parser.add_argument('--snapshot', type=str, metavar='JSON',
+                        help='Use existing program snapshot JSON for address discovery (skips session 1)')
 
     args = parser.parse_args()
 
@@ -207,22 +232,56 @@ def main():
         for entry in monitor_entries:
             print(f"  {entry['cmd']}/{entry['sub_cmd']}: {entry['note']}")
         print(f"J heartbeat: {j_heartbeat_hex[:40] if j_heartbeat_hex else '(not set)'}...")
-        if args.mw:
-            print(f"Custom MW addresses: {args.mw}")
+
+        # Handle --auto mode discovery in dry-run
+        if args.auto:
+            if args.snapshot:
+                print(f"\n[AUTO] Would load snapshot: {args.snapshot}")
+                try:
+                    from plc_upload_decode import build_program_state
+                    with open(args.snapshot, encoding='utf-8') as f:
+                        snap = json.load(f)
+                    state = build_program_state(snap)
+                    addrs = extract_mw_addresses_from_state(state)
+                    print(f"  Discovered MW addresses: {addrs}")
+                    print(f"  Total: {len(addrs)} unique MW words")
+                except Exception as e:
+                    print(f"  Error loading snapshot: {e}")
+            else:
+                print(f"\n[AUTO] Would run session 1 (program read) to discover addresses")
+                print(f"  Frames: {len(frames_data.get('upload_frames', []))} (estimated)")
+        elif args.mw:
+            print(f"\nCustom MW addresses: {args.mw}")
             frame = build_r_e0_request(args.mw)
             print(f"Built R/0xE0 frame: {len(frame)}B")
             print(f"Frame hex: {frame.hex()[:80]}...")
         else:
-            print(f"R/0xE0 template: {read_request_hex[:40]}...")
+            print(f"\nR/0xE0 template: {read_request_hex[:40]}...")
+
         print(f"DISC frame: {disc_frame_hex[:40] if disc_frame_hex else '(not set)'}...")
         print(f"\nWould send:")
-        print(f"  1. CONN frame")
-        if j_heartbeat_hex:
-            print(f"  2. J heartbeat (optional priming)")
-        print(f"  3. Monitor entry frames (Z/0x8D + Z/0x8E)")
-        print(f"  4. {args.samples} R/0xE0 read(s)")
-        if disc_frame_hex:
-            print(f"  5. DISC frame")
+        if args.auto and not args.snapshot:
+            print(f"  [SESSION 1] Program read:")
+            print(f"  1. CONN frame")
+            print(f"  2. Upload replay (discover addresses)")
+            print(f"  3. DISC frame")
+            print(f"  [WAIT 0.5s]")
+            print(f"  [SESSION 2] Value read:")
+            print(f"  4. CONN frame")
+            if j_heartbeat_hex:
+                print(f"  5. J heartbeat (optional priming)")
+            print(f"  6. Monitor entry frames (Z/0x8D + Z/0x8E)")
+            print(f"  7. {args.samples} R/0xE0 read(s) for discovered addresses")
+            if disc_frame_hex:
+                print(f"  8. DISC frame")
+        else:
+            print(f"  1. CONN frame")
+            if j_heartbeat_hex:
+                print(f"  2. J heartbeat (optional priming)")
+            print(f"  3. Monitor entry frames (Z/0x8D + Z/0x8E)")
+            print(f"  4. {args.samples} R/0xE0 read(s)")
+            if disc_frame_hex:
+                print(f"  5. DISC frame")
         return
 
     # Live read mode
@@ -230,7 +289,81 @@ def main():
         print("Error: Use --dry-run or --read IP")
         sys.exit(1)
 
-    print(f"\n=== Connecting to PLC {args.read}:{args.port} ===")
+    # Auto-discover MW addresses if --auto is set
+    if args.auto:
+        from plc_upload_decode import build_program_state
+
+        if args.snapshot:
+            # Use existing snapshot
+            print(f"\n=== AUTO MODE: Loading snapshot ===")
+            print(f"  [AUTO] Loading snapshot: {args.snapshot}")
+            try:
+                with open(args.snapshot, encoding='utf-8') as f:
+                    snap_responses = json.load(f)
+            except Exception as e:
+                print(f"  ✗ Failed to load snapshot: {e}")
+                sys.exit(1)
+        else:
+            # Session 1: Upload replay to get program state
+            print(f"\n=== AUTO MODE: Session 1 (Program Read) ===")
+            print(f"  [AUTO] Session 1: Reading PLC program...")
+
+            # Load upload replay frames
+            upload_json_path = resource_path('upload_replay_frames.json')
+            try:
+                with open(upload_json_path, encoding='utf-8') as f:
+                    upload_frames = json.load(f)
+            except Exception as e:
+                print(f"  ✗ Failed to load upload frames: {e}")
+                sys.exit(1)
+
+            # Create temporary client for session 1
+            print(f"  Connecting to PLC {args.read}:{args.port} (Session 1)...")
+            client1 = PLCUploadClient(args.read, args.port, timeout=5.0)
+            try:
+                client1.connect()
+            except Exception as e:
+                print(f"  ✗ Connection failed: {e}")
+                sys.exit(1)
+
+            # Replay upload frames
+            try:
+                success, errors = client1.replay_frames(upload_frames, delay=0.05)
+                print(f"  ✓ Program read: {success} frames OK, {errors} errors")
+
+                # Serialize responses for build_program_state
+                snap_responses = []
+                for r in client1.responses:
+                    entry = {}
+                    for k, v in r.items():
+                        if isinstance(v, bytes):
+                            entry[k + '_hex'] = v.hex()
+                        else:
+                            entry[k] = v
+                    snap_responses.append(entry)
+                print(f"  ✓ Collected {len(snap_responses)} responses")
+            finally:
+                client1.disconnect()
+
+            time.sleep(0.5)  # Wait between sessions
+
+        # Extract symbols and discover MW addresses
+        try:
+            state = build_program_state(snap_responses)
+            mw_addresses = extract_mw_addresses_from_state(state)
+            print(f"  [AUTO] Discovered {len(mw_addresses)} MW addresses: {mw_addresses}")
+
+            if not mw_addresses:
+                print(f"  ✗ No MW addresses found in program")
+                sys.exit(1)
+
+            # Override args.mw with discovered addresses
+            args.mw = mw_addresses
+        except Exception as e:
+            print(f"  ✗ Failed to extract symbols: {e}")
+            sys.exit(1)
+
+    print(f"\n=== AUTO MODE: Session 2 (Value Read) ===" if args.auto else f"\n=== Connecting to PLC {args.read}:{args.port} ===")
     client = PLCUploadClient(args.read, args.port, timeout=5.0)
 
     try:
