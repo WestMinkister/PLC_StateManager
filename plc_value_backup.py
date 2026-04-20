@@ -51,25 +51,25 @@ def build_r_e0_request(mw_addresses):
         Complete LGIS-GLOFA frame (bytes)
     """
     # Binary payload
-    # 캡처 분석: 첫 엔트리(flag=0x04)는 "컨텍스트"로 소비되어 응답 값에 포함 안 됨.
-    # 4엔트리 → 3값, 3엔트리 → 2값 패턴 확인.
-    # 해결: 더미 첫 엔트리(offset=0) 추가 → 실제 주소는 모두 flag=0x00으로.
-    total_entries = len(mw_addresses) + 1  # +1 for dummy context entry
+    # 캡처 분석: 응답 decoded = [값 워드 × N] + [3바이트 trailer].
+    # trailer = 마지막 엔트리 값(2B) + 프로토콜 메타(1B).
+    # 해결: 실제 주소 뒤에 패딩 엔트리 추가 → 패딩 값이 trailer에 소비됨.
+    total_entries = len(mw_addresses) + 1  # +1 trailing padding
     payload_bin = bytearray()
     payload_bin.extend(struct.pack('>I', total_entries * 2))
 
-    # 더미 첫 엔트리 (flag=0x04, context entry)
-    payload_bin.append(0x04)
-    payload_bin.extend([0x4D, 0x42, 0x02, 0x00])
-    payload_bin.extend(struct.pack('<H', 0))  # offset 0 (dummy)
-    payload_bin.append(0x00)
-
-    # 실제 MW 주소 엔트리들 (flag=0x00)
-    for mw in mw_addresses:
-        payload_bin.append(0x00)
+    # 실제 MW 주소 엔트리들
+    for idx, mw in enumerate(mw_addresses):
+        payload_bin.append(0x04 if idx == 0 else 0x00)
         payload_bin.extend([0x4D, 0x42, 0x02, 0x00])
-        payload_bin.extend(struct.pack('<H', mw * 2))  # MW번호 → 바이트 오프셋
+        payload_bin.extend(struct.pack('<H', mw * 2))
         payload_bin.append(0x00)
+
+    # 패딩 엔트리 (이 값이 trailer 3바이트에 소비됨)
+    payload_bin.append(0x00)
+    payload_bin.extend([0x4D, 0x42, 0x02, 0x00])
+    payload_bin.extend(struct.pack('<H', 0))
+    payload_bin.append(0x00)
 
     payload_bin.extend([0x00, 0xD4])
 
