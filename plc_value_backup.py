@@ -418,44 +418,73 @@ def main():
             except Exception as e:
                 print(f"  ✗ {cmd}/{sub_cmd}: {e}")
 
-        # Determine read frame and variable names
+        # Determine addresses and variable names
         if args.mw:
-            print(f"  [CUSTOM] Building R/0xE0 for MW: {args.mw}")
-            read_frame_bytes = build_r_e0_request(args.mw)
-            var_names = [f'MW{addr}' for addr in args.mw]
+            mw_list = args.mw
+            var_names = [f'MW{addr}' for addr in mw_list]
         else:
-            read_frame_bytes = bytes.fromhex(read_request_hex)
+            mw_list = None
             var_names = [f"{v['marker_hex']}_0x{v['offset']:04x}" for v in variables]
 
-        # 4. R/0xE0 polling
+        # 4. R/0xE0 polling (배치 분할: 3주소/배치, PLC 응답 버퍼 한계 대응)
+        BATCH_SIZE = 3  # 3 real + 1 padding = 4 entries (캡처에서 검증된 크기)
         print(f"  [READ] Starting R/0xE0 polls...")
+
         for sample_num in range(args.samples):
             if args.samples > 1:
                 print(f"\n  Sample {sample_num + 1}/{args.samples}...")
 
             try:
-                resp = client.send_frame(read_frame_bytes)
+                if mw_list:
+                    # 배치 분할 읽기
+                    all_values = []
+                    batches = [mw_list[i:i+BATCH_SIZE] for i in range(0, len(mw_list), BATCH_SIZE)]
+                    for batch_idx, batch in enumerate(batches):
+                        read_frame_bytes = build_r_e0_request(batch)
+                        resp = client.send_frame(read_frame_bytes)
+                        if resp and resp.get('raw'):
+                            raw = resp['raw']
+                            sig_pos = raw.find(b'LGIS-GLOFA')
+                            if sig_pos >= 0 and len(raw) > sig_pos + 26:
+                                payload_bytes = raw[sig_pos + 26:]
+                                decoded = decode_response_payload(payload_bytes.hex())
+                                batch_values = decoded.get('values', [])[:len(batch)]
+                                all_values.extend(batch_values)
+                                batch_names = [f'MW{a}' for a in batch]
+                                print(f"    [batch {batch_idx+1}/{len(batches)}] {dict(zip(batch_names, batch_values))}")
+                            else:
+                                print(f"    [batch {batch_idx+1}] response too short")
+                                all_values.extend([None] * len(batch))
+                        else:
+                            print(f"    [batch {batch_idx+1}] NO RESPONSE")
+                            all_values.extend([None] * len(batch))
+                        time.sleep(0.05)
 
-                if resp and resp.get('raw'):
-                    raw = resp['raw']
-                    sig_pos = raw.find(b'LGIS-GLOFA')
-                    if sig_pos >= 0 and len(raw) > sig_pos + 26:
-                        payload_bytes = raw[sig_pos + 26:]
-                        payload_hex = payload_bytes.hex()
-                        decoded = decode_response_payload(payload_hex)
-                        sample_values = decoded.get('values', [])
-                        samples.append(sample_values)
-                        print(f"    ✓ READ OK: {len(sample_values)} values {sample_values}")
-                    else:
-                        print(f"    ✗ READ: response too short ({len(raw)}B)")
+                    samples.append(all_values)
+                    print(f"    ✓ READ OK: {len(all_values)} values")
                 else:
-                    print(f"    ✗ READ NO RESPONSE")
+                    # 기존 템플릿 모드 (단일 요청)
+                    read_frame_bytes = bytes.fromhex(read_request_hex)
+                    resp = client.send_frame(read_frame_bytes)
+                    if resp and resp.get('raw'):
+                        raw = resp['raw']
+                        sig_pos = raw.find(b'LGIS-GLOFA')
+                        if sig_pos >= 0 and len(raw) > sig_pos + 26:
+                            payload_bytes = raw[sig_pos + 26:]
+                            decoded = decode_response_payload(payload_bytes.hex())
+                            sample_values = decoded.get('values', [])
+                            samples.append(sample_values)
+                            print(f"    ✓ READ OK: {len(sample_values)} values {sample_values}")
+                        else:
+                            print(f"    ✗ READ: response too short")
+                    else:
+                        print(f"    ✗ READ NO RESPONSE")
 
             except Exception as e:
                 print(f"    ✗ READ ERROR: {e}")
 
             if args.samples > 1 and sample_num < args.samples - 1:
-                time.sleep(0.5)  # polling interval between samples
+                time.sleep(0.5)
 
         # 5. DISC frame
         if disc_frame_hex:
