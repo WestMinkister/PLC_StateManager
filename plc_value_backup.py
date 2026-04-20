@@ -51,13 +51,26 @@ def build_r_e0_request(mw_addresses):
         Complete LGIS-GLOFA frame (bytes)
     """
     # Binary payload
+    # 캡처 분석: 첫 엔트리(flag=0x04)는 "컨텍스트"로 소비되어 응답 값에 포함 안 됨.
+    # 4엔트리 → 3값, 3엔트리 → 2값 패턴 확인.
+    # 해결: 더미 첫 엔트리(offset=0) 추가 → 실제 주소는 모두 flag=0x00으로.
+    total_entries = len(mw_addresses) + 1  # +1 for dummy context entry
     payload_bin = bytearray()
-    payload_bin.extend(struct.pack('>I', len(mw_addresses) * 2))
-    for idx, mw in enumerate(mw_addresses):
-        payload_bin.append(0x04 if idx == 0 else 0x00)
-        payload_bin.extend([0x4D, 0x42, 0x02, 0x00])
-        payload_bin.extend(struct.pack('<H', mw * 2))  # MW번호 → 바이트 오프셋 (MW30=60, MW152=304)
+    payload_bin.extend(struct.pack('>I', total_entries * 2))
+
+    # 더미 첫 엔트리 (flag=0x04, context entry)
+    payload_bin.append(0x04)
+    payload_bin.extend([0x4D, 0x42, 0x02, 0x00])
+    payload_bin.extend(struct.pack('<H', 0))  # offset 0 (dummy)
+    payload_bin.append(0x00)
+
+    # 실제 MW 주소 엔트리들 (flag=0x00)
+    for mw in mw_addresses:
         payload_bin.append(0x00)
+        payload_bin.extend([0x4D, 0x42, 0x02, 0x00])
+        payload_bin.extend(struct.pack('<H', mw * 2))  # MW번호 → 바이트 오프셋
+        payload_bin.append(0x00)
+
     payload_bin.extend([0x00, 0xD4])
 
     # Double ASCII-hex encode
