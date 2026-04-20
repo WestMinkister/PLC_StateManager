@@ -56,7 +56,7 @@ def build_r_e0_request(mw_addresses):
     for idx, mw in enumerate(mw_addresses):
         payload_bin.append(0x04 if idx == 0 else 0x00)
         payload_bin.extend([0x4D, 0x42, 0x02, 0x00])
-        payload_bin.extend(struct.pack('<H', mw))
+        payload_bin.extend(struct.pack('<H', mw * 2))  # MW번호 → 바이트 오프셋 (MW30=60, MW152=304)
         payload_bin.append(0x00)
     payload_bin.extend([0x00, 0xD4])
 
