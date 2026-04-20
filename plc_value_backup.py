@@ -42,6 +42,47 @@ except ImportError as e:
     sys.exit(1)
 
 
+def build_r_e0_request(mw_addresses):
+    """Build R/0xE0 request frame for specified MW addresses.
+
+    Args:
+        mw_addresses: List of MW address integers (e.g., [152, 3000, 1002])
+    Returns:
+        Complete LGIS-GLOFA frame (bytes)
+    """
+    # Binary payload
+    payload_bin = bytearray()
+    payload_bin.extend(struct.pack('>I', len(mw_addresses) * 2))
+    for idx, mw in enumerate(mw_addresses):
+        payload_bin.append(0x04 if idx == 0 else 0x00)
+        payload_bin.extend([0x4D, 0x42, 0x02, 0x00])
+        payload_bin.extend(struct.pack('<H', mw))
+        payload_bin.append(0x00)
+    payload_bin.extend([0x00, 0xD4])
+
+    # Double ASCII-hex encode
+    ascii_hex_bytes = payload_bin.hex().upper().encode('ascii')
+
+    # Build LGIS-GLOFA frame
+    cmd_payload = bytes([0xE0]) + ascii_hex_bytes
+    cmd_data = bytes([0x52]) + cmd_payload
+    cmd_data_len = len(cmd_data)
+    length = 2 + 2 + cmd_data_len
+
+    header = bytearray(20)
+    header[0:10] = b'LGIS-GLOFA'
+    header[10:12] = b'\x00\x00'
+    header[12] = 0x00
+    header[13] = 0x22
+    header[14:16] = struct.pack('<H', 0)
+    header[16:18] = struct.pack('<H', length)
+    header[18] = 0x00
+    header[19] = sum(header[0:19]) % 256
+
+    sub_header = b'\x0e\x00' + struct.pack('<H', cmd_data_len)
+    return bytes(header) + sub_header + cmd_data
+
+
 def decode_response_payload(response_payload_hex_ascii):
     """
     Decode R/0xE0 response payload to extract values.
@@ -104,6 +145,8 @@ def main():
                         help=f'PLC port (default: {DEFAULT_PORT})')
     parser.add_argument('--out', type=str, default='snapshots/values.json',
                         help='Output snapshot file')
+    parser.add_argument('--mw', nargs='+', type=int, metavar='ADDR',
+                        help='MW addresses to read (e.g., --mw 152 3000 1002)')
 
     args = parser.parse_args()
 
@@ -151,7 +194,13 @@ def main():
         for entry in monitor_entries:
             print(f"  {entry['cmd']}/{entry['sub_cmd']}: {entry['note']}")
         print(f"J heartbeat: {j_heartbeat_hex[:40] if j_heartbeat_hex else '(not set)'}...")
-        print(f"R/0xE0 template: {read_request_hex[:40]}...")
+        if args.mw:
+            print(f"Custom MW addresses: {args.mw}")
+            frame = build_r_e0_request(args.mw)
+            print(f"Built R/0xE0 frame: {len(frame)}B")
+            print(f"Frame hex: {frame.hex()[:80]}...")
+        else:
+            print(f"R/0xE0 template: {read_request_hex[:40]}...")
         print(f"DISC frame: {disc_frame_hex[:40] if disc_frame_hex else '(not set)'}...")
         print(f"\nWould send:")
         print(f"  1. CONN frame")
@@ -223,6 +272,15 @@ def main():
             except Exception as e:
                 print(f"  ✗ {cmd}/{sub_cmd}: {e}")
 
+        # Determine read frame and variable names
+        if args.mw:
+            print(f"  [CUSTOM] Building R/0xE0 for MW: {args.mw}")
+            read_frame_bytes = build_r_e0_request(args.mw)
+            var_names = [f'MW{addr}' for addr in args.mw]
+        else:
+            read_frame_bytes = bytes.fromhex(read_request_hex)
+            var_names = [f"{v['marker_hex']}_0x{v['offset']:04x}" for v in variables]
+
         # 4. R/0xE0 polling
         print(f"  [READ] Starting R/0xE0 polls...")
         for sample_num in range(args.samples):
@@ -230,8 +288,7 @@ def main():
                 print(f"\n  Sample {sample_num + 1}/{args.samples}...")
 
             try:
-                req_bytes = bytes.fromhex(read_request_hex)
-                resp = client.send_frame(req_bytes)
+                resp = client.send_frame(read_frame_bytes)
 
                 if resp and resp.get('raw'):
                     raw = resp['raw']
@@ -280,10 +337,9 @@ def main():
 
     # Build latest values dict (if we have samples)
     if samples and samples[-1]:
-        for var_idx, var in enumerate(variables):
-            if var_idx < len(samples[-1]):
-                key = f"{var['marker_hex']}_0x{var['offset']:04x}"
-                output['values_latest'][key] = samples[-1][var_idx]
+        for i, name in enumerate(var_names):
+            if i < len(samples[-1]):
+                output['values_latest'][name] = samples[-1][i]
 
     # Save output
     out_path = Path(args.out)
