@@ -226,19 +226,51 @@ def main():
                 resp = client.send_frame(req_bytes)
 
                 if resp and resp.get('raw'):
-                    # R/0xE0 응답은 byte[26:]부터 payload (sub_cmd echo 없음).
-                    # parse_response가 byte[26]을 sub_cmd로 잘못 소비하므로
-                    # raw 바이트에서 직접 추출.
                     raw = resp['raw']
                     sig_pos = raw.find(b'LGIS-GLOFA')
                     if sig_pos >= 0 and len(raw) > sig_pos + 26:
+                        # DEBUG: 응답 구조 전체 출력 (프로토콜 분석용)
+                        total_len = len(raw) - sig_pos
+                        status = raw[sig_pos + 24] if len(raw) > sig_pos + 24 else '?'
+                        cmd_echo = raw[sig_pos + 25] if len(raw) > sig_pos + 25 else '?'
+                        cmd_data_len_bytes = raw[sig_pos + 22:sig_pos + 24]
+                        cmd_data_len = int.from_bytes(cmd_data_len_bytes, 'little') if len(cmd_data_len_bytes) == 2 else '?'
+
+                        print(f"    [DEBUG] Response: {total_len}B total, "
+                              f"status=0x{status:02x}, cmd_echo=0x{cmd_echo:02x}, "
+                              f"cmd_data_len={cmd_data_len}")
+
+                        # byte[24:] 전체를 hex로 출력 (최대 120 chars)
+                        all_after_header = raw[sig_pos + 24:]
+                        print(f"    [DEBUG] Bytes[24:]: {all_after_header.hex()[:120]}")
+
+                        # byte[26:] = payload 부분
                         payload_bytes = raw[sig_pos + 26:]
-                        payload_hex = payload_bytes.hex()
-                        decoded = decode_response_payload(payload_hex)
-                        sample_values = decoded.get('values', [])
+                        print(f"    [DEBUG] Bytes[26:] ({len(payload_bytes)}B): "
+                              f"{payload_bytes.hex()[:120]}")
+
+                        # ASCII 해석 시도
+                        try:
+                            ascii_str = payload_bytes.decode('ascii', errors='replace')
+                            print(f"    [DEBUG] ASCII decode: {ascii_str[:60]}")
+                        except Exception:
+                            pass
+
+                        # 방법 A: double-decode (ASCII hex → binary → LE16)
+                        decoded_a = decode_response_payload(payload_bytes.hex())
+                        # 방법 B: raw binary 직접 LE16 파싱 (double-decode 스킵)
+                        values_b = []
+                        for i in range(0, len(payload_bytes) - 1, 2):
+                            w = int.from_bytes(payload_bytes[i:i+2], 'little')
+                            values_b.append(w)
+
+                        print(f"    [DEBUG] Method A (double-decode): {decoded_a.get('values', [])}")
+                        print(f"    [DEBUG] Method B (raw LE16):      {values_b}")
+
+                        # 기존 로직 (method A) 유지
+                        sample_values = decoded_a.get('values', [])
                         samples.append(sample_values)
-                        vals_preview = sample_values[:5]
-                        print(f"    ✓ READ OK: {len(sample_values)} values {vals_preview}")
+                        print(f"    ✓ READ: {len(sample_values)} values (Method A)")
                     else:
                         print(f"    ✗ READ: response too short ({len(raw)}B)")
                 else:
