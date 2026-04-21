@@ -165,9 +165,10 @@ def dynamic_scatter_gather(client):
             print(f"    [SG] Small response ({len(decoded)}B < 10) — stopping")
             break
 
-        # 모든 바이트가 0이면 유효 메모리 영역 끝 — PLC는 빈 영역도 zero-padded 응답
-        if all(b == 0 for b in decoded):
-            print(f"    [SG] All-zero fragment at offset {offset} — reached end of valid data")
+        # 앞부분 50B가 모두 0이면 유효 메모리 영역 끝 — 실측(0422_cmd1)에서 유효 fragment는
+        # 헤더(addr/len) 때문에 첫 30B 내 non-zero 확실. 뒤쪽 651B padding/trailer는 무시.
+        if all(b == 0 for b in decoded[:50]):
+            print(f"    [SG] All-zero head (50B) at offset {offset} — reached end of valid data")
             break
 
         fragments.append({'offset': offset, 'data': decoded})
@@ -905,11 +906,14 @@ def main():
                 client1.disconnect()
                 sys.exit(1)
 
-        # Extract symbols and discover MW addresses
+        # Extract symbols and discover addresses (multi-area: M/I/Q/F)
         try:
             state = build_program_state(snap_responses)
             mw_addresses = extract_mw_addresses_from_state(state)
             print(f"  [AUTO] Discovered {len(mw_addresses)} MW addresses (parser): {mw_addresses}")
+
+            # Collect all discovered (area, word) pairs — parser only returns M
+            discovered_pairs = {('M', w) for w in mw_addresses}
 
             # Dynamic scatter-gather: send Z/0xC0 at sequential offsets
             # client1 is still connected (DISC was excluded from replay)
@@ -919,12 +923,11 @@ def main():
                     sg_symbols, n_frags = dynamic_scatter_gather(client1)
                     sg_addresses = extract_addresses_from_symbols(sg_symbols)
 
-                    mw_set = set(mw_addresses)
+                    # 다중 영역 지원 (M/I/Q/F) — 심볼 테이블에 있는 모든 영역 포함
                     for area, word in sg_addresses:
-                        if area == 'M':
-                            mw_set.add(word)
+                        if area in ('M', 'I', 'Q', 'F'):
+                            discovered_pairs.add((area, word))
 
-                    mw_addresses = sorted(mw_set)
                     print(f"  [AUTO] Scatter-gather: {n_frags} fragments → {len(sg_symbols)} symbols")
                     if sg_symbols:
                         print(f"  [AUTO] Symbols: {sorted(sg_symbols)}")
@@ -940,26 +943,39 @@ def main():
 
                 time.sleep(0.5)  # Wait between sessions
 
-            if not mw_addresses:
-                print(f"  ✗ No MW addresses found in program")
+            if not discovered_pairs:
+                print(f"  ✗ No addresses found in program")
                 sys.exit(1)
 
-            print(f"  [AUTO] Total discovered: {len(mw_addresses)} MW addresses: {mw_addresses}")
+            # 정렬 (영역별, 주소별) → R/0xE0 배치에 넘길 dict 리스트 구성
+            AREA_ORDER = {'M': 0, 'I': 1, 'Q': 2, 'F': 3}
+            sorted_pairs = sorted(discovered_pairs, key=lambda x: (AREA_ORDER.get(x[0], 99), x[1]))
+            discovered_read_vars = [{'area': a, 'word': w} for a, w in sorted_pairs]
+            discovered_names = [f"{a}W{w}" for a, w in sorted_pairs]
 
-            # Override args.mw with discovered addresses
-            args.mw = mw_addresses
+            # 영역별 집계
+            area_counts = {a: sum(1 for p in sorted_pairs if p[0] == a) for a in ('M', 'I', 'Q', 'F')}
+            summary = ', '.join(f"{n} {a}" for a, n in area_counts.items() if n > 0)
+            print(f"  [AUTO] Total discovered: {len(discovered_read_vars)} addresses ({summary})")
+            print(f"  [AUTO] Addresses: {discovered_names}")
+
+            # L1027의 _config_vars 분기를 재활용 — MW/IW/QW/FW 모두 R/0xE0로 읽힘
+            args._config_vars = discovered_read_vars
+            args._config_names = discovered_names
+            # 하위호환: args.mw 는 M 영역만 유지 (legacy consumers)
+            args.mw = sorted(w for a, w in sorted_pairs if a == 'M')
 
             # Export to config file if --export is specified
             if args.export:
                 export_data = {
-                    "variables": [{"area": "M", "word": mw, "name": f"MW{mw}"} for mw in mw_addresses]
+                    "variables": [{"area": a, "word": w, "name": f"{a}W{w}"} for a, w in sorted_pairs]
                 }
                 try:
                     export_path = Path(args.export)
                     export_path.parent.mkdir(parents=True, exist_ok=True)
                     with open(export_path, 'w', encoding='utf-8') as f:
                         json.dump(export_data, f, indent=2, ensure_ascii=False)
-                    print(f"  ✓ Exported {len(mw_addresses)} variables to {args.export}")
+                    print(f"  ✓ Exported {len(discovered_read_vars)} variables to {args.export}")
                 except Exception as e:
                     print(f"  ✗ Failed to export: {e}")
                     sys.exit(1)
