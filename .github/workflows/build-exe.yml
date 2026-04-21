@@ -58,6 +58,11 @@ jobs:
           --hidden-import plc_upload_test
           plc_value_backup.py
 
+      - name: Build PLC_XMLParser (콘솔)
+        run: >
+          pyinstaller --onefile --console --name PLC_XMLParser --noconfirm
+          plc_xml_parser.py
+
       - name: Upload PLC_WriteReplay
         uses: actions/upload-artifact@v4
         with:
@@ -87,3 +92,9 @@ jobs:
         with:
           name: PLC_ValueBackup-Windows
           path: dist/PLC_ValueBackup.exe
+
+      - name: Upload PLC_XMLParser
+        uses: actions/upload-artifact@v4
+        with:
+          name: PLC_XMLParser-Windows
+          path: dist/PLC_XMLParser.exe

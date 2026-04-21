@@ -206,8 +206,168 @@ def main():
                         help='Export auto-discovered variables to config file')
     parser.add_argument('--snapshot', type=str, metavar='JSON',
                         help='Use existing program snapshot JSON for address discovery (skips session 1)')
+    parser.add_argument('--scan', type=str, metavar='IP',
+                        help='Scan MW address range for non-zero values (auto-discovery)')
+    parser.add_argument('--range', nargs=2, type=int, metavar=('START', 'END'),
+                        default=[0, 10000],
+                        help='MW address range for --scan (default: 0 10000)')
 
     args = parser.parse_args()
+
+    # Scan mode (early exit)
+    if args.scan:
+        start, end = args.range
+        print(f"\n=== MEMORY SCAN: MW{start} ~ MW{end} ===")
+        print(f"  Total addresses: {end - start + 1}")
+        BATCH_SIZE = 3
+        total_addrs = end - start + 1
+        total_batches = (total_addrs + BATCH_SIZE - 1) // BATCH_SIZE
+        print(f"  Batch size: {BATCH_SIZE}, estimated batches: {total_batches}")
+
+        # Estimate time (0.02s per batch + ~0.05s RTT)
+        est_time = total_batches * 0.07
+        est_minutes = est_time / 60
+        print(f"  Estimated time: {est_minutes:.1f} minutes")
+
+        # Connect to PLC
+        print(f"\nConnecting to PLC {args.scan}:{args.port}...")
+        client = PLCUploadClient(args.scan, args.port, timeout=5.0)
+        try:
+            client.connect()
+        except Exception as e:
+            print(f"✗ Connection failed: {e}")
+            sys.exit(1)
+
+        # Load CONN and monitor entry frames
+        frames_file = Path(resource_path('value_read_frames.json'))
+        if not frames_file.exists():
+            print(f"Error: value_read_frames.json not found")
+            sys.exit(1)
+
+        try:
+            with open(frames_file, encoding='utf-8') as f:
+                frames_data = json.load(f)
+        except Exception as e:
+            print(f"Error loading frames: {e}")
+            sys.exit(1)
+
+        conn_frame_hex = frames_data.get('conn_frame_hex')
+        monitor_entries = frames_data.get('monitor_entry_frames', [])
+        disc_frame_hex = frames_data.get('disc_frame_hex')
+        j_heartbeat_hex = frames_data.get('j_heartbeat_frame_hex')
+
+        try:
+            # 1. CONN frame
+            print("\n[SCAN] Sending CONN frame...")
+            conn_bytes = bytes.fromhex(conn_frame_hex)
+            resp = client.send_frame(conn_bytes)
+            if not resp:
+                print("✗ CONN response not received")
+                sys.exit(1)
+            print(f"✓ CONN OK")
+            time.sleep(0.3)
+
+            # 2. J heartbeat (optional priming)
+            if j_heartbeat_hex:
+                print("[PRIMING] Sending J heartbeat...")
+                j_bytes = bytes.fromhex(j_heartbeat_hex)
+                resp = client.send_frame(j_bytes)
+                if resp:
+                    print(f"✓ J/0x34 OK")
+                else:
+                    print(f"⚠ J/0x34 NO RESPONSE (continuing anyway)")
+                time.sleep(0.05)
+
+            # 3. Monitor mode entry: Z/0x8D + Z/0x8E
+            print("[MONITOR] Entering monitor mode...")
+            for entry in monitor_entries:
+                frame_hex = entry.get('frame_hex')
+                cmd = entry.get('cmd')
+                sub_cmd = entry.get('sub_cmd')
+                if not frame_hex:
+                    continue
+                try:
+                    frame_bytes = bytes.fromhex(frame_hex)
+                    resp = client.send_frame(frame_bytes)
+                    status = "OK" if resp else "NO RESPONSE"
+                    print(f"  {cmd}/{sub_cmd}: {status}")
+                    time.sleep(0.05)
+                except Exception as e:
+                    print(f"  ✗ {cmd}/{sub_cmd}: {e}")
+
+            # 4. Batch-scan the address range
+            print(f"\n[SCAN] Starting batch scan...\n")
+            found_vars = []
+            all_scanned = 0
+
+            for batch_start in range(start, end + 1, BATCH_SIZE):
+                batch_end = min(batch_start + BATCH_SIZE, end + 1)
+                batch_addrs = list(range(batch_start, batch_end))
+
+                batch_vars = [{'area': 'M', 'word': mw} for mw in batch_addrs]
+                req = build_r_e0_request(batch_vars)
+                resp = client.send_frame(req)
+
+                if resp and resp.get('raw'):
+                    raw = resp['raw']
+                    sig_pos = raw.find(b'LGIS-GLOFA')
+                    if sig_pos >= 0 and len(raw) > sig_pos + 26:
+                        payload_bytes = raw[sig_pos + 26:]
+                        decoded = decode_response_payload(payload_bytes.hex())
+                        values = decoded.get('values', [])
+
+                        for i, mw in enumerate(batch_addrs):
+                            if i < len(values) and values[i] != 0:
+                                found_vars.append({'area': 'M', 'word': mw, 'value': values[i]})
+
+                all_scanned += len(batch_addrs)
+
+                # Progress indicator every ~100 addresses
+                if all_scanned % 99 < BATCH_SIZE or all_scanned == total_addrs:
+                    pct = all_scanned * 100 // total_addrs
+                    found_count = len(found_vars)
+                    print(f"  [{pct:3d}%] MW{batch_start}... ({found_count} non-zero found)", end='\r')
+
+                time.sleep(0.02)
+
+            # 5. DISC frame
+            if disc_frame_hex:
+                print("\n  [SCAN] Sending DISC frame...")
+                try:
+                    disc_bytes = bytes.fromhex(disc_frame_hex)
+                    client.send_frame(disc_bytes)
+                    print(f"  ✓ DISC OK")
+                except Exception as e:
+                    print(f"  ⚠ DISC error: {e}")
+
+        finally:
+            client.disconnect()
+
+        # Report results
+        print(f"\n\n=== SCAN COMPLETE ===")
+        print(f"  Scanned: MW{start} ~ MW{end} ({all_scanned} addresses)")
+        print(f"  Non-zero: {len(found_vars)} addresses")
+        print()
+        for v in sorted(found_vars, key=lambda x: x['word']):
+            print(f"  MW{v['word']:>5} = {v['value']}")
+
+        # Export if requested
+        if args.export:
+            export_data = {
+                'source': f'memory_scan MW{start}-MW{end}',
+                'variables': [{'area': v['area'], 'word': v['word'], 'name': f"MW{v['word']}"} for v in sorted(found_vars, key=lambda x: x['word'])]
+            }
+            export_path = Path(args.export)
+            export_path.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                with open(export_path, 'w', encoding='utf-8') as f:
+                    json.dump(export_data, f, indent=2, ensure_ascii=False)
+                print(f"\n✓ Exported {len(found_vars)} variables to {args.export}")
+            except Exception as e:
+                print(f"\n✗ Failed to export: {e}")
+                sys.exit(1)
+
+        sys.exit(0)
 
     # Handle --config mode: load variables from config file
     config_vars = None
