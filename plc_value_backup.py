@@ -29,16 +29,32 @@ sys.path.insert(0, script_dir)
 if hasattr(sys, '_MEIPASS') and sys._MEIPASS not in sys.path:
     sys.path.insert(0, sys._MEIPASS)
 
-# Area markers for multi-area support (M/I/Q/F/K/D)
+# Area markers — XGB CPU 메모리 디바이스 영역 (PDF 부록 A.1 기준 15종)
+# 검증 상태:
+#   ✅ 확정: M, I, Q, F (0422 실측 완료)
+#   🟡 구현: K, D, W (주석 기반, 실측 검증 미완)
+#   🟡 신규: P, T, C, L, N, U, R, Z (PDF에서 이름만 확정, marker bytes는 ASCII convention 유추)
 AREA_MARKERS = {
-    'M': [0x4D, 0x42],  # MB — Memory
+    'P': [0x50, 0x42],  # PB — Peripheral (입출력)
+    'M': [0x4D, 0x42],  # MB — Memory (마커)
+    'K': [0x4B, 0x42],  # KB — Keep (PID, 위치결정 운전)
+    'F': [0x46, 0x42],  # FB — Flag (시스템 플래그, 읽기전용)
+    'T': [0x54, 0x42],  # TB — Timer
+    'C': [0x43, 0x42],  # CB — Counter
+    'L': [0x4C, 0x42],  # LB — Link (고속링크/P2P 플래그)
+    'N': [0x4E, 0x42],  # NB — Network (P2P 파라미터, 읽기전용)
+    'D': [0x44, 0x42],  # DB — Data register
+    'U': [0x55, 0x42],  # UB — Unit (아날로그 데이터 리프레시)
+    'Z': [0x5A, 0x42],  # ZB — Z temporary
+    'R': [0x52, 0x42],  # RB — R extended
+    'W': [0x57, 0x42],  # WB — W direct variable (IEC, R과 동일 영역)
     'I': [0x49, 0x42],  # IB — Input
     'Q': [0x51, 0x42],  # QB — Output
-    'F': [0x46, 0x42],  # FB — Function block
-    'K': [0x4B, 0x42],  # KB — Keep/Constant
-    'D': [0x44, 0x42],  # DB — Data
-    'W': [0x57, 0x42],  # WB — Word? (tentative)
 }
+
+# 집계·정렬용 영역 순서 (물리적 직관 순)
+AREA_ORDER = {a: i for i, a in enumerate(['P', 'M', 'K', 'F', 'T', 'C', 'L', 'N', 'D', 'U', 'Z', 'R', 'W', 'I', 'Q'])}
+ALL_AREAS = frozenset(AREA_MARKERS.keys())
 
 
 def resource_path(relative_path: str) -> str:
@@ -923,9 +939,9 @@ def main():
                     sg_symbols, n_frags = dynamic_scatter_gather(client1)
                     sg_addresses = extract_addresses_from_symbols(sg_symbols)
 
-                    # 다중 영역 지원 (M/I/Q/F) — 심볼 테이블에 있는 모든 영역 포함
+                    # 다중 영역 지원 (PDF 부록 A.1 15종) — 심볼 테이블에 있는 모든 영역 포함
                     for area, word in sg_addresses:
-                        if area in ('M', 'I', 'Q', 'F'):
+                        if area in ALL_AREAS:
                             discovered_pairs.add((area, word))
 
                     print(f"  [AUTO] Scatter-gather: {n_frags} fragments → {len(sg_symbols)} symbols")
@@ -948,13 +964,12 @@ def main():
                 sys.exit(1)
 
             # 정렬 (영역별, 주소별) → R/0xE0 배치에 넘길 dict 리스트 구성
-            AREA_ORDER = {'M': 0, 'I': 1, 'Q': 2, 'F': 3}
             sorted_pairs = sorted(discovered_pairs, key=lambda x: (AREA_ORDER.get(x[0], 99), x[1]))
             discovered_read_vars = [{'area': a, 'word': w} for a, w in sorted_pairs]
             discovered_names = [f"{a}W{w}" for a, w in sorted_pairs]
 
-            # 영역별 집계
-            area_counts = {a: sum(1 for p in sorted_pairs if p[0] == a) for a in ('M', 'I', 'Q', 'F')}
+            # 영역별 집계 (15개 영역 전체)
+            area_counts = {a: sum(1 for p in sorted_pairs if p[0] == a) for a in AREA_ORDER}
             summary = ', '.join(f"{n} {a}" for a, n in area_counts.items() if n > 0)
             print(f"  [AUTO] Total discovered: {len(discovered_read_vars)} addresses ({summary})")
             print(f"  [AUTO] Addresses: {discovered_names}")
