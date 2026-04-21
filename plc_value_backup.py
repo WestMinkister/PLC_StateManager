@@ -18,6 +18,7 @@ import time
 import struct
 import argparse
 import re
+import bz2
 from pathlib import Path
 from datetime import datetime
 
@@ -55,7 +56,7 @@ except ImportError as e:
 
 
 def extract_mw_addresses_from_state(state):
-    """Extract unique MW word numbers from ProgramState symbols.
+    """Extract unique MW/IW/QW word numbers from ProgramState symbols.
 
     Args:
         state: ProgramState object from plc_upload_decode.build_program_state()
@@ -67,11 +68,167 @@ def extract_mw_addresses_from_state(state):
     for sym in state.all_symbols:
         # SymbolEntry has .address property like "%MW152.0" or "%MW3000.2"
         addr = sym.address if hasattr(sym, 'address') else sym.get('address', '')
-        # Match %MW<number> or %MW<number>.<bit>
-        match = re.match(r'%MW(\d+)', addr)
+        # Match %MW<number>, %IW<number>, or %QW<number>
+        match = re.match(r'%([A-Z])W(\d+)', addr)
         if match:
-            mw_set.add(int(match.group(1)))
+            area = match.group(1)
+            word = int(match.group(2))
+            if area == 'M':
+                mw_set.add(word)
     return sorted(mw_set)
+
+
+def scatter_gather_symbols(upload_frames, responses):
+    """Extract ALL symbols via Z/0xC0 scatter-gather reassembly.
+
+    Args:
+        upload_frames: list of dicts from upload_replay_frames.json (PC→PLC)
+        responses: list of response dicts from PLCUploadClient.responses (from PLCUploadClient.responses)
+
+    Returns:
+        set of symbol addresses like {'%MW152', '%MW6000', '%IW5000', '%QW10'}
+    """
+    # 1. Find Z/0xC0 requests and their offsets
+    c0_offsets = []
+    c0_request_indices = []  # Track which request index each offset is from
+    for i, frame in enumerate(upload_frames):
+        cmd = frame.get('command_char') or frame.get('command')
+        # Check if this is a Z/0xC0 request (Z=0x5A)
+        if (cmd == 'Z' or cmd == 0x5A or isinstance(cmd, int) and cmd == 0x5A) and frame.get('sub_cmd') == 0xC0:
+            # Request payload is ASCII hex encoded
+            payload_hex = frame.get('cmd_payload_hex', '')
+            if payload_hex and len(payload_hex) >= 6:
+                try:
+                    # Double decode: hex(ASCII_hex(binary))
+                    # Step 1: hex string → raw bytes (which are ASCII hex chars)
+                    raw_ascii_bytes = bytes.fromhex(payload_hex)
+                    # Step 2: ASCII hex chars → actual binary
+                    ascii_str = raw_ascii_bytes.decode('ascii', errors='ignore')
+                    actual_binary = bytes.fromhex(ascii_str)
+                    # First 2 bytes of actual binary = LE16 buffer offset
+                    if len(actual_binary) >= 2:
+                        offset = struct.unpack('<H', actual_binary[0:2])[0]
+                        c0_offsets.append(offset)
+                        c0_request_indices.append(i)
+                except Exception:
+                    pass
+
+    if not c0_offsets:
+        return set()
+
+    # 2. Extract Z response payloads
+    # Since responses list is from PLCUploadClient (has ALL responses in order),
+    # we need to match based on Z command order
+    z_responses = []
+
+    for r in responses:
+        cmd = r.get('command_char') or r.get('command')
+        # Check if this is a Z response (Z=0x5A)
+        if cmd == 'Z' or (isinstance(cmd, int) and cmd == 0x5A):
+            # Get response raw data
+            raw = r.get('raw')
+            if isinstance(raw, str):
+                try:
+                    raw = bytes.fromhex(raw)
+                except Exception:
+                    raw = None
+
+            if not isinstance(raw, bytes):
+                continue
+
+            sig = raw.find(b'LGIS-GLOFA')
+            if sig >= 0 and len(raw) > sig + 26:
+                payload_bytes = raw[sig + 26:]
+                try:
+                    # Payload is ASCII-encoded hex
+                    ascii_str = payload_bytes.decode('ascii', errors='ignore')
+                    # Clean to valid hex characters
+                    clean = ''.join(c for c in ascii_str if c in '0123456789abcdefABCDEF')
+                    if len(clean) % 2:
+                        clean = clean[:-1]
+                    if clean:
+                        decoded = bytes.fromhex(clean)
+                        z_responses.append(decoded)
+                except Exception:
+                    pass
+
+    if not z_responses:
+        return set()
+
+    # 3. Match Z/0xC0 requests with responses
+    # Count how many Z requests exist before each 0xC0 request
+    z_request_count = 0
+    c0_resp_indices = []  # Index into z_responses for each C0 request
+
+    for i, frame in enumerate(upload_frames):
+        cmd = frame.get('command_char') or frame.get('command')
+        if cmd == 'Z' or (isinstance(cmd, int) and cmd == 0x5A):
+            # This is a Z request (any type)
+            if frame.get('sub_cmd') == 0xC0:
+                # This 0xC0 request is the z_request_count'th Z request
+                c0_resp_indices.append(z_request_count)
+            z_request_count += 1
+
+    # Build pairs: match each C0 offset with the corresponding Z response
+    c0_pairs = []
+    for offset, resp_idx in zip(c0_offsets, c0_resp_indices):
+        if resp_idx < len(z_responses):
+            c0_pairs.append({
+                'offset': offset,
+                'data': z_responses[resp_idx]
+            })
+
+    if not c0_pairs:
+        return set()
+
+    # 4. Reassemble buffer
+    max_end = max(p['offset'] + len(p['data']) for p in c0_pairs)
+    buffer = bytearray(max_end)
+    for p in sorted(c0_pairs, key=lambda x: x['offset']):
+        start = p['offset']
+        end = start + len(p['data'])
+        buffer[start:end] = p['data']
+
+    # 5. Find and decompress all BZh blocks
+    symbols = set()
+    pos = 0
+    while pos < len(buffer) - 3:
+        bz_idx = buffer.find(b'BZh', pos)
+        if bz_idx < 0:
+            break
+        try:
+            decompressed = bz2.decompress(buffer[bz_idx:])
+            text = decompressed.decode('ascii', errors='replace')
+            found = re.findall(r'%[A-Z]+\d+', text)
+            symbols.update(found)
+        except Exception:
+            pass
+        pos = bz_idx + 1
+
+    return symbols
+
+
+def extract_addresses_from_symbols(symbols):
+    """Convert symbol addresses to (area, word) tuples.
+
+    '%MW152' → ('M', 152)
+    '%IW5000' → ('I', 5000)
+    '%QW10' → ('Q', 10)
+
+    Args:
+        symbols: iterable of symbol strings like '%MW152'
+
+    Returns:
+        list of (area, word) tuples
+    """
+    result = []
+    for sym in symbols:
+        match = re.match(r'%([A-Z])W(\d+)', sym)
+        if match:
+            area = match.group(1)
+            word = int(match.group(2))
+            result.append((area, word))
+    return result
 
 
 def build_r_e0_request(variables):
@@ -593,11 +750,34 @@ def main():
         try:
             state = build_program_state(snap_responses)
             mw_addresses = extract_mw_addresses_from_state(state)
-            print(f"  [AUTO] Discovered {len(mw_addresses)} MW addresses: {mw_addresses}")
+            print(f"  [AUTO] Discovered {len(mw_addresses)} MW addresses (parser): {mw_addresses}")
+
+            # Scatter-gather symbol extraction (supplements parser)
+            if not args.snapshot:
+                # Raw responses available from session 1
+                try:
+                    print(f"  [AUTO] Scatter-gather symbol extraction...")
+                    sg_symbols = scatter_gather_symbols(upload_frames, client1.responses)
+                    sg_addresses = extract_addresses_from_symbols(sg_symbols)
+
+                    # Merge with parser results
+                    mw_set = set(mw_addresses)
+                    for area, word in sg_addresses:
+                        if area == 'M':
+                            mw_set.add(word)
+
+                    mw_addresses = sorted(mw_set)
+                    print(f"  [AUTO] Scatter-gather found: {len(sg_symbols)} symbols")
+                    if sg_symbols:
+                        print(f"  [AUTO] Symbols: {sorted(sg_symbols)}")
+                except Exception as e:
+                    print(f"  [AUTO] Scatter-gather failed: {e} (using parser results only)")
 
             if not mw_addresses:
                 print(f"  ✗ No MW addresses found in program")
                 sys.exit(1)
+
+            print(f"  [AUTO] Total discovered: {len(mw_addresses)} MW addresses: {mw_addresses}")
 
             # Override args.mw with discovered addresses
             args.mw = mw_addresses
