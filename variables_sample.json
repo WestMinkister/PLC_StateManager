@@ -1,0 +1,13 @@
+{
+  "description": "PLC 변수 설정 파일 예시 — 사용자가 모니터링할 변수를 정의",
+  "variables": [
+    {"area": "M", "word": 152, "name": "입력신호 MW152"},
+    {"area": "M", "word": 200, "name": "보조릴레이 MW200"},
+    {"area": "M", "word": 900, "name": "추가접점 MW900"},
+    {"area": "M", "word": 1000, "name": "ADD입력 MW1000"},
+    {"area": "M", "word": 1002, "name": "ADD출력 MW1002"},
+    {"area": "M", "word": 3000, "name": "메인코일 MW3000"},
+    {"area": "M", "word": 6000, "name": "NP2코일 MW6000"},
+    {"area": "I", "word": 5000, "name": "입력포트 IW5000"}
+  ]
+}

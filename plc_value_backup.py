@@ -27,6 +27,17 @@ sys.path.insert(0, script_dir)
 if hasattr(sys, '_MEIPASS') and sys._MEIPASS not in sys.path:
     sys.path.insert(0, sys._MEIPASS)
 
+# Area markers for multi-area support (M/I/Q/F/K/D)
+AREA_MARKERS = {
+    'M': [0x4D, 0x42],  # MB — Memory
+    'I': [0x49, 0x42],  # IB — Input
+    'Q': [0x51, 0x42],  # QB — Output
+    'F': [0x46, 0x42],  # FB — Function block
+    'K': [0x4B, 0x42],  # KB — Keep/Constant
+    'D': [0x44, 0x42],  # DB — Data
+    'W': [0x57, 0x42],  # WB — Word? (tentative)
+}
+
 
 def resource_path(relative_path: str) -> str:
     """Resolve a resource file path, handling PyInstaller --onefile bundles.
@@ -63,27 +74,33 @@ def extract_mw_addresses_from_state(state):
     return sorted(mw_set)
 
 
-def build_r_e0_request(mw_addresses):
-    """Build R/0xE0 request frame for specified MW addresses.
+def build_r_e0_request(variables):
+    """Build R/0xE0 request frame for specified variables (multi-area support).
 
     Args:
-        mw_addresses: List of MW address integers (e.g., [152, 3000, 1002])
+        variables: List of dicts like {'area': 'M', 'word': 152} or list of ints for backwards compat
     Returns:
         Complete LGIS-GLOFA frame (bytes)
     """
+    # Handle backwards compat: convert list of ints to list of dicts
+    if variables and isinstance(variables[0], int):
+        variables = [{'area': 'M', 'word': addr} for addr in variables]
+
     # Binary payload
     # 캡처 분석: 응답 decoded = [값 워드 × N] + [3바이트 trailer].
     # trailer = 마지막 엔트리 값(2B) + 프로토콜 메타(1B).
     # 해결: 실제 주소 뒤에 패딩 엔트리 추가 → 패딩 값이 trailer에 소비됨.
-    total_entries = len(mw_addresses) + 1  # +1 trailing padding
+    total_entries = len(variables) + 1  # +1 trailing padding
     payload_bin = bytearray()
     payload_bin.extend(struct.pack('>I', total_entries * 2))
 
-    # 실제 MW 주소 엔트리들
-    for idx, mw in enumerate(mw_addresses):
+    # 실제 변수 엔트리들
+    for idx, var in enumerate(variables):
         payload_bin.append(0x04 if idx == 0 else 0x00)
-        payload_bin.extend([0x4D, 0x42, 0x02, 0x00])
-        payload_bin.extend(struct.pack('<H', mw * 2))
+        area = var.get('area', 'M')
+        marker = AREA_MARKERS.get(area, [0x4D, 0x42])
+        payload_bin.extend(marker + [0x02, 0x00])
+        payload_bin.extend(struct.pack('<H', var['word'] * 2))
         payload_bin.append(0x00)
 
     # 패딩 엔트리 (이 값이 trailer 3바이트에 소비됨)
@@ -181,12 +198,37 @@ def main():
                         help='Output snapshot file')
     parser.add_argument('--mw', nargs='+', type=int, metavar='ADDR',
                         help='MW addresses to read (e.g., --mw 152 3000 1002)')
+    parser.add_argument('--config', type=str, metavar='JSON',
+                        help='Variable config file (e.g., variables.json)')
     parser.add_argument('--auto', action='store_true',
                         help='Auto-discover all MW addresses from PLC program and read values')
+    parser.add_argument('--export', type=str, metavar='JSON',
+                        help='Export auto-discovered variables to config file')
     parser.add_argument('--snapshot', type=str, metavar='JSON',
                         help='Use existing program snapshot JSON for address discovery (skips session 1)')
 
     args = parser.parse_args()
+
+    # Handle --config mode: load variables from config file
+    config_vars = None
+    if args.config:
+        config_path = Path(args.config)
+        if not config_path.exists():
+            print(f"Error: config file not found: {args.config}")
+            sys.exit(1)
+        try:
+            with open(config_path, encoding='utf-8') as f:
+                config = json.load(f)
+        except Exception as e:
+            print(f"Error loading config file: {e}")
+            sys.exit(1)
+        config_vars = config.get('variables', [])
+        if not config_vars:
+            print("Error: no variables in config file")
+            sys.exit(1)
+        # Convert to internal format and store for later use
+        args._config_vars = [{'area': v.get('area', 'M'), 'word': v['word']} for v in config_vars]
+        args._config_names = [f"{v.get('area','M')}W{v['word']}" for v in config_vars]
 
     # Load value_read_frames.json
     frames_file = Path(resource_path('value_read_frames.json'))
@@ -227,7 +269,20 @@ def main():
     # Dry-run mode
     if args.dry_run:
         print("\n=== Dry-run mode (no network) ===")
-        print(f"CONN frame: {conn_frame_hex[:40]}...")
+
+        # Show config if provided
+        if args.config:
+            print(f"\nConfig file: {args.config}")
+            print(f"Variables ({len(config_vars)}):")
+            for v in config_vars:
+                area = v.get('area', 'M')
+                name = v.get('name', '')
+                var_str = f"{area}W{v['word']}"
+                if name:
+                    var_str += f" ({name})"
+                print(f"  {var_str}")
+
+        print(f"\nCONN frame: {conn_frame_hex[:40]}...")
         print(f"Monitor entry frames:")
         for entry in monitor_entries:
             print(f"  {entry['cmd']}/{entry['sub_cmd']}: {entry['note']}")
@@ -237,22 +292,34 @@ def main():
         if args.auto:
             if args.snapshot:
                 print(f"\n[AUTO] Would load snapshot: {args.snapshot}")
-                try:
-                    from plc_upload_decode import build_program_state
-                    with open(args.snapshot, encoding='utf-8') as f:
-                        snap = json.load(f)
-                    state = build_program_state(snap)
-                    addrs = extract_mw_addresses_from_state(state)
-                    print(f"  Discovered MW addresses: {addrs}")
-                    print(f"  Total: {len(addrs)} unique MW words")
-                except Exception as e:
-                    print(f"  Error loading snapshot: {e}")
+                # Try to resolve snapshot path
+                snap_path = Path(args.snapshot)
+                if not snap_path.exists():
+                    for fallback_dir in [Path('snapshots'), Path('docs'), Path('.')]:
+                        candidate = fallback_dir / snap_path.name
+                        if candidate.exists():
+                            snap_path = candidate
+                            break
+                if snap_path.exists():
+                    try:
+                        from plc_upload_decode import build_program_state
+                        with open(snap_path, encoding='utf-8') as f:
+                            snap = json.load(f)
+                        state = build_program_state(snap)
+                        addrs = extract_mw_addresses_from_state(state)
+                        print(f"  Discovered MW addresses: {addrs}")
+                        print(f"  Total: {len(addrs)} unique MW words")
+                    except Exception as e:
+                        print(f"  Error loading snapshot: {e}")
+                else:
+                    print(f"  Error: snapshot not found: {args.snapshot}")
+                    print(f"    Also tried: snapshots/, docs/, CWD")
             else:
                 print(f"\n[AUTO] Would run session 1 (program read) to discover addresses")
                 print(f"  Frames: {len(frames_data.get('upload_frames', []))} (estimated)")
         elif args.mw:
             print(f"\nCustom MW addresses: {args.mw}")
-            frame = build_r_e0_request(args.mw)
+            frame = build_r_e0_request(args.mw)  # backwards compat: accepts list of ints
             print(f"Built R/0xE0 frame: {len(frame)}B")
             print(f"Frame hex: {frame.hex()[:80]}...")
         else:
@@ -297,8 +364,23 @@ def main():
             # Use existing snapshot
             print(f"\n=== AUTO MODE: Loading snapshot ===")
             print(f"  [AUTO] Loading snapshot: {args.snapshot}")
+
+            # Try to resolve snapshot path
+            snap_path = Path(args.snapshot)
+            if not snap_path.exists():
+                for fallback_dir in [Path('snapshots'), Path('docs'), Path('.')]:
+                    candidate = fallback_dir / snap_path.name
+                    if candidate.exists():
+                        snap_path = candidate
+                        break
+
+            if not snap_path.exists():
+                print(f"  ✗ Snapshot not found: {args.snapshot}")
+                print(f"    Also tried: snapshots/, docs/, CWD")
+                sys.exit(1)
+
             try:
-                with open(args.snapshot, encoding='utf-8') as f:
+                with open(snap_path, encoding='utf-8') as f:
                     snap_responses = json.load(f)
             except Exception as e:
                 print(f"  ✗ Failed to load snapshot: {e}")
@@ -359,6 +441,22 @@ def main():
 
             # Override args.mw with discovered addresses
             args.mw = mw_addresses
+
+            # Export to config file if --export is specified
+            if args.export:
+                export_data = {
+                    "variables": [{"area": "M", "word": mw, "name": f"MW{mw}"} for mw in mw_addresses]
+                }
+                try:
+                    export_path = Path(args.export)
+                    export_path.parent.mkdir(parents=True, exist_ok=True)
+                    with open(export_path, 'w', encoding='utf-8') as f:
+                        json.dump(export_data, f, indent=2, ensure_ascii=False)
+                    print(f"  ✓ Exported {len(mw_addresses)} variables to {args.export}")
+                except Exception as e:
+                    print(f"  ✗ Failed to export: {e}")
+                    sys.exit(1)
+
         except Exception as e:
             print(f"  ✗ Failed to extract symbols: {e}")
             sys.exit(1)
@@ -418,12 +516,15 @@ def main():
             except Exception as e:
                 print(f"  ✗ {cmd}/{sub_cmd}: {e}")
 
-        # Determine addresses and variable names
-        if args.mw:
-            mw_list = args.mw
-            var_names = [f'MW{addr}' for addr in mw_list]
+        # Determine variables to read and variable names
+        if hasattr(args, '_config_vars') and args._config_vars:
+            read_vars = args._config_vars
+            var_names = args._config_names
+        elif args.mw:
+            read_vars = [{'area': 'M', 'word': addr} for addr in args.mw]
+            var_names = [f'MW{addr}' for addr in args.mw]
         else:
-            mw_list = None
+            read_vars = None
             var_names = [f"{v['marker_hex']}_0x{v['offset']:04x}" for v in variables]
 
         # 4. R/0xE0 polling (배치 분할: 3주소/배치, PLC 응답 버퍼 한계 대응)
@@ -435,10 +536,10 @@ def main():
                 print(f"\n  Sample {sample_num + 1}/{args.samples}...")
 
             try:
-                if mw_list:
-                    # 배치 분할 읽기
+                if read_vars:
+                    # 배치 분할 읽기 (--config 또는 --mw 모드)
                     all_values = []
-                    batches = [mw_list[i:i+BATCH_SIZE] for i in range(0, len(mw_list), BATCH_SIZE)]
+                    batches = [read_vars[i:i+BATCH_SIZE] for i in range(0, len(read_vars), BATCH_SIZE)]
                     for batch_idx, batch in enumerate(batches):
                         read_frame_bytes = build_r_e0_request(batch)
                         resp = client.send_frame(read_frame_bytes)
@@ -450,7 +551,7 @@ def main():
                                 decoded = decode_response_payload(payload_bytes.hex())
                                 batch_values = decoded.get('values', [])[:len(batch)]
                                 all_values.extend(batch_values)
-                                batch_names = [f'MW{a}' for a in batch]
+                                batch_names = [f"{v['area']}W{v['word']}" for v in batch]
                                 print(f"    [batch {batch_idx+1}/{len(batches)}] {dict(zip(batch_names, batch_values))}")
                             else:
                                 print(f"    [batch {batch_idx+1}] response too short")
