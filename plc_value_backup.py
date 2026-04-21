@@ -149,7 +149,7 @@ def dynamic_scatter_gather(client):
             if len(clean) % 2:
                 clean = clean[:-1]
             decoded = bytes.fromhex(clean) if clean else b''
-        except:
+        except (ValueError, UnicodeDecodeError):
             print(f"    [SG] DECODE FAILED")
             break
 
@@ -167,7 +167,7 @@ def dynamic_scatter_gather(client):
         time.sleep(0.05)
 
     if not fragments:
-        return set()
+        return set(), 0
 
     # Reassemble buffer
     max_end = max(f['offset'] + len(f['data']) for f in fragments)
@@ -185,9 +185,9 @@ def dynamic_scatter_gather(client):
         try:
             d = bz2.decompress(buffer[idx:])
             symbols.update(re.findall(r'%[A-Z]+\d+', d.decode('ascii', errors='replace')))
-        except:
-            pass
-        pos = idx + 1
+            pos = idx + len(d) + 1
+        except Exception:
+            pos = idx + 1
 
     return symbols, len(fragments)
 
@@ -888,11 +888,7 @@ def main():
             if not args.snapshot:
                 try:
                     print(f"  [AUTO] Dynamic scatter-gather (sequential Z/0xC0)...")
-                    sg_result = dynamic_scatter_gather(client1)
-                    if isinstance(sg_result, tuple):
-                        sg_symbols, n_frags = sg_result
-                    else:
-                        sg_symbols, n_frags = sg_result, 0
+                    sg_symbols, n_frags = dynamic_scatter_gather(client1)
                     sg_addresses = extract_addresses_from_symbols(sg_symbols)
 
                     mw_set = set(mw_addresses)
