@@ -78,6 +78,109 @@ def extract_mw_addresses_from_state(state):
     return sorted(mw_set)
 
 
+def build_z_c0_request(offset):
+    """Build a Z/0xC0 request frame for the given buffer offset.
+
+    Used for dynamic symbol table reading without hardcoded offset lists.
+    """
+    # Z/0xC0 payload: 3 bytes = [LE16 offset][0x00], double-ASCII-hex encoded
+    addr_bin = struct.pack('<H', offset) + b'\x00'
+    ascii_hex = addr_bin.hex().upper().encode('ascii')
+
+    # Build LGIS-GLOFA frame: Z command (0x5A) + sub_cmd (0xC0) + payload
+    cmd_payload = bytes([0xC0]) + ascii_hex
+    cmd_data = bytes([0x5A]) + cmd_payload
+    cmd_data_len = len(cmd_data)
+    length = 2 + 2 + cmd_data_len
+
+    header = bytearray(20)
+    header[0:10] = b'LGIS-GLOFA'
+    header[13] = 0x22  # Source: PC→PLC
+    header[16:18] = struct.pack('<H', length)
+    header[19] = sum(header[0:19]) % 256
+
+    sub_header = b'\x0e\x00' + struct.pack('<H', cmd_data_len)
+    return bytes(header) + sub_header + cmd_data
+
+
+def dynamic_scatter_gather(client):
+    """Dynamically read symbol table from PLC using sequential Z/0xC0 requests.
+
+    Sends Z/0xC0 at offsets 0, 680, 1360, ... until response < 680 bytes.
+    No hardcoded offset list — works for any number of programs.
+
+    Args:
+        client: Connected PLCUploadClient (session already primed with upload replay)
+    Returns:
+        set of symbol addresses like {'%MW152', '%MW6000'}
+    """
+    STEP = 680
+    MIN_RESPONSE = 680
+
+    fragments = []
+    offset = 0
+
+    while True:
+        frame = build_z_c0_request(offset)
+        resp = client.send_frame(frame)
+
+        if not resp or not resp.get('raw'):
+            break
+
+        raw = resp['raw']
+        sig = raw.find(b'LGIS-GLOFA')
+        if sig < 0:
+            break
+
+        payload = raw[sig + 26:]
+        try:
+            clean = ''.join(c for c in payload.decode('ascii', errors='ignore')
+                           if c in '0123456789abcdefABCDEF')
+            if len(clean) % 2:
+                clean = clean[:-1]
+            decoded = bytes.fromhex(clean) if clean else b''
+        except:
+            break
+
+        if len(decoded) < 10:
+            if decoded:
+                fragments.append({'offset': offset, 'data': decoded})
+            break
+
+        fragments.append({'offset': offset, 'data': decoded})
+
+        if len(decoded) < MIN_RESPONSE:
+            break
+
+        offset += STEP
+        time.sleep(0.05)
+
+    if not fragments:
+        return set()
+
+    # Reassemble buffer
+    max_end = max(f['offset'] + len(f['data']) for f in fragments)
+    buffer = bytearray(max_end)
+    for f in sorted(fragments, key=lambda x: x['offset']):
+        buffer[f['offset']:f['offset'] + len(f['data'])] = f['data']
+
+    # Extract symbols from all BZh blocks
+    symbols = set()
+    pos = 0
+    while pos < len(buffer) - 3:
+        idx = buffer.find(b'BZh', pos)
+        if idx < 0:
+            break
+        try:
+            d = bz2.decompress(buffer[idx:])
+            symbols.update(re.findall(r'%[A-Z]+\d+', d.decode('ascii', errors='replace')))
+        except:
+            pass
+        pos = idx + 1
+
+    return symbols, len(fragments)
+
+
 def scatter_gather_symbols(upload_frames, responses):
     """Extract ALL symbols via Z/0xC0 scatter-gather reassembly.
 
@@ -725,10 +828,13 @@ def main():
                 print(f"  ✗ Connection failed: {e}")
                 sys.exit(1)
 
-            # Replay upload frames
+            # Replay upload frames (excluding DISC and Z/0xC0 — we handle those dynamically)
+            priming_frames = [f for f in upload_frames
+                              if f.get('frame_type') != 0x12  # skip DISC
+                              and not (f.get('command') == 'Z' and f.get('sub_cmd') == 0xC0)]  # skip Z/0xC0
             try:
-                success, errors = client1.replay_frames(upload_frames, delay=0.05)
-                print(f"  ✓ Program read: {success} frames OK, {errors} errors")
+                success, errors = client1.replay_frames(priming_frames, delay=0.05)
+                print(f"  ✓ Program priming: {success} frames OK, {errors} errors")
 
                 # Serialize responses for build_program_state
                 snap_responses = []
@@ -741,10 +847,11 @@ def main():
                             entry[k] = v
                     snap_responses.append(entry)
                 print(f"  ✓ Collected {len(snap_responses)} responses")
-            finally:
+                # NOTE: client1 stays connected (no DISC sent yet) for scatter-gather
+            except Exception as e:
+                print(f"  ✗ Replay failed: {e}")
                 client1.disconnect()
-
-            time.sleep(0.5)  # Wait between sessions
+                sys.exit(1)
 
         # Extract symbols and discover MW addresses
         try:
@@ -752,26 +859,39 @@ def main():
             mw_addresses = extract_mw_addresses_from_state(state)
             print(f"  [AUTO] Discovered {len(mw_addresses)} MW addresses (parser): {mw_addresses}")
 
-            # Scatter-gather symbol extraction (supplements parser)
+            # Dynamic scatter-gather: send Z/0xC0 at sequential offsets
+            # client1 is still connected (DISC was excluded from replay)
             if not args.snapshot:
-                # Raw responses available from session 1
                 try:
-                    print(f"  [AUTO] Scatter-gather symbol extraction...")
-                    sg_symbols = scatter_gather_symbols(upload_frames, client1.responses)
+                    print(f"  [AUTO] Dynamic scatter-gather (sequential Z/0xC0)...")
+                    sg_result = dynamic_scatter_gather(client1)
+                    if isinstance(sg_result, tuple):
+                        sg_symbols, n_frags = sg_result
+                    else:
+                        sg_symbols, n_frags = sg_result, 0
                     sg_addresses = extract_addresses_from_symbols(sg_symbols)
 
-                    # Merge with parser results
                     mw_set = set(mw_addresses)
                     for area, word in sg_addresses:
                         if area == 'M':
                             mw_set.add(word)
 
                     mw_addresses = sorted(mw_set)
-                    print(f"  [AUTO] Scatter-gather found: {len(sg_symbols)} symbols")
+                    print(f"  [AUTO] Scatter-gather: {n_frags} fragments → {len(sg_symbols)} symbols")
                     if sg_symbols:
                         print(f"  [AUTO] Symbols: {sorted(sg_symbols)}")
                 except Exception as e:
                     print(f"  [AUTO] Scatter-gather failed: {e} (using parser results only)")
+                finally:
+                    # Close session 1 (DISC + disconnect)
+                    disc_entries = [f for f in upload_frames if f.get('frame_type') == 0x12]
+                    if disc_entries and disc_entries[0].get('frame_hex'):
+                        try:
+                            client1.send_frame(bytes.fromhex(disc_entries[0]['frame_hex']))
+                        except: pass
+                    client1.disconnect()
+
+                time.sleep(0.5)  # Wait between sessions
 
             if not mw_addresses:
                 print(f"  ✗ No MW addresses found in program")
