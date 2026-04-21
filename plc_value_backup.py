@@ -153,9 +153,12 @@ def dynamic_scatter_gather(client):
             print(f"    [SG] DECODE FAILED")
             break
 
+        print(f"    [SG] Decoded: {len(decoded)}B, hex: {decoded[:30].hex()}")
+
         if len(decoded) < 10:
             if decoded:
                 fragments.append({'offset': offset, 'data': decoded})
+            print(f"    [SG] Small response ({len(decoded)}B < 10) — stopping")
             break
 
         fragments.append({'offset': offset, 'data': decoded})
