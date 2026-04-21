@@ -83,8 +83,11 @@ def build_z_c0_request(offset):
 
     Used for dynamic symbol table reading without hardcoded offset lists.
     """
-    # Z/0xC0 payload: 3 bytes = [LE16 offset][0x00], double-ASCII-hex encoded
-    addr_bin = struct.pack('<H', offset) + b'\x00'
+    # Z/0xC0 payload: 6 bytes = [LE16 offset][0x00][LE16 frag_size=680][1B checksum]
+    FRAG_SIZE = 680
+    payload_prefix = struct.pack('<H', offset) + b'\x00' + struct.pack('<H', FRAG_SIZE)
+    checksum = sum(payload_prefix) % 256
+    addr_bin = payload_prefix + bytes([checksum])
     ascii_hex = addr_bin.hex().upper().encode('ascii')
 
     # Build LGIS-GLOFA frame: Z command (0x5A) + sub_cmd (0xC0) + payload
