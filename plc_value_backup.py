@@ -122,15 +122,25 @@ def dynamic_scatter_gather(client):
 
     while True:
         frame = build_z_c0_request(offset)
+        print(f"    [SG] Sending Z/0xC0 offset={offset}...", end=' ')
         resp = client.send_frame(frame)
 
-        if not resp or not resp.get('raw'):
+        if not resp:
+            print("NO RESPONSE (None)")
+            break
+        if not resp.get('raw'):
+            print(f"NO RAW DATA (keys: {list(resp.keys())})")
             break
 
         raw = resp['raw']
         sig = raw.find(b'LGIS-GLOFA')
         if sig < 0:
+            print(f"NO SIGNATURE in {len(raw)}B response")
             break
+
+        # Check status byte
+        status = raw[sig + 24] if len(raw) > sig + 24 else None
+        print(f"response {len(raw)}B, status=0x{status:02x}" if status is not None else f"response {len(raw)}B")
 
         payload = raw[sig + 26:]
         try:
@@ -140,6 +150,7 @@ def dynamic_scatter_gather(client):
                 clean = clean[:-1]
             decoded = bytes.fromhex(clean) if clean else b''
         except:
+            print(f"    [SG] DECODE FAILED")
             break
 
         if len(decoded) < 10:
@@ -832,10 +843,25 @@ def main():
                 print(f"  ✗ Connection failed: {e}")
                 sys.exit(1)
 
-            # Replay 36 universal priming frames (NO DISC, NO Z/0xC0)
+            # Send 36 universal priming frames IN ORDER (no reordering!)
+            # replay_frames reorders CONN/DISC which breaks the 2-session pattern
             try:
-                success, errors = client1.replay_frames(priming_frames, delay=0.05)
-                print(f"  ✓ Priming: {success}/{len(priming_frames)} frames OK")
+                success = 0
+                errors = 0
+                for i, pf in enumerate(priming_frames):
+                    fhex = pf.get('frame_hex', '')
+                    if not fhex:
+                        continue
+                    fb = bytes.fromhex(fhex)
+                    resp = client1.send_frame(fb)
+                    if resp:
+                        success += 1
+                        # Store for build_program_state
+                        client1.responses.append(resp)
+                    else:
+                        errors += 1
+                    time.sleep(0.05)
+                print(f"  ✓ Priming: {success}/{len(priming_frames)} frames OK, {errors} errors")
 
                 snap_responses = []
                 for r in client1.responses:
@@ -882,10 +908,9 @@ def main():
                     print(f"  [AUTO] Scatter-gather failed: {e} (using parser results only)")
                 finally:
                     # Close session 1 (DISC + disconnect)
-                    disc_entries = [f for f in upload_frames if f.get('frame_type') == 0x12]
-                    if disc_entries and disc_entries[0].get('frame_hex'):
+                    if disc_frame_entry and disc_frame_entry.get('frame_hex'):
                         try:
-                            client1.send_frame(bytes.fromhex(disc_entries[0]['frame_hex']))
+                            client1.send_frame(bytes.fromhex(disc_frame_entry['frame_hex']))
                         except: pass
                     client1.disconnect()
 
