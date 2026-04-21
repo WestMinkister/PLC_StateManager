@@ -1,5 +1,5 @@
 {
-  "description": "Universal priming sequence — identical across 1/2/4-program captures",
+  "description": "Universal priming — main session only (frames 6-35, skip quick-check session 0-5 with DISC)",
   "priming_frames": [
     {
       "index": 0,
@@ -27,8 +27,8 @@
       "index": 3,
       "frame_type": 14,
       "command": "R",
-      "sub_cmd": 110,
-      "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00526e35433030303030343543"
+      "sub_cmd": 86,
+      "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00525630303030303030413339"
     },
     {
       "index": 4,
@@ -39,25 +39,24 @@
     },
     {
       "index": 5,
-      "frame_type": 18,
-      "command": "?",
-      "sub_cmd": null,
-      "frame_hex": "4c4749532d474c4f4641000000220000020000e91200"
-    },
-    {
-      "index": 6,
-      "frame_type": 10,
-      "command": "?",
-      "sub_cmd": null,
-      "frame_hex": "4c4749532d474c4f46410000002200000c0000f30a00c0a8fa6e00000000ff00",
-      "plc_ip": "192.168.250.110"
-    },
-    {
-      "index": 7,
       "frame_type": 14,
       "command": "J",
       "sub_cmd": 52,
       "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
+    },
+    {
+      "index": 6,
+      "frame_type": 14,
+      "command": "R",
+      "sub_cmd": 110,
+      "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00526e35433030303030343543"
+    },
+    {
+      "index": 7,
+      "frame_type": 14,
+      "command": "Y",
+      "sub_cmd": 82,
+      "frame_hex": "4c4749532d474c4f4641000000220000080000ef0e00040059524142"
     },
     {
       "index": 8,
@@ -69,187 +68,145 @@
     {
       "index": 9,
       "frame_type": 14,
-      "command": "R",
-      "sub_cmd": 86,
-      "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00525630303030303030413339"
-    },
-    {
-      "index": 10,
-      "frame_type": 14,
-      "command": "J",
-      "sub_cmd": 52,
-      "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-    },
-    {
-      "index": 11,
-      "frame_type": 14,
-      "command": "J",
-      "sub_cmd": 52,
-      "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-    },
-    {
-      "index": 12,
-      "frame_type": 14,
-      "command": "R",
-      "sub_cmd": 110,
-      "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00526e35433030303030343543"
-    },
-    {
-      "index": 13,
-      "frame_type": 14,
-      "command": "Y",
-      "sub_cmd": 82,
-      "frame_hex": "4c4749532d474c4f4641000000220000080000ef0e00040059524142"
-    },
-    {
-      "index": 14,
-      "frame_type": 14,
-      "command": "J",
-      "sub_cmd": 52,
-      "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-    },
-    {
-      "index": 15,
-      "frame_type": 14,
       "command": "W",
       "sub_cmd": 78,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e00574e303830303030303138313937"
     },
     {
-      "index": 16,
+      "index": 10,
       "frame_type": 14,
       "command": "R",
       "sub_cmd": 110,
       "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00526e46303037303030343631"
     },
     {
-      "index": 17,
+      "index": 11,
       "frame_type": 14,
       "command": "R",
       "sub_cmd": 198,
       "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052c630303030303034384134"
     },
     {
-      "index": 18,
+      "index": 12,
       "frame_type": 14,
       "command": "R",
       "sub_cmd": 172,
       "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052ac30303030303030383836"
     },
     {
-      "index": 19,
+      "index": 13,
       "frame_type": 14,
       "command": "R",
       "sub_cmd": 172,
       "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052ac41383030303030383946"
     },
     {
-      "index": 20,
+      "index": 14,
       "frame_type": 14,
       "command": "R",
       "sub_cmd": 172,
       "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052ac30303030303037303835"
     },
     {
-      "index": 21,
+      "index": 15,
       "frame_type": 14,
       "command": "R",
       "sub_cmd": 172,
       "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052ac37303030303034303839"
     },
     {
-      "index": 22,
+      "index": 16,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 90,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a5a303030303030303030323936"
     },
     {
-      "index": 23,
+      "index": 17,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 106,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a6a344331443030304330304533"
     },
     {
-      "index": 24,
+      "index": 18,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 106,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a6a433431443030304330304533"
     },
     {
-      "index": 25,
+      "index": 19,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 92,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a5c303030303030303430303941"
     },
     {
-      "index": 26,
+      "index": 20,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 93,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a5d303030303030313030303938"
     },
     {
-      "index": 27,
+      "index": 21,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 207,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005acf303030303030323030303042"
     },
     {
-      "index": 28,
+      "index": 22,
       "frame_type": 14,
       "command": "J",
       "sub_cmd": 52,
       "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
     },
     {
-      "index": 29,
+      "index": 23,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 88,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a58303030303030303430303936"
     },
     {
-      "index": 30,
+      "index": 24,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 89,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a59303030303030303430303937"
     },
     {
-      "index": 31,
+      "index": 25,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 110,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a6e463030373030303430304339"
     },
     {
-      "index": 32,
+      "index": 26,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 198,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac6303030303030343830303043"
     },
     {
-      "index": 33,
+      "index": 27,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 150,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a96303030303030303830304438"
     },
     {
-      "index": 34,
+      "index": 28,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 150,
       "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a96393830303030303830304539"
     },
     {
-      "index": 35,
+      "index": 29,
       "frame_type": 14,
       "command": "Z",
       "sub_cmd": 150,
@@ -263,5 +220,5 @@
     "sub_cmd": null,
     "frame_hex": "4c4749532d474c4f4641000000220000020000e91200"
   },
-  "total": 36
+  "total": 30
 }
