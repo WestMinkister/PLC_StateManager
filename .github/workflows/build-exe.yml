@@ -55,7 +55,9 @@ jobs:
           pyinstaller --onefile --console --name PLC_ValueBackup --noconfirm
           --add-data "value_read_frames.json;."
           --add-data "upload_replay_frames.json;."
+          --add-data "generic_priming.json;."
           --hidden-import plc_upload_test
+          --hidden-import plc_upload_decode
           plc_value_backup.py
 
       - name: Build PLC_XMLParser (콘솔)

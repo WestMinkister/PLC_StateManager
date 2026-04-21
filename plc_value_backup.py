@@ -806,21 +806,25 @@ def main():
                 print(f"  ✗ Failed to load snapshot: {e}")
                 sys.exit(1)
         else:
-            # Session 1: Upload replay to get program state
-            print(f"\n=== AUTO MODE: Session 1 (Program Read) ===")
-            print(f"  [AUTO] Session 1: Reading PLC program...")
+            # Session 1: Generic priming + dynamic Z/0xC0 scatter-gather
+            # Uses 36 UNIVERSAL priming frames (identical across all programs)
+            # Then dynamically reads symbol table via Z/0xC0 at sequential offsets
+            print(f"\n=== AUTO MODE: Universal Priming + Dynamic Scatter-Gather ===")
 
-            # Load upload replay frames
-            upload_json_path = resource_path('upload_replay_frames.json')
+            # Load generic priming frames (program-independent, verified identical across 1/2/4-prog captures)
+            priming_path = resource_path('generic_priming.json')
             try:
-                with open(upload_json_path, encoding='utf-8') as f:
-                    upload_frames = json.load(f)
+                with open(priming_path, encoding='utf-8') as f:
+                    priming_data = json.load(f)
+                priming_frames = priming_data.get('priming_frames', [])
+                disc_frame_entry = priming_data.get('disc_frame')
+                print(f"  [AUTO] Loaded {len(priming_frames)} universal priming frames")
             except Exception as e:
-                print(f"  ✗ Failed to load upload frames: {e}")
+                print(f"  ✗ Failed to load generic_priming.json: {e}")
                 sys.exit(1)
 
-            # Create temporary client for session 1
-            print(f"  Connecting to PLC {args.read}:{args.port} (Session 1)...")
+            # Connect
+            print(f"  Connecting to PLC {args.read}:{args.port}...")
             client1 = PLCUploadClient(args.read, args.port, timeout=5.0)
             try:
                 client1.connect()
@@ -828,15 +832,11 @@ def main():
                 print(f"  ✗ Connection failed: {e}")
                 sys.exit(1)
 
-            # Replay upload frames (excluding DISC and Z/0xC0 — we handle those dynamically)
-            priming_frames = [f for f in upload_frames
-                              if f.get('frame_type') != 0x12  # skip DISC
-                              and not (f.get('command') == 'Z' and f.get('sub_cmd') == 0xC0)]  # skip Z/0xC0
+            # Replay 36 universal priming frames (NO DISC, NO Z/0xC0)
             try:
                 success, errors = client1.replay_frames(priming_frames, delay=0.05)
-                print(f"  ✓ Program priming: {success} frames OK, {errors} errors")
+                print(f"  ✓ Priming: {success}/{len(priming_frames)} frames OK")
 
-                # Serialize responses for build_program_state
                 snap_responses = []
                 for r in client1.responses:
                     entry = {}
@@ -846,10 +846,8 @@ def main():
                         else:
                             entry[k] = v
                     snap_responses.append(entry)
-                print(f"  ✓ Collected {len(snap_responses)} responses")
-                # NOTE: client1 stays connected (no DISC sent yet) for scatter-gather
             except Exception as e:
-                print(f"  ✗ Replay failed: {e}")
+                print(f"  ✗ Priming failed: {e}")
                 client1.disconnect()
                 sys.exit(1)
 
