@@ -63,6 +63,11 @@ jobs:
           pyinstaller --onefile --console --name PLC_XMLParser --noconfirm
           plc_xml_parser.py
 
+      - name: Build PLC_XGTReader (콘솔)
+        run: >
+          pyinstaller --onefile --console --name PLC_XGTReader --noconfirm
+          plc_xgt_reader.py
+
       - name: Upload PLC_WriteReplay
         uses: actions/upload-artifact@v4
         with:
@@ -98,3 +103,9 @@ jobs:
         with:
           name: PLC_XMLParser-Windows
           path: dist/PLC_XMLParser.exe
+
+      - name: Upload PLC_XGTReader
+        uses: actions/upload-artifact@v4
+        with:
+          name: PLC_XGTReader-Windows
+          path: dist/PLC_XGTReader.exe
