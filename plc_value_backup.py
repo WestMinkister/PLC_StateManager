@@ -19,6 +19,7 @@ import struct
 import argparse
 import re
 import bz2
+import gzip
 from pathlib import Path
 from datetime import datetime
 
@@ -115,7 +116,7 @@ def dynamic_scatter_gather(client):
     Args:
         client: Connected PLCUploadClient (session already primed with upload replay)
     Returns:
-        set of symbol addresses like {'%MW152', '%MW6000'}
+        tuple: (set of symbol addresses like {'%MW152', '%MW6000'}, fragment_count: int)
     """
     STEP = 680
     MIN_RESPONSE = 680
@@ -164,12 +165,20 @@ def dynamic_scatter_gather(client):
             print(f"    [SG] Small response ({len(decoded)}B < 10) — stopping")
             break
 
+        # 모든 바이트가 0이면 유효 메모리 영역 끝 — PLC는 빈 영역도 zero-padded 응답
+        if all(b == 0 for b in decoded):
+            print(f"    [SG] All-zero fragment at offset {offset} — reached end of valid data")
+            break
+
         fragments.append({'offset': offset, 'data': decoded})
 
         if len(decoded) < MIN_RESPONSE:
             break
 
         offset += STEP
+        if offset + STEP > 0xFFFF:
+            print(f"    [SG] Next offset {offset} would exceed LE16 limit — stopping")
+            break
         time.sleep(0.05)
 
     if not fragments:
@@ -181,19 +190,27 @@ def dynamic_scatter_gather(client):
     for f in sorted(fragments, key=lambda x: x['offset']):
         buffer[f['offset']:f['offset'] + len(f['data'])] = f['data']
 
-    # Extract symbols from all BZh blocks
+    # Extract symbols: try both bzip2 (BZh) and gzip (\x1f\x8b) compressed blocks.
+    # 실측: 이 PLC 펌웨어는 symbol table을 GZIP으로 압축 (PRD §8.3 "GZIP 내포 → UTF-16LE XML"와 정합).
     symbols = set()
-    pos = 0
-    while pos < len(buffer) - 3:
-        idx = buffer.find(b'BZh', pos)
-        if idx < 0:
-            break
-        try:
-            d = bz2.decompress(buffer[idx:])
-            symbols.update(re.findall(r'%[A-Z]+\d+', d.decode('ascii', errors='replace')))
-            pos = idx + len(d) + 1
-        except Exception:
-            pos = idx + 1
+    for magic, decompressor in [(b'BZh', bz2.decompress), (b'\x1f\x8b', gzip.decompress)]:
+        pos = 0
+        while pos < len(buffer) - len(magic):
+            idx = buffer.find(magic, pos)
+            if idx < 0:
+                break
+            try:
+                d = decompressor(buffer[idx:])
+                # 해제된 텍스트는 UTF-16LE XML 또는 ASCII — 둘 다 시도
+                for enc in ('utf-16-le', 'ascii'):
+                    try:
+                        text = d.decode(enc, errors='replace')
+                        symbols.update(re.findall(r'%[A-Z]+\d+', text))
+                    except Exception:
+                        pass
+                pos = idx + len(d) + 1
+            except Exception:
+                pos = idx + 1
 
     return symbols, len(fragments)
 
@@ -207,6 +224,7 @@ def scatter_gather_symbols(upload_frames, responses):
 
     Returns:
         set of symbol addresses like {'%MW152', '%MW6000', '%IW5000', '%QW10'}
+        or empty set if no Z/0xC0 responses found
     """
     # 1. Find Z/0xC0 requests and their offsets
     c0_offsets = []
@@ -309,21 +327,25 @@ def scatter_gather_symbols(upload_frames, responses):
         end = start + len(p['data'])
         buffer[start:end] = p['data']
 
-    # 5. Find and decompress all BZh blocks
+    # 5. Find and decompress all compressed blocks (BZh + gzip; UTF-16LE + ASCII)
     symbols = set()
-    pos = 0
-    while pos < len(buffer) - 3:
-        bz_idx = buffer.find(b'BZh', pos)
-        if bz_idx < 0:
-            break
-        try:
-            decompressed = bz2.decompress(buffer[bz_idx:])
-            text = decompressed.decode('ascii', errors='replace')
-            found = re.findall(r'%[A-Z]+\d+', text)
-            symbols.update(found)
-        except Exception:
-            pass
-        pos = bz_idx + 1
+    for magic, decompressor in [(b'BZh', bz2.decompress), (b'\x1f\x8b', gzip.decompress)]:
+        pos = 0
+        while pos < len(buffer) - len(magic):
+            idx = buffer.find(magic, pos)
+            if idx < 0:
+                break
+            try:
+                decompressed = decompressor(buffer[idx:])
+                for enc in ('utf-16-le', 'ascii'):
+                    try:
+                        text = decompressed.decode(enc, errors='replace')
+                        symbols.update(re.findall(r'%[A-Z]+\d+', text))
+                    except Exception:
+                        pass
+                pos = idx + len(decompressed) + 1
+            except Exception:
+                pos = idx + 1
 
     return symbols
 
