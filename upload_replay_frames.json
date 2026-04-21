@@ -1,96 +1,6 @@
 [
   {
-    "index": 0,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "J",
-    "command_byte": 74,
-    "sub_cmd": 52,
-    "sub_cmd_hex": "0x34",
-    "cmd_data_length": 3,
-    "invoke_id": 0,
-    "cmd_payload_hex": "41",
-    "cmd_payload_len": 1,
-    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-  },
-  {
-    "index": 2,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "J",
-    "command_byte": 74,
-    "sub_cmd": 52,
-    "sub_cmd_hex": "0x34",
-    "cmd_data_length": 3,
-    "invoke_id": 0,
-    "cmd_payload_hex": "41",
-    "cmd_payload_len": 1,
-    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-  },
-  {
-    "index": 4,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "J",
-    "command_byte": 74,
-    "sub_cmd": 52,
-    "sub_cmd_hex": "0x34",
-    "cmd_data_length": 3,
-    "invoke_id": 0,
-    "cmd_payload_hex": "41",
-    "cmd_payload_len": 1,
-    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-  },
-  {
-    "index": 6,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "J",
-    "command_byte": 74,
-    "sub_cmd": 52,
-    "sub_cmd_hex": "0x34",
-    "cmd_data_length": 3,
-    "invoke_id": 0,
-    "cmd_payload_hex": "41",
-    "cmd_payload_len": 1,
-    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-  },
-  {
-    "index": 8,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "E",
-    "command_byte": 69,
-    "sub_cmd": 78,
-    "sub_cmd_hex": "0x4e",
-    "cmd_data_length": 16,
-    "invoke_id": 0,
-    "cmd_payload_hex": "3038303030303031303030304443",
-    "cmd_payload_len": 14,
-    "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000454e3038303030303031303030304443"
-  },
-  {
-    "index": 10,
-    "frame_type": 18,
-    "frame_type_hex": "0x12",
-    "frame_type_name": "Disconnect",
-    "command": "?",
-    "command_byte": null,
-    "sub_cmd": null,
-    "sub_cmd_hex": null,
-    "cmd_data_length": null,
-    "invoke_id": 0,
-    "cmd_payload_hex": "",
-    "cmd_payload_len": null,
-    "frame_hex": "4c4749532d474c4f4641000000220000020000e91200"
-  },
-  {
-    "index": 14,
+    "index": 1,
     "frame_type": 10,
     "frame_type_hex": "0x0a",
     "frame_type_name": "Connection",
@@ -107,10 +17,10 @@
     "connection_payload": "00000000ff00"
   },
   {
-    "index": 16,
+    "index": 3,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -122,10 +32,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 18,
+    "index": 5,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -137,10 +47,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 20,
+    "index": 7,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "R",
     "command_byte": 82,
     "sub_cmd": 110,
@@ -152,10 +62,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00526e35433030303030343543"
   },
   {
-    "index": 22,
+    "index": 9,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -167,7 +77,7 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 24,
+    "index": 11,
     "frame_type": 18,
     "frame_type_hex": "0x12",
     "frame_type_name": "Disconnect",
@@ -182,7 +92,7 @@
     "frame_hex": "4c4749532d474c4f4641000000220000020000e91200"
   },
   {
-    "index": 28,
+    "index": 15,
     "frame_type": 10,
     "frame_type_hex": "0x0a",
     "frame_type_name": "Connection",
@@ -199,10 +109,10 @@
     "connection_payload": "00000000ff00"
   },
   {
-    "index": 30,
+    "index": 17,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -214,10 +124,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 32,
+    "index": 19,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -229,10 +139,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 34,
+    "index": 21,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "R",
     "command_byte": 82,
     "sub_cmd": 86,
@@ -244,10 +154,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00525630303030303030413339"
   },
   {
-    "index": 36,
+    "index": 23,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -259,10 +169,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 38,
+    "index": 25,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -274,10 +184,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 40,
+    "index": 27,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "R",
     "command_byte": 82,
     "sub_cmd": 110,
@@ -289,10 +199,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00526e35433030303030343543"
   },
   {
-    "index": 42,
+    "index": 29,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Y",
     "command_byte": 89,
     "sub_cmd": 82,
@@ -304,10 +214,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000080000ef0e00040059524142"
   },
   {
-    "index": 44,
+    "index": 31,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -319,10 +229,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 46,
+    "index": 33,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "W",
     "command_byte": 87,
     "sub_cmd": 78,
@@ -334,10 +244,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e00574e303830303030303138313937"
   },
   {
-    "index": 48,
+    "index": 35,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "R",
     "command_byte": 82,
     "sub_cmd": 110,
@@ -349,10 +259,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c00526e46303037303030343631"
   },
   {
-    "index": 50,
+    "index": 37,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "R",
     "command_byte": 82,
     "sub_cmd": 198,
@@ -364,10 +274,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052c630303030303034384134"
   },
   {
-    "index": 52,
+    "index": 39,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "R",
     "command_byte": 82,
     "sub_cmd": 172,
@@ -379,10 +289,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052ac30303030303030383836"
   },
   {
-    "index": 54,
+    "index": 41,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "R",
     "command_byte": 82,
     "sub_cmd": 172,
@@ -394,10 +304,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052ac41383030303030383946"
   },
   {
-    "index": 56,
+    "index": 43,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "R",
     "command_byte": 82,
     "sub_cmd": 172,
@@ -409,10 +319,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052ac30303030303037303835"
   },
   {
-    "index": 58,
+    "index": 45,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "R",
     "command_byte": 82,
     "sub_cmd": 172,
@@ -424,10 +334,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000100000f70e000c0052ac37303030303034303839"
   },
   {
-    "index": 60,
+    "index": 47,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 90,
@@ -439,10 +349,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a5a303030303030303030323936"
   },
   {
-    "index": 62,
+    "index": 49,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 106,
@@ -454,10 +364,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a6a344331443030304330304533"
   },
   {
-    "index": 64,
+    "index": 51,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 106,
@@ -469,10 +379,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a6a433431443030304330304533"
   },
   {
-    "index": 66,
+    "index": 53,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 92,
@@ -484,10 +394,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a5c303030303030303430303941"
   },
   {
-    "index": 68,
+    "index": 55,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 93,
@@ -499,10 +409,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a5d303030303030313030303938"
   },
   {
-    "index": 70,
+    "index": 57,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 207,
@@ -514,10 +424,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005acf303030303030323030303042"
   },
   {
-    "index": 72,
+    "index": 59,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -529,10 +439,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 74,
+    "index": 61,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 88,
@@ -544,10 +454,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a58303030303030303430303936"
   },
   {
-    "index": 76,
+    "index": 63,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 89,
@@ -559,10 +469,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a59303030303030303430303937"
   },
   {
-    "index": 78,
+    "index": 65,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 110,
@@ -574,10 +484,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a6e463030373030303430304339"
   },
   {
-    "index": 80,
+    "index": 67,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 198,
@@ -589,10 +499,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac6303030303030343830303043"
   },
   {
-    "index": 82,
+    "index": 69,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 150,
@@ -604,10 +514,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a96303030303030303830304438"
   },
   {
-    "index": 84,
+    "index": 71,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 150,
@@ -619,10 +529,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a96393830303030303830304539"
   },
   {
-    "index": 86,
+    "index": 73,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 150,
@@ -634,40 +544,40 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a96303030303030413030304531"
   },
   {
-    "index": 88,
+    "index": 75,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 192,
     "sub_cmd_hex": "0xc0",
     "cmd_data_length": 14,
     "invoke_id": 0,
-    "cmd_payload_hex": "443430313030413830323245",
+    "cmd_payload_hex": "463830313030413830323334",
     "cmd_payload_len": 12,
-    "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0443430313030413830323245"
+    "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0463830313030413830323334"
   },
   {
-    "index": 90,
+    "index": 77,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 192,
     "sub_cmd_hex": "0xc0",
     "cmd_data_length": 14,
     "invoke_id": 0,
-    "cmd_payload_hex": "374330343030373430323235",
+    "cmd_payload_hex": "413030343030413030323232",
     "cmd_payload_len": 12,
-    "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0374330343030373430323235"
+    "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0413030343030413030323232"
   },
   {
-    "index": 92,
+    "index": 79,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -679,10 +589,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83303030303030413830324438"
   },
   {
-    "index": 94,
+    "index": 81,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -694,10 +604,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83413830323030413830324633"
   },
   {
-    "index": 96,
+    "index": 83,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -709,10 +619,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83353030353030443830304533"
   },
   {
-    "index": 98,
+    "index": 85,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 110,
@@ -724,10 +634,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a6e463030373030303430304339"
   },
   {
-    "index": 100,
+    "index": 87,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 198,
@@ -739,10 +649,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac6303030303030343830303043"
   },
   {
-    "index": 102,
+    "index": 89,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 90,
@@ -754,10 +664,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a5a303030303030303030323936"
   },
   {
-    "index": 104,
+    "index": 91,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -769,10 +679,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83303030303030413830324438"
   },
   {
-    "index": 106,
+    "index": 93,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -784,10 +694,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83413830323030413830324633"
   },
   {
-    "index": 108,
+    "index": 95,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -799,10 +709,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83353030353030433030304441"
   },
   {
-    "index": 110,
+    "index": 97,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -814,10 +724,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 112,
+    "index": 99,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -829,10 +739,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200003c0000230e0038005857303030303138303431343030313430303034303030313030303030303035314530313030303030303030303030303030304330304241"
   },
   {
-    "index": 114,
+    "index": 101,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -844,10 +754,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034373830303031"
   },
   {
-    "index": 116,
+    "index": 103,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -859,10 +769,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 118,
+    "index": 105,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -874,10 +784,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 120,
+    "index": 107,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -889,10 +799,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200003c0000230e0038005857303030313138303431343030313430303034303030313030303030303035314530313030303030303030303030303030304330304242"
   },
   {
-    "index": 122,
+    "index": 109,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -904,10 +814,25 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034373830303032"
   },
   {
-    "index": 124,
+    "index": 111,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
+    "command": "J",
+    "command_byte": 74,
+    "sub_cmd": 52,
+    "sub_cmd_hex": "0x34",
+    "cmd_data_length": 3,
+    "invoke_id": 0,
+    "cmd_payload_hex": "41",
+    "cmd_payload_len": 1,
+    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
+  },
+  {
+    "index": 113,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -919,10 +844,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 126,
+    "index": 115,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 130,
@@ -934,10 +859,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a82303030303030303830304334"
   },
   {
-    "index": 128,
+    "index": 117,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 130,
@@ -949,10 +874,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a82393830313030303830304436"
   },
   {
-    "index": 130,
+    "index": 119,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -964,10 +889,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83313030363030313030304335"
   },
   {
-    "index": 132,
+    "index": 121,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 90,
@@ -979,10 +904,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a5a303030303030303030323936"
   },
   {
-    "index": 134,
+    "index": 123,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 141,
@@ -994,25 +919,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a8d303030303030303830304346"
   },
   {
-    "index": 136,
+    "index": 125,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "J",
-    "command_byte": 74,
-    "sub_cmd": 52,
-    "sub_cmd_hex": "0x34",
-    "cmd_data_length": 3,
-    "invoke_id": 0,
-    "cmd_payload_hex": "41",
-    "cmd_payload_len": 1,
-    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-  },
-  {
-    "index": 138,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 141,
@@ -1024,10 +934,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a8d303030303030373030304345"
   },
   {
-    "index": 140,
+    "index": 127,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 142,
@@ -1039,25 +949,25 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a8e303030303030303830304430"
   },
   {
-    "index": 142,
+    "index": 129,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 142,
     "sub_cmd_hex": "0x8e",
     "cmd_data_length": 14,
     "invoke_id": 0,
-    "cmd_payload_hex": "303030303030463830304536",
+    "cmd_payload_hex": "303030303030453030314445",
     "cmd_payload_len": 12,
-    "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a8e303030303030463830304536"
+    "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a8e303030303030453030314445"
   },
   {
-    "index": 144,
+    "index": 131,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 150,
@@ -1069,10 +979,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a96303030303030303830304438"
   },
   {
-    "index": 146,
+    "index": 133,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 150,
@@ -1084,10 +994,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a96303830303030393830304539"
   },
   {
-    "index": 148,
+    "index": 135,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 155,
@@ -1099,10 +1009,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a9b303030303030313830304445"
   },
   {
-    "index": 150,
+    "index": 137,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 134,
@@ -1114,10 +1024,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a86303030303030314330304434"
   },
   {
-    "index": 152,
+    "index": 139,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 134,
@@ -1129,10 +1039,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a86303030313030314330304435"
   },
   {
-    "index": 154,
+    "index": 141,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1144,10 +1054,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88303030303030314330304436"
   },
   {
-    "index": 156,
+    "index": 143,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1159,10 +1069,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88363030413030314330304544"
   },
   {
-    "index": 158,
+    "index": 145,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1174,10 +1084,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88433031343030314330304545"
   },
   {
-    "index": 160,
+    "index": 147,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1189,10 +1099,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88323031463030314330304546"
   },
   {
-    "index": 162,
+    "index": 149,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1204,10 +1114,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88383032393030314330304539"
   },
   {
-    "index": 164,
+    "index": 151,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1219,10 +1129,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88453033333030314330304631"
   },
   {
-    "index": 166,
+    "index": 153,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1234,10 +1144,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88343033453030314330304632"
   },
   {
-    "index": 168,
+    "index": 155,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1249,10 +1159,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88413034383030314330304633"
   },
   {
-    "index": 170,
+    "index": 157,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1264,10 +1174,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88303035333030314330304445"
   },
   {
-    "index": 172,
+    "index": 159,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1279,10 +1189,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88363035443030314330304635"
   },
   {
-    "index": 174,
+    "index": 161,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1294,10 +1204,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88433036373030314330304636"
   },
   {
-    "index": 176,
+    "index": 163,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 136,
@@ -1309,10 +1219,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a88323037323030314330304531"
   },
   {
-    "index": 178,
+    "index": 165,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 137,
@@ -1324,10 +1234,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a89303030303030314330304437"
   },
   {
-    "index": 180,
+    "index": 167,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 137,
@@ -1339,10 +1249,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a89303031363030314330304445"
   },
   {
-    "index": 182,
+    "index": 169,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 137,
@@ -1354,10 +1264,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a89303032433030314330304543"
   },
   {
-    "index": 184,
+    "index": 171,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 137,
@@ -1369,10 +1279,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a89303034323030314330304444"
   },
   {
-    "index": 186,
+    "index": 173,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 137,
@@ -1384,10 +1294,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a89303035383030314330304534"
   },
   {
-    "index": 188,
+    "index": 175,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 137,
@@ -1399,10 +1309,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a89303036453030314330304632"
   },
   {
-    "index": 190,
+    "index": 177,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 137,
@@ -1414,10 +1324,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a89303038343030314330304533"
   },
   {
-    "index": 192,
+    "index": 179,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 137,
@@ -1429,10 +1339,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a89303039413030314330304631"
   },
   {
-    "index": 194,
+    "index": 181,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -1444,10 +1354,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 196,
+    "index": 183,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1459,10 +1369,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303032323030303030303235"
   },
   {
-    "index": 198,
+    "index": 185,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1474,10 +1384,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 200,
+    "index": 187,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1489,10 +1399,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034313030303030303236"
   },
   {
-    "index": 202,
+    "index": 189,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1504,10 +1414,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 204,
+    "index": 191,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1519,10 +1429,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034333030303030303238"
   },
   {
-    "index": 206,
+    "index": 193,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1534,10 +1444,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 208,
+    "index": 195,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1549,10 +1459,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034323030303030303237"
   },
   {
-    "index": 210,
+    "index": 197,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1564,10 +1474,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 212,
+    "index": 199,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1579,10 +1489,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034363030303030303242"
   },
   {
-    "index": 214,
+    "index": 201,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1594,10 +1504,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 216,
+    "index": 203,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1609,10 +1519,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303033303030303030303234"
   },
   {
-    "index": 218,
+    "index": 205,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1624,10 +1534,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 220,
+    "index": 207,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1639,10 +1549,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303036303030303030303237"
   },
   {
-    "index": 222,
+    "index": 209,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1654,130 +1564,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 224,
+    "index": 211,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "X",
-    "command_byte": 88,
-    "sub_cmd": 77,
-    "sub_cmd_hex": "0x4d",
-    "cmd_data_length": 16,
-    "invoke_id": 0,
-    "cmd_payload_hex": "3030303031383034303630304638",
-    "cmd_payload_len": 14,
-    "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
-  },
-  {
-    "index": 226,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "X",
-    "command_byte": 88,
-    "sub_cmd": 87,
-    "sub_cmd_hex": "0x57",
-    "cmd_data_length": 64,
-    "invoke_id": 0,
-    "cmd_payload_hex": "3030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038313030303030303241",
-    "cmd_payload_len": 62,
-    "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038313030303030303241"
-  },
-  {
-    "index": 228,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "X",
-    "command_byte": 88,
-    "sub_cmd": 77,
-    "sub_cmd_hex": "0x4d",
-    "cmd_data_length": 16,
-    "invoke_id": 0,
-    "cmd_payload_hex": "3030303031383034303630304638",
-    "cmd_payload_len": 14,
-    "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
-  },
-  {
-    "index": 230,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "X",
-    "command_byte": 88,
-    "sub_cmd": 87,
-    "sub_cmd_hex": "0x57",
-    "cmd_data_length": 64,
-    "invoke_id": 0,
-    "cmd_payload_hex": "3030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038323030303030303242",
-    "cmd_payload_len": 62,
-    "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038323030303030303242"
-  },
-  {
-    "index": 232,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "X",
-    "command_byte": 88,
-    "sub_cmd": 77,
-    "sub_cmd_hex": "0x4d",
-    "cmd_data_length": 16,
-    "invoke_id": 0,
-    "cmd_payload_hex": "3030303031383034303630304638",
-    "cmd_payload_len": 14,
-    "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
-  },
-  {
-    "index": 234,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "X",
-    "command_byte": 88,
-    "sub_cmd": 76,
-    "sub_cmd_hex": "0x4c",
-    "cmd_data_length": 28,
-    "invoke_id": 0,
-    "cmd_payload_hex": "3030303030303030303030363030303030303030303030303241",
-    "cmd_payload_len": 26,
-    "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
-  },
-  {
-    "index": 236,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "X",
-    "command_byte": 88,
-    "sub_cmd": 76,
-    "sub_cmd_hex": "0x4c",
-    "cmd_data_length": 28,
-    "invoke_id": 0,
-    "cmd_payload_hex": "3030303130303030303030363030303130393030303030303335",
-    "cmd_payload_len": 26,
-    "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
-  },
-  {
-    "index": 238,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "X",
-    "command_byte": 88,
-    "sub_cmd": 87,
-    "sub_cmd_hex": "0x57",
-    "cmd_data_length": 64,
-    "invoke_id": 0,
-    "cmd_payload_hex": "3030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303032323030303030303236",
-    "cmd_payload_len": 62,
-    "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303032323030303030303236"
-  },
-  {
-    "index": 240,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -1789,10 +1579,130 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 242,
+    "index": 213,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
+    "command": "X",
+    "command_byte": 88,
+    "sub_cmd": 77,
+    "sub_cmd_hex": "0x4d",
+    "cmd_data_length": 16,
+    "invoke_id": 0,
+    "cmd_payload_hex": "3030303031383034303630304638",
+    "cmd_payload_len": 14,
+    "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
+  },
+  {
+    "index": 215,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
+    "command": "X",
+    "command_byte": 88,
+    "sub_cmd": 87,
+    "sub_cmd_hex": "0x57",
+    "cmd_data_length": 64,
+    "invoke_id": 0,
+    "cmd_payload_hex": "3030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038313030303030303241",
+    "cmd_payload_len": 62,
+    "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038313030303030303241"
+  },
+  {
+    "index": 217,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
+    "command": "X",
+    "command_byte": 88,
+    "sub_cmd": 77,
+    "sub_cmd_hex": "0x4d",
+    "cmd_data_length": 16,
+    "invoke_id": 0,
+    "cmd_payload_hex": "3030303031383034303630304638",
+    "cmd_payload_len": 14,
+    "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
+  },
+  {
+    "index": 219,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
+    "command": "X",
+    "command_byte": 88,
+    "sub_cmd": 87,
+    "sub_cmd_hex": "0x57",
+    "cmd_data_length": 64,
+    "invoke_id": 0,
+    "cmd_payload_hex": "3030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038323030303030303242",
+    "cmd_payload_len": 62,
+    "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038323030303030303242"
+  },
+  {
+    "index": 221,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
+    "command": "X",
+    "command_byte": 88,
+    "sub_cmd": 77,
+    "sub_cmd_hex": "0x4d",
+    "cmd_data_length": 16,
+    "invoke_id": 0,
+    "cmd_payload_hex": "3030303031383034303630304638",
+    "cmd_payload_len": 14,
+    "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
+  },
+  {
+    "index": 223,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
+    "command": "X",
+    "command_byte": 88,
+    "sub_cmd": 76,
+    "sub_cmd_hex": "0x4c",
+    "cmd_data_length": 28,
+    "invoke_id": 0,
+    "cmd_payload_hex": "3030303030303030303030363030303030303030303030303241",
+    "cmd_payload_len": 26,
+    "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
+  },
+  {
+    "index": 225,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
+    "command": "X",
+    "command_byte": 88,
+    "sub_cmd": 76,
+    "sub_cmd_hex": "0x4c",
+    "cmd_data_length": 28,
+    "invoke_id": 0,
+    "cmd_payload_hex": "3030303130303030303030363030303130393030303030303335",
+    "cmd_payload_len": 26,
+    "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
+  },
+  {
+    "index": 227,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
+    "command": "X",
+    "command_byte": 88,
+    "sub_cmd": 87,
+    "sub_cmd_hex": "0x57",
+    "cmd_data_length": 64,
+    "invoke_id": 0,
+    "cmd_payload_hex": "3030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303032323030303030303236",
+    "cmd_payload_len": 62,
+    "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303032323030303030303236"
+  },
+  {
+    "index": 229,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1804,10 +1714,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 244,
+    "index": 231,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1819,10 +1729,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034313030303030303237"
   },
   {
-    "index": 246,
+    "index": 233,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1834,10 +1744,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 248,
+    "index": 235,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1849,10 +1759,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034333030303030303239"
   },
   {
-    "index": 250,
+    "index": 237,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1864,10 +1774,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 252,
+    "index": 239,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1879,10 +1789,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034323030303030303238"
   },
   {
-    "index": 254,
+    "index": 241,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1894,10 +1804,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 256,
+    "index": 243,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1909,10 +1819,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034363030303030303243"
   },
   {
-    "index": 258,
+    "index": 245,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1924,10 +1834,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 260,
+    "index": 247,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1939,10 +1849,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303033303030303030303235"
   },
   {
-    "index": 262,
+    "index": 249,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1954,10 +1864,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 264,
+    "index": 251,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -1969,10 +1879,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303036303030303030303238"
   },
   {
-    "index": 266,
+    "index": 253,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1984,10 +1894,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 268,
+    "index": 255,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -1999,10 +1909,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 270,
+    "index": 257,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2014,10 +1924,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038313030303030303242"
   },
   {
-    "index": 272,
+    "index": 259,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2029,10 +1939,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 274,
+    "index": 261,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2044,10 +1954,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038323030303030303243"
   },
   {
-    "index": 276,
+    "index": 263,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2059,10 +1969,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 278,
+    "index": 265,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2074,10 +1984,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 280,
+    "index": 267,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 148,
@@ -2089,10 +1999,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a94303030303030413830304537"
   },
   {
-    "index": 282,
+    "index": 269,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 130,
@@ -2104,10 +2014,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a82303030303030413030314345"
   },
   {
-    "index": 284,
+    "index": 271,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -2119,10 +2029,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83303030303030413830324438"
   },
   {
-    "index": 286,
+    "index": 273,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -2134,10 +2044,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83413830323030413830324633"
   },
   {
-    "index": 288,
+    "index": 275,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 131,
@@ -2149,10 +2059,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a83353030353030443830304533"
   },
   {
-    "index": 290,
+    "index": 277,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 192,
@@ -2164,10 +2074,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0303030303030413830323135"
   },
   {
-    "index": 292,
+    "index": 279,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 192,
@@ -2179,10 +2089,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0413830323030413830323330"
   },
   {
-    "index": 294,
+    "index": 281,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 192,
@@ -2194,10 +2104,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0353030353030413830323146"
   },
   {
-    "index": 296,
+    "index": 283,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 192,
@@ -2209,25 +2119,40 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0463830373030413830323341"
   },
   {
-    "index": 298,
+    "index": 285,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 192,
     "sub_cmd_hex": "0xc0",
     "cmd_data_length": 14,
     "invoke_id": 0,
-    "cmd_payload_hex": "413030413030343430303234",
+    "cmd_payload_hex": "413030413030413830323337",
     "cmd_payload_len": 12,
-    "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0413030413030343430303234"
+    "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0413030413030413830323337"
   },
   {
-    "index": 300,
+    "index": 287,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
+    "command": "Z",
+    "command_byte": 90,
+    "sub_cmd": 192,
+    "sub_cmd_hex": "0xc0",
+    "cmd_data_length": 14,
+    "invoke_id": 0,
+    "cmd_payload_hex": "343830443030304230303243",
+    "cmd_payload_len": 12,
+    "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac0343830443030304230303243"
+  },
+  {
+    "index": 289,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2239,10 +2164,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 302,
+    "index": 291,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2254,10 +2179,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303032323030303030303235"
   },
   {
-    "index": 304,
+    "index": 293,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2269,10 +2194,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 306,
+    "index": 295,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2284,10 +2209,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 308,
+    "index": 297,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 134,
@@ -2299,10 +2224,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a86303030303030303030314331"
   },
   {
-    "index": 310,
+    "index": 299,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2314,10 +2239,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 312,
+    "index": 301,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2329,10 +2254,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034313030303030303236"
   },
   {
-    "index": 314,
+    "index": 303,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2344,10 +2269,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 316,
+    "index": 305,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2359,10 +2284,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 318,
+    "index": 307,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2374,10 +2299,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 320,
+    "index": 309,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2389,10 +2314,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034333030303030303238"
   },
   {
-    "index": 322,
+    "index": 311,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2404,10 +2329,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 324,
+    "index": 313,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2419,10 +2344,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 326,
+    "index": 315,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2434,10 +2359,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 328,
+    "index": 317,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2449,10 +2374,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034323030303030303237"
   },
   {
-    "index": 330,
+    "index": 319,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2464,10 +2389,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 332,
+    "index": 321,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2479,10 +2404,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 334,
+    "index": 323,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2494,10 +2419,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 336,
+    "index": 325,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2509,10 +2434,25 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034363030303030303242"
   },
   {
-    "index": 338,
+    "index": 327,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
+    "command": "J",
+    "command_byte": 74,
+    "sub_cmd": 52,
+    "sub_cmd_hex": "0x34",
+    "cmd_data_length": 3,
+    "invoke_id": 0,
+    "cmd_payload_hex": "41",
+    "cmd_payload_len": 1,
+    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
+  },
+  {
+    "index": 329,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2524,10 +2464,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 340,
+    "index": 331,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2539,10 +2479,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 342,
+    "index": 333,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2554,10 +2494,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 344,
+    "index": 335,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2569,10 +2509,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303033303030303030303234"
   },
   {
-    "index": 346,
+    "index": 337,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2584,10 +2524,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 348,
+    "index": 339,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2599,10 +2539,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 350,
+    "index": 341,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2614,10 +2554,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 352,
+    "index": 343,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2629,10 +2569,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303036303030303030303237"
   },
   {
-    "index": 354,
+    "index": 345,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2644,25 +2584,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 356,
+    "index": 347,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "J",
-    "command_byte": 74,
-    "sub_cmd": 52,
-    "sub_cmd_hex": "0x34",
-    "cmd_data_length": 3,
-    "invoke_id": 0,
-    "cmd_payload_hex": "41",
-    "cmd_payload_len": 1,
-    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-  },
-  {
-    "index": 358,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2674,10 +2599,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 360,
+    "index": 349,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2689,10 +2614,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303036303030303130303238"
   },
   {
-    "index": 362,
+    "index": 351,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2704,10 +2629,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 364,
+    "index": 353,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2719,10 +2644,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 366,
+    "index": 355,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2734,10 +2659,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303036303030303230303239"
   },
   {
-    "index": 368,
+    "index": 357,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2749,10 +2674,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 370,
+    "index": 359,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2764,10 +2689,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 372,
+    "index": 361,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2779,10 +2704,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 374,
+    "index": 363,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2794,10 +2719,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038313030303030303241"
   },
   {
-    "index": 376,
+    "index": 365,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2809,10 +2734,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 378,
+    "index": 367,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2824,10 +2749,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 380,
+    "index": 369,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2839,10 +2764,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030393030303030303333"
   },
   {
-    "index": 382,
+    "index": 371,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2854,10 +2779,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303031383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038323030303030303242"
   },
   {
-    "index": 384,
+    "index": 373,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2869,10 +2794,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303031383034303630304638"
   },
   {
-    "index": 386,
+    "index": 375,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2884,10 +2809,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303030303030303030363030303030303030303030303241"
   },
   {
-    "index": 388,
+    "index": 377,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2899,10 +2824,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 390,
+    "index": 379,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2914,10 +2839,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303032323030303030303236"
   },
   {
-    "index": 392,
+    "index": 381,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -2929,10 +2854,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 394,
+    "index": 383,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2944,10 +2869,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 396,
+    "index": 385,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 134,
@@ -2959,10 +2884,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a86303030313030303030314332"
   },
   {
-    "index": 398,
+    "index": 387,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -2974,10 +2899,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 400,
+    "index": 389,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -2989,10 +2914,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034313030303030303237"
   },
   {
-    "index": 402,
+    "index": 391,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3004,10 +2929,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 404,
+    "index": 393,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3019,10 +2944,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 406,
+    "index": 395,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3034,10 +2959,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 408,
+    "index": 397,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -3049,10 +2974,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034333030303030303239"
   },
   {
-    "index": 410,
+    "index": 399,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3064,10 +2989,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 412,
+    "index": 401,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3079,10 +3004,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 414,
+    "index": 403,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3094,10 +3019,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 416,
+    "index": 405,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -3109,10 +3034,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034323030303030303238"
   },
   {
-    "index": 418,
+    "index": 407,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3124,10 +3049,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 420,
+    "index": 409,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3139,10 +3064,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 422,
+    "index": 411,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3154,10 +3079,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 424,
+    "index": 413,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -3169,10 +3094,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303034363030303030303243"
   },
   {
-    "index": 426,
+    "index": 415,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3184,10 +3109,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 428,
+    "index": 417,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3199,10 +3124,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 430,
+    "index": 419,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3214,10 +3139,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 432,
+    "index": 421,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -3229,10 +3154,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303033303030303030303235"
   },
   {
-    "index": 434,
+    "index": 423,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3244,10 +3169,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 436,
+    "index": 425,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3259,10 +3184,25 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 438,
+    "index": 427,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
+    "command": "J",
+    "command_byte": 74,
+    "sub_cmd": 52,
+    "sub_cmd_hex": "0x34",
+    "cmd_data_length": 3,
+    "invoke_id": 0,
+    "cmd_payload_hex": "41",
+    "cmd_payload_len": 1,
+    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
+  },
+  {
+    "index": 429,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3274,10 +3214,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 440,
+    "index": 431,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -3289,10 +3229,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303036303030303030303238"
   },
   {
-    "index": 442,
+    "index": 433,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3304,10 +3244,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 444,
+    "index": 435,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3319,10 +3259,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 446,
+    "index": 437,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -3334,10 +3274,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303036303030303130303239"
   },
   {
-    "index": 448,
+    "index": 439,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3349,10 +3289,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 450,
+    "index": 441,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3364,10 +3304,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 452,
+    "index": 443,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -3379,25 +3319,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303036303030303230303241"
   },
   {
-    "index": 454,
+    "index": 445,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "J",
-    "command_byte": 74,
-    "sub_cmd": 52,
-    "sub_cmd_hex": "0x34",
-    "cmd_data_length": 3,
-    "invoke_id": 0,
-    "cmd_payload_hex": "41",
-    "cmd_payload_len": 1,
-    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-  },
-  {
-    "index": 456,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3409,10 +3334,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 458,
+    "index": 447,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3424,10 +3349,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 460,
+    "index": 449,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3439,10 +3364,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 462,
+    "index": 451,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -3454,10 +3379,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038313030303030303242"
   },
   {
-    "index": 464,
+    "index": 453,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3469,10 +3394,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 466,
+    "index": 455,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3484,10 +3409,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 468,
+    "index": 457,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3499,10 +3424,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130393030303030303335"
   },
   {
-    "index": 470,
+    "index": 459,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 87,
@@ -3514,10 +3439,10 @@
     "frame_hex": "4c4749532d474c4f46410000002200004400002b0e00400058573030303131383034313830303138303030343030303130303030303030353037303130303030303030303030303030303130303038323030303030303243"
   },
   {
-    "index": 472,
+    "index": 461,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 77,
@@ -3529,10 +3454,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000140000fb0e001000584d3030303131383034303630304639"
   },
   {
-    "index": 474,
+    "index": 463,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "X",
     "command_byte": 88,
     "sub_cmd": 76,
@@ -3544,10 +3469,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000200000070e001c00584c3030303130303030303030363030303130303030303030303243"
   },
   {
-    "index": 476,
+    "index": 465,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -3559,10 +3484,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 478,
+    "index": 467,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -3574,25 +3499,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 480,
+    "index": 469,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
-    "command": "J",
-    "command_byte": 74,
-    "sub_cmd": 52,
-    "sub_cmd_hex": "0x34",
-    "cmd_data_length": 3,
-    "invoke_id": 0,
-    "cmd_payload_hex": "41",
-    "cmd_payload_len": 1,
-    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
-  },
-  {
-    "index": 482,
-    "frame_type": 14,
-    "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 110,
@@ -3604,10 +3514,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005a6e463030373030303430304339"
   },
   {
-    "index": 484,
+    "index": 471,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "Z",
     "command_byte": 90,
     "sub_cmd": 198,
@@ -3619,10 +3529,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000120000f90e000e005ac6303030303030343830303043"
   },
   {
-    "index": 486,
+    "index": 473,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -3634,10 +3544,10 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 488,
+    "index": 475,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
@@ -3649,10 +3559,25 @@
     "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
   },
   {
-    "index": 490,
+    "index": 477,
     "frame_type": 14,
     "frame_type_hex": "0x0e",
-    "frame_type_name": "PC\u2192PLC command",
+    "frame_type_name": "PC→PLC command",
+    "command": "J",
+    "command_byte": 74,
+    "sub_cmd": 52,
+    "sub_cmd_hex": "0x34",
+    "cmd_data_length": 3,
+    "invoke_id": 0,
+    "cmd_payload_hex": "41",
+    "cmd_payload_len": 1,
+    "frame_hex": "4c4749532d474c4f4641000000220000070000ee0e0003004a3441"
+  },
+  {
+    "index": 479,
+    "frame_type": 14,
+    "frame_type_hex": "0x0e",
+    "frame_type_name": "PC→PLC command",
     "command": "J",
     "command_byte": 74,
     "sub_cmd": 52,
