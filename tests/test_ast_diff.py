@@ -22,6 +22,10 @@ from plc_ast_diff import (
     diff_instruction_list,
     diff_rung,
     diff_ast,
+    classify_change,
+    summarize_stats_diff,
+    print_ast_diff,
+    write_json_diff,
 )
 
 
@@ -361,3 +365,229 @@ class TestProgramAlignment:
         assert len(result['matched']) == 1  # A
         assert result['added_names'] == ['C']
         assert result['removed_names'] == ['B']
+
+
+# ============================================================================
+# Commit 3 테스트: Classifier + Reporter + CLI
+# ============================================================================
+
+
+class TestReporter:
+    """Classifier + Reporter 단위 테스트."""
+
+    def test_classify_change_opcode(self):
+        """함수 변경 메시지 포맷."""
+        changes = {'opcode_label': ('ADD', 'SUB')}
+        msgs = classify_change(changes)
+        assert len(msgs) == 1
+        assert 'ADD' in msgs[0] and 'SUB' in msgs[0]
+        assert '함수/opcode' in msgs[0]
+
+    def test_classify_change_preset_time(self):
+        """Timer preset 메시지 포맷."""
+        changes = {'params.preset_time': (3.0, 5.0)}
+        msgs = classify_change(changes)
+        assert 'timer preset' in msgs[0]
+        assert '3' in msgs[0] and '5' in msgs[0]
+
+    def test_classify_change_address(self):
+        """Contact address 메시지 포맷."""
+        changes = {'address': ('%MW1000', '%MW2000')}
+        msgs = classify_change(changes)
+        assert '주소' in msgs[0]
+        assert '%MW1000' in msgs[0] and '%MW2000' in msgs[0]
+
+    def test_classify_change_params_in_list(self):
+        """params.in 리스트 포맷."""
+        changes = {'params.in': (['%MW1'], ['%MW2'])}
+        msgs = classify_change(changes)
+        assert 'params.in (입력)' in msgs[0]
+        assert '%MW1' in msgs[0] and '%MW2' in msgs[0]
+
+    def test_classify_change_multiple_fields(self):
+        """여러 필드 동시 변경."""
+        changes = {
+            'opcode_label': ('ADD', 'SUB'),
+            'func_id': (71, 127),
+            'address': ('%MW1000', '%MW2000'),
+        }
+        msgs = classify_change(changes)
+        assert len(msgs) == 3
+        assert any('함수/opcode' in m for m in msgs)
+        assert any('func_id' in m for m in msgs)
+        assert any('주소' in m for m in msgs)
+
+    def test_summarize_stats_diff(self):
+        """stats_diff → 한국어 요약 리스트."""
+        stats_diff = {
+            'by_kind': {
+                'function_call': {'before': 17, 'after': 16, 'delta': -1},
+                'timer': {'before': 2, 'after': 3, 'delta': 1},
+            },
+            'function_call_recall': {'before': '16/18', 'after': '17/18'},
+        }
+        lines = summarize_stats_diff(stats_diff)
+        assert any('function_call' in l and '-1' in l for l in lines)
+        assert any('timer' in l and '+1' in l for l in lines)
+        assert any('recall' in l for l in lines)
+
+    def test_summarize_stats_diff_parse_quality(self):
+        """parse_quality_distribution 요약."""
+        stats_diff = {
+            'parse_quality_distribution': {
+                'full': {'before': 100, 'after': 102, 'delta': 2},
+                'il_fallback': {'before': 5, 'after': 3, 'delta': -2},
+            },
+        }
+        lines = summarize_stats_diff(stats_diff)
+        assert any('parse_quality.full' in l and '+2' in l for l in lines)
+        assert any('parse_quality.il_fallback' in l and '-2' in l for l in lines)
+
+    def test_print_ast_diff_no_changes(self, capsys):
+        """변경 없는 경우 출력."""
+        diff = {
+            'grammar_version_a': '2026-04-23',
+            'grammar_version_b': '2026-04-23',
+            'programs_added': [],
+            'programs_removed': [],
+            'programs_changed': {},
+            'stats_diff': {},
+            'warnings': [],
+        }
+        print_ast_diff(diff)
+        captured = capsys.readouterr()
+        assert '변경 없음' in captured.out
+        assert '의미적으로 동일' in captured.out
+
+    def test_print_ast_diff_with_changes(self, capsys):
+        """변경 있는 경우 출력."""
+        diff = {
+            'grammar_version_a': '2026-04-23',
+            'grammar_version_b': '2026-04-23',
+            'programs_added': [],
+            'programs_removed': [],
+            'programs_changed': {
+                'P0': {
+                    'rungs_added': [],
+                    'rungs_removed': [],
+                    'rungs_changed': {
+                        '0': {
+                            'instructions_added': [],
+                            'instructions_removed': [],
+                            'instructions_changed': [{
+                                'index': 0,
+                                'before': {'kind': 'function_call', 'opcode_label': 'ADD'},
+                                'after': {'kind': 'function_call', 'opcode_label': 'SUB'},
+                                'changes': {'opcode_label': ('ADD', 'SUB')},
+                            }],
+                            'warnings': [],
+                        }
+                    },
+                }
+            },
+            'stats_diff': {},
+            'warnings': [],
+        }
+        print_ast_diff(diff)
+        captured = capsys.readouterr()
+        assert '변경 있음' in captured.out or 'Changes detected' in captured.out
+        assert '[P0]' in captured.out
+        assert 'rung[0]' in captured.out
+
+    def test_print_ast_diff_summary_only(self, capsys):
+        """--summary-only 플래그."""
+        diff = {
+            'grammar_version_a': '2026-04-23',
+            'grammar_version_b': '2026-04-23',
+            'programs_added': [],
+            'programs_removed': [],
+            'programs_changed': {
+                'P0': {
+                    'rungs_added': [],
+                    'rungs_removed': [],
+                    'rungs_changed': {'0': {'instructions_changed': []}},
+                }
+            },
+            'stats_diff': {
+                'by_kind': {'function_call': {'before': 10, 'after': 11, 'delta': 1}}
+            },
+            'warnings': [],
+        }
+        print_ast_diff(diff, summary_only=True)
+        captured = capsys.readouterr()
+        assert 'SUMMARY' in captured.out
+        assert 'Stats Delta' in captured.out
+        # rung 상세는 없어야 함
+        assert 'rung[0]' not in captured.out
+
+
+class TestCLI:
+    """CLI + write_json_diff 통합 테스트."""
+
+    def test_write_json_diff(self, tmp_path):
+        """JSON 파일로 저장."""
+        diff = {
+            'grammar_version_a': '2026-04-23',
+            'grammar_version_b': '2026-04-23',
+            'programs_added': [],
+            'programs_removed': [],
+            'programs_changed': {},
+            'stats_diff': {},
+            'warnings': [],
+        }
+        out_path = tmp_path / 'diff.json'
+        write_json_diff(diff, out_path)
+        assert out_path.exists()
+        import json as _json
+        result = _json.loads(out_path.read_text(encoding='utf-8'))
+        assert result['grammar_version_a'] == '2026-04-23'
+
+    def test_cli_json_out(self, tmp_path):
+        """tmp_path 에 두 AST 저장 후 CLI 실행, --json-out 으로 결과 저장 확인."""
+        import json as _json
+        import subprocess
+
+        ast = {
+            'grammar_version': '2026-04-23',
+            'programs': [{
+                'index': 0, 'name': 'P0', 'rung_count': 1, 'fb_count': 0,
+                'byte_range': [0, 100], 'boundary_marker': 'TEST',
+                'rungs': [{
+                    'index': 0, 'byte_range': [0, 100], 'boundary_marker': 'TEST',
+                    'instructions': [{
+                        'kind': 'function_call', 'opcode_label': 'ADD',
+                        'func_id': 71, 'params': {'in': [], 'out': []},
+                    }],
+                }],
+            }],
+            'stats': {'by_kind': {'function_call': 1}, 'total_programs': 1, 'total_rungs': 1},
+        }
+
+        a_path = tmp_path / 'a.json'
+        b_path = tmp_path / 'b.json'
+        out_path = tmp_path / 'diff.json'
+
+        a_path.write_text(_json.dumps(ast), encoding='utf-8')
+        # b 에서 ADD → SUB 로 변경
+        ast_b = _json.loads(_json.dumps(ast))
+        ast_b['programs'][0]['rungs'][0]['instructions'][0]['opcode_label'] = 'SUB'
+        ast_b['programs'][0]['rungs'][0]['instructions'][0]['func_id'] = 127
+        b_path.write_text(_json.dumps(ast_b), encoding='utf-8')
+
+        # CLI 실행
+        script_path = Path(__file__).parent.parent / 'plc_ast_diff.py'
+        result = subprocess.run(
+            ['python', str(script_path), str(a_path), str(b_path),
+             '--json-out', str(out_path)],
+            capture_output=True, text=True, timeout=30,
+        )
+        assert result.returncode == 0, f"CLI failed: {result.stderr}"
+        assert out_path.exists(), f"--json-out 파일 없음"
+
+        # JSON 내용 검증
+        diff_result = _json.loads(out_path.read_text(encoding='utf-8'))
+        assert 'P0' in diff_result['programs_changed']
+        rung0 = diff_result['programs_changed']['P0']['rungs_changed']['0']
+        assert len(rung0['instructions_changed']) == 1
+        changes = rung0['instructions_changed'][0]['changes']
+        assert 'opcode_label' in changes

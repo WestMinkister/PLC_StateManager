@@ -618,3 +618,324 @@ def diff_ast(
         'stats_diff': stats_diff,
         'warnings': all_warnings,
     }
+
+
+# ============================================================================
+# Classifier 계층 (Commit 3)
+# ============================================================================
+
+_CHANGE_LABELS: Dict[str, str] = {
+    'kind':                '종류 (kind)',
+    'opcode_label':        '함수/opcode',
+    'func_id':             'func_id',
+    'address':             '주소',
+    'element_type':        'element_type',
+    'contact_type':        'contact 타입',
+    'coil_type':           'coil 타입',
+    'fx_index':            'FX index',
+    'symbol':              'symbol',
+    'opcode':              'opcode',
+    'operand_str':         'operand',
+    'token_type':          'token_type',
+    'params.in':           'params.in (입력)',
+    'params.out':          'params.out (출력)',
+    'params.preset_time':  'timer preset',
+    'params.preset_value': 'counter preset',
+    'params.instance':     'FB instance',
+}
+
+
+def classify_change(change_dict: Dict[str, Tuple[Any, Any]]) -> List[str]:
+    """detect_instruction_changes() 결과 → 한국어 메시지 리스트.
+
+    예:
+      {'opcode_label': ('ADD','SUB')} → ['함수/opcode: ADD → SUB']
+      {'params.preset_time': (3.0, 5.0)} → ['timer preset: 3.0 → 5.0']
+      {'params.in': (['%MW1'],['%MW2'])} → ['params.in (입력): ["%MW1"] → ["%MW2"]']
+    """
+    messages: List[str] = []
+    for field, (before, after) in change_dict.items():
+        label = _CHANGE_LABELS.get(field, field)
+        messages.append(f"{label}: {_format_value(before)} → {_format_value(after)}")
+    return messages
+
+
+def _format_value(v: Any) -> str:
+    """값을 console 에 적합한 형태로 포맷."""
+    if v is None:
+        return 'None'
+    if isinstance(v, list):
+        return '[' + ', '.join(f'"{x}"' if isinstance(x, str) else str(x) for x in v) + ']'
+    if isinstance(v, float):
+        return f"{v:.6g}"
+    return str(v)
+
+
+def summarize_stats_diff(stats_diff: Dict[str, Any]) -> List[str]:
+    """stats_diff dict → 한국어 요약 리스트.
+
+    예: by_kind.function_call: 17 → 16 (-1)
+    """
+    lines: List[str] = []
+
+    by_kind = stats_diff.get('by_kind', {})
+    for kind, delta in sorted(by_kind.items()):
+        before = delta['before']
+        after = delta['after']
+        diff = delta['delta']
+        sign = '+' if diff > 0 else ''
+        lines.append(f"by_kind.{kind}: {before} → {after} ({sign}{diff})")
+
+    pq = stats_diff.get('parse_quality_distribution', {})
+    for key, delta in sorted(pq.items()):
+        before = delta['before']
+        after = delta['after']
+        diff = delta['delta']
+        sign = '+' if diff > 0 else ''
+        lines.append(f"parse_quality.{key}: {before} → {after} ({sign}{diff})")
+
+    recall = stats_diff.get('function_call_recall')
+    if recall:
+        lines.append(f"recall: {recall['before']} → {recall['after']}")
+
+    return lines
+
+
+# ============================================================================
+# Reporter 계층 (Commit 3)
+# ============================================================================
+
+
+def print_ast_diff(
+    diff: Dict[str, Any],
+    *,
+    verbose: bool = False,
+    summary_only: bool = False,
+) -> None:
+    """AST diff 결과를 console 에 한국어로 출력.
+
+    형식 (plc_upload_decode.py::print_diff 스타일 계승):
+      === AST SEMANTIC DIFF ===
+      Grammar: 2026-04-23
+
+      --- SUMMARY ---
+      Programs 추가: 0
+      Programs 제거: 0
+      Programs 변경: 2 (NewProgram, NewProgram3)
+      Rungs 변경: 3
+      Instructions 변경: 5
+
+      --- [NewProgram] ---
+        rung[0]:
+          [변경] 함수/opcode: ADD → SUB
+          [변경] params.in (입력): [%MW1000] → [%MW2000]
+
+      --- Stats Delta ---
+      by_kind.function_call: 17 → 16 (-1)
+
+      ✓ Changes detected
+    """
+    # 헤더
+    print("=== AST SEMANTIC DIFF ===")
+    gva = diff.get('grammar_version_a')
+    gvb = diff.get('grammar_version_b')
+    if gva or gvb:
+        if gva == gvb:
+            print(f"Grammar: {gva}")
+        else:
+            print(f"Grammar: {gva} ↔ {gvb} (불일치)")
+
+    # 요약
+    print()
+    print("--- SUMMARY ---")
+    programs_added = diff.get('programs_added', [])
+    programs_removed = diff.get('programs_removed', [])
+    programs_changed = diff.get('programs_changed', {})
+
+    # 총계 계산
+    total_rungs_added = 0
+    total_rungs_removed = 0
+    total_rungs_changed = 0
+    total_instr_added = 0
+    total_instr_removed = 0
+    total_instr_changed = 0
+    for pname, pdata in programs_changed.items():
+        total_rungs_added += len(pdata.get('rungs_added', []))
+        total_rungs_removed += len(pdata.get('rungs_removed', []))
+        total_rungs_changed += len(pdata.get('rungs_changed', {}))
+        for rkey, rdata in pdata.get('rungs_changed', {}).items():
+            total_instr_added += len(rdata.get('instructions_added', []))
+            total_instr_removed += len(rdata.get('instructions_removed', []))
+            total_instr_changed += len(rdata.get('instructions_changed', []))
+
+    print(f"Programs 추가: {len(programs_added)}")
+    print(f"Programs 제거: {len(programs_removed)}")
+    if programs_changed:
+        print(f"Programs 변경: {len(programs_changed)} ({', '.join(programs_changed.keys())})")
+    else:
+        print(f"Programs 변경: 0")
+    print(f"Rungs 추가: {total_rungs_added}")
+    print(f"Rungs 제거: {total_rungs_removed}")
+    print(f"Rungs 변경: {total_rungs_changed}")
+    print(f"Instructions 추가: {total_instr_added}")
+    print(f"Instructions 제거: {total_instr_removed}")
+    print(f"Instructions 변경: {total_instr_changed}")
+
+    if summary_only:
+        stats_diff = diff.get('stats_diff', {})
+        if stats_diff:
+            print()
+            print("--- Stats Delta ---")
+            for line in summarize_stats_diff(stats_diff):
+                print(line)
+        warnings = diff.get('warnings', [])
+        if warnings:
+            print()
+            print(f"⚠ Warnings: {len(warnings)}")
+            if verbose:
+                for w in warnings:
+                    print(f"  - {w}")
+        _print_final_status(diff)
+        return
+
+    # 프로그램 별 상세
+    for pname, pdata in programs_changed.items():
+        print()
+        print(f"--- [{pname}] ---")
+
+        # rungs_added
+        for r in pdata.get('rungs_added', []):
+            instr_count = len(r.get('instructions', []))
+            print(f"  rung[{r.get('index', '?')}] 추가됨 ({instr_count} instructions)")
+
+        # rungs_removed
+        for r in pdata.get('rungs_removed', []):
+            instr_count = len(r.get('instructions', []))
+            print(f"  rung[{r.get('index', '?')}] 제거됨 ({instr_count} instructions)")
+
+        # rungs_changed
+        for rkey, rdata in pdata.get('rungs_changed', {}).items():
+            print(f"  rung[{rkey}]:")
+            for added in rdata.get('instructions_added', []):
+                label = added.get('opcode_label') or added.get('kind', '?')
+                print(f"    [추가] {label}")
+            for removed in rdata.get('instructions_removed', []):
+                label = removed.get('opcode_label') or removed.get('kind', '?')
+                print(f"    [제거] {label}")
+            for ch in rdata.get('instructions_changed', []):
+                messages = classify_change(ch.get('changes', {}))
+                for msg in messages:
+                    warn = ''
+                    if rdata.get('warnings'):
+                        if any('il_fallback' in w for w in rdata.get('warnings', [])):
+                            warn = '  ⚠ il_fallback comparison'
+                    print(f"    [변경] {msg}{warn}")
+            if verbose:
+                for w in rdata.get('warnings', []):
+                    print(f"    ⚠ {w}")
+
+    # Stats Delta
+    stats_diff = diff.get('stats_diff', {})
+    if stats_diff:
+        print()
+        print("--- Stats Delta ---")
+        for line in summarize_stats_diff(stats_diff):
+            print(line)
+
+    # Warnings
+    warnings = diff.get('warnings', [])
+    if warnings:
+        print()
+        print(f"⚠ Warnings: {len(warnings)}")
+        for w in warnings:
+            print(f"  - {w}")
+
+    _print_final_status(diff)
+
+
+def _print_final_status(diff: Dict[str, Any]) -> None:
+    """diff 결과 요약 마지막 줄."""
+    has_changes = (
+        diff.get('programs_added')
+        or diff.get('programs_removed')
+        or diff.get('programs_changed')
+        or diff.get('stats_diff')
+    )
+    print()
+    if has_changes:
+        print("✓ Changes detected")
+    else:
+        print("✓ 변경 없음 (두 AST 는 의미적으로 동일)")
+
+
+def write_json_diff(diff: Dict[str, Any], path) -> None:
+    """diff 결과를 JSON 파일로 저장.
+
+    주의: programs_changed 내 'before'/'after' instruction dict 는 원본 그대로 포함
+    (재현성 목적). 출력 크기 큼.
+    """
+    path = Path(path)
+    with path.open('w', encoding='utf-8') as f:
+        json.dump(diff, f, ensure_ascii=False, indent=2, default=str)
+
+
+# ============================================================================
+# CLI (Commit 3)
+# ============================================================================
+
+
+def main() -> int:
+    """CLI 진입점. argparse 기반.
+
+    반환: exit code (0=정상, 1=파일 오류, 2=인자 오류)
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description='AST 기반 의미적 diff (Phase B.4)',
+        epilog="예: python plc_ast_diff.py docs/program_ast_A.json docs/program_ast_B.json",
+    )
+    parser.add_argument('ast_a', help='이전 AST JSON 경로')
+    parser.add_argument('ast_b', help='이후 AST JSON 경로')
+    parser.add_argument('--json-out', metavar='FILE', help='결과를 JSON 으로 저장')
+    parser.add_argument('--verbose', action='store_true', help='경고 상세 출력')
+    parser.add_argument('--summary-only', action='store_true', help='요약만 출력')
+    parser.add_argument('--strict-addr', action='store_true',
+                        help='주소 비트 오프셋 엄격 비교')
+    parser.add_argument('--strict-opcode', action='store_true',
+                        help='opcode_label 정규화 없이 엄격 비교')
+    parser.add_argument('--ignore-il-fallback', action='store_true',
+                        help='il_fallback instruction 변경 무시')
+
+    args = parser.parse_args()
+
+    try:
+        ast_a = load_ast(args.ast_a)
+        ast_b = load_ast(args.ast_b)
+    except (FileNotFoundError, ValueError) as e:
+        print(f"오류: {e}")
+        return 1
+    except json.JSONDecodeError as e:
+        print(f"JSON 파싱 실패: {e}")
+        return 1
+
+    opts = DiffOptions(
+        ignore_addr_bit=not args.strict_addr,
+        strict_opcode=args.strict_opcode,
+        ignore_il_fallback=args.ignore_il_fallback,
+    )
+
+    diff = diff_ast(ast_a, ast_b, opts=opts)
+
+    print_ast_diff(diff, verbose=args.verbose, summary_only=args.summary_only)
+
+    if args.json_out:
+        write_json_diff(diff, args.json_out)
+        print(f"\nJSON 저장: {args.json_out}")
+
+    return 0
+
+
+if __name__ == '__main__':
+    import sys
+    sys.exit(main())
