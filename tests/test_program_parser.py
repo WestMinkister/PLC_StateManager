@@ -91,14 +91,16 @@ class TestProgramASTBuilder:
             assert prog['index'] == i
 
     def test_rung_boundaries_nonempty(self, builder_from_json):
-        """각 rung의 바이트 범위 유효성 (Phase B.5.1: EMPTY_RUNG 허용)."""
+        """각 rung의 바이트 범위 유효성 (Phase B.5.1: EMPTY_RUNG, B.5.3: NO_BYTECODE_EVIDENCE 허용)."""
         ast = builder_from_json.build()
         for prog in ast['programs']:
             for rung in prog['rungs']:
                 start, end = rung['byte_range']
-                # Phase B.5.1: EMPTY_RUNG(0, 0)은 허용 (IL rung 초과), 나머지는 유효해야 함
+                # Phase B.5.1: EMPTY_RUNG(0, 0)은 허용 (IL rung 초과)
+                # B.5.3: NO_BYTECODE_EVIDENCE 프로그램의 rung도 (0, 0) 허용
                 marker = rung.get('boundary_marker', '')
-                if marker != 'EMPTY_RUNG':
+                prog_marker = prog.get('boundary_marker', '')
+                if marker not in ('EMPTY_RUNG',) and prog_marker != 'NO_BYTECODE_EVIDENCE':
                     assert end > start, \
                         f"{prog['name']} rung {rung['index']}: 범위 [{start}, {end}] 유효하지 않음"
 
@@ -129,11 +131,12 @@ class TestProgramASTBuilder:
         assert ast['stats']['total_rungs'] == 21
 
     def test_programs_have_names(self, builder_from_json):
-        """각 프로그램이 이름 보유."""
+        """각 프로그램이 이름 보유 (B.5.3: IL ground truth 이름 사용)."""
         ast = builder_from_json.build()
         for prog in ast['programs']:
             assert 'name' in prog
-            assert prog['name'].startswith('Program_')
+            # B.5.3: IL ground truth 에서 프로그램 이름을 가져옴 (Program_* 또는 IL 이름)
+            assert isinstance(prog['name'], str) and len(prog['name']) > 0
 
     def test_rungs_have_boundary_markers(self, builder_from_json):
         """각 rung이 경계 마커 보유 (Phase B.5.1: FB_DEFINITION_BASED 추가)."""
@@ -728,6 +731,59 @@ class TestPhaseB53TimerCounter:
         assert variants[10]['kind'] == 'timer'
         assert variants[81]['kind'] == 'timer'
         assert variants[243]['kind'] == 'counter'
+
+    def test_address_fingerprint_dispatch(self, builder_from_json):
+        """IL 주소 지문 기반 매핑으로 프로그램이 올바른 response 에 배정됨."""
+        ast = builder_from_json.build()
+        programs = ast['programs']
+
+        # NewProgram → response_idx=138 기대
+        np_prog = next((p for p in programs if 'NewProgram' == p['name']), None)
+        assert np_prog is not None, "NewProgram 프로그램 없음"
+        assert np_prog.get('response_idx') == 138, \
+            f"NewProgram response_idx: {np_prog.get('response_idx')} (기대 138)"
+
+        # NewProgram2 → response_idx=139 기대
+        np2_prog = next((p for p in programs if p['name'] == 'NewProgram2'), None)
+        assert np2_prog is not None, "NewProgram2 프로그램 없음"
+        assert np2_prog.get('response_idx') == 139, \
+            f"NewProgram2 response_idx: {np2_prog.get('response_idx')} (기대 139)"
+
+        # NewProgram3 → response_idx=None (missing)
+        np3_prog = next((p for p in programs if p['name'] == 'NewProgram3'), None)
+        assert np3_prog is not None, "NewProgram3 프로그램 없음"
+        assert np3_prog.get('boundary_marker') == 'NO_BYTECODE_EVIDENCE', \
+            f"NewProgram3 marker: {np3_prog.get('boundary_marker')} (기대 NO_BYTECODE_EVIDENCE)"
+        assert np3_prog.get('fb_count', 0) == 0, \
+            f"NewProgram3 fb_count: {np3_prog.get('fb_count')} (기대 0)"
+        assert np3_prog.get('response_idx') is None, \
+            f"NewProgram3 response_idx: {np3_prog.get('response_idx')} (기대 None)"
+
+        # FUNCTION_Program → response_idx=140 기대
+        fp_prog = next((p for p in programs if p['name'] == 'FUNCTION_Program'), None)
+        assert fp_prog is not None, "FUNCTION_Program 프로그램 없음"
+        assert fp_prog.get('response_idx') == 140, \
+            f"FUNCTION_Program response_idx: {fp_prog.get('response_idx')} (기대 140)"
+
+    def test_newprogram3_il_fallback_rungs(self, builder_from_json):
+        """NewProgram3 는 bytecode 부재이지만 IL 기반 rung 들을 가진다."""
+        ast = builder_from_json.build()
+        np3 = next((p for p in ast['programs'] if p['name'] == 'NewProgram3'), None)
+        assert np3 is not None, "NewProgram3 프로그램 없음"
+        # IL 에 NewProgram3 가 있으면 rung 생성되어야 함
+        assert len(np3['rungs']) >= 1, \
+            f"NewProgram3 rung 수: {len(np3['rungs'])} (기대 >= 1)"
+        # IL 에서 예상되는 rung 수는 4개
+        assert len(np3['rungs']) == 4, \
+            f"NewProgram3 rung 수: {len(np3['rungs'])} (기대 4)"
+
+    def test_total_programs_and_rungs_preserved(self, builder_from_json):
+        """Commit 3 refactor 후에도 프로그램 4개, rung 21개 유지."""
+        ast = builder_from_json.build()
+        assert ast['stats']['total_programs'] == 4, \
+            f"프로그램 수: {ast['stats']['total_programs']} (기대 4)"
+        assert ast['stats']['total_rungs'] == 21, \
+            f"rung 수: {ast['stats']['total_rungs']} (기대 21)"
 
 
 if __name__ == '__main__':

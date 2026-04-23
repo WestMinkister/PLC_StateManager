@@ -80,83 +80,181 @@ class ProgramASTBuilder:
         else:
             raise ValueError(f"지원 안 함: {path.suffix}")
 
-    def locate_program_regions(self) -> List[Dict[str, Any]]:
-        """IL 시그니처 기반 프로그램 분할.
+    def _collect_program_address_fingerprint(self, program_idx: int) -> set:
+        """IL 의 특정 프로그램이 참조하는 주소 집합 추출.
 
-        Protocol 바이트 마커가 없으므로 IL rung 분포(1+4+4+12)로 프로그램 경계 확정.
-        각 프로그램은 FB_DEFINITION 토큰 클러스터로 식별.
+        주소 지문은 '%' 로 시작하는 ASCII 주소 (예: %MW1000, %IW5000.12).
 
-        15개의 FB_DEFINITION을 분배: 1+4+4+6 (IL rung count 기반)
+        Args:
+            program_idx: IL 프로그램 인덱스 (0~3)
 
-        반환: [{'name': 'Program_0', 'byte_range': [start, end], 'boundary_marker': '...', 'response_idx': int}]
-        기대: 4개 프로그램
+        Returns:
+            set of address strings like {'%MW1000', '%IW5000.12'}
         """
-        if not self.responses:
-            return []
+        addrs = set()
+        if not self.il_ground_truth:
+            return addrs
+        programs = self.il_ground_truth.get('programs', [])
+        if program_idx >= len(programs):
+            return addrs
+        prog = programs[program_idx]
+        for rung in prog.get('rungs', []):
+            for instr in rung.get('instructions', []):
+                for op in instr.get('operands', []):
+                    op_str = str(op).strip()
+                    if op_str.startswith('%'):
+                        # 비트 오프셋 제거 (%MW1000.0 → %MW1000 정규화)
+                        # 매칭 완화를 위해 베이스 주소도 추가
+                        addrs.add(op_str)
+                        if '.' in op_str:
+                            base = op_str.split('.')[0]
+                            addrs.add(base)
+        return addrs
 
-        # FB_DEFINITION 토큰 수집
+    def _collect_response_address_set(self, response_idx: int) -> set:
+        """BC response 의 모든 ADDRESS 토큰 집합 추출."""
+        if response_idx >= len(self.responses):
+            return set()
+        response = self.responses[response_idx]
+        addrs = set()
+        for token in response.get('tokens', []):
+            if token.get('type') == 'ADDRESS' and 'addr' in token:
+                addr_str = token['addr']
+                addrs.add(addr_str)
+                if '.' in addr_str:
+                    addrs.add(addr_str.split('.')[0])
+        return addrs
+
+    def locate_program_regions(self) -> List[Dict[str, Any]]:
+        """IL 주소 지문 기반 프로그램 ↔ BC response 동적 매핑.
+
+        과거: FB 개수 기반 hardcoded splits [0,1,5,9] — DOTALL fix 이후 무효화됨.
+        현재: 각 IL 프로그램의 주소 집합과 BC response 의 ADDRESS 토큰 집합을 Jaccard similarity 로 매칭.
+
+        NewProgram3 같이 BC 에 없는 프로그램은 boundary_marker='NO_BYTECODE_EVIDENCE' 로 마킹하고
+        fb_count=0, fb_indices=[] 로 설정. IL fallback 이 rung 들을 생성함.
+
+        반환: [{'name': str, 'byte_range': [int, int], 'boundary_marker': str,
+                'response_idx': int|None, 'fb_indices': List[int], 'fb_count': int, ...}]
+        """
+        # IL 프로그램 개수 (기본 4, il_ground_truth 에서 추출)
+        il_programs = []
+        if self.il_ground_truth:
+            il_programs = self.il_ground_truth.get('programs', [])
+        num_programs = max(len(il_programs), 4)
+
+        if not self.responses:
+            return [
+                {
+                    'index': i,
+                    'name': il_programs[i].get('name', f'Program_{i}') if i < len(il_programs) else f'Program_{i}',
+                    'byte_range': [0, 0],
+                    'boundary_marker': 'NO_BYTECODE_EVIDENCE',
+                    'response_idx': None,
+                    'token_count': 0,
+                    'rung_count': 0,
+                    'fb_count': 0,
+                    'fb_indices': [],
+                }
+                for i in range(num_programs)
+            ]
+
+        # 1. 모든 FB_DEFINITION 수집 (response_idx, pos 정렬)
         fb_defs = []
         for resp_idx, response in enumerate(self.responses):
-            tokens = response.get('tokens', [])
-            for token in tokens:
-                if token['type'] == 'FB_DEFINITION':
+            for token in response.get('tokens', []):
+                if token.get('type') == 'FB_DEFINITION':
                     fb_defs.append({
                         'func_id': token.get('func_id'),
                         'pos': token['pos'],
                         'response_idx': resp_idx,
                     })
-
-        # 정렬: response_idx, pos 순
         fb_defs = sorted(fb_defs, key=lambda x: (x['response_idx'], x['pos']))
 
-        # IL 기반 분배: 1+4+4+6 (대신 6개로 해야 correct)
-        # 검증: rosetta_0423.json의 bc_func_id_counts 확인하면 15개 total
-        # IL rung count 1+4+4+12이므로 FB는 함수 호출당 1개
-        # 하지만 MOVE_WORD는 IL에서 3회, BC에서 1회 → 2개 recall gap
-        # 따라서 15개 BC FB를 정확히 1+4+4+6으로 분배
+        # 2. 각 IL 프로그램의 주소 지문 계산
+        program_fingerprints = {
+            i: self._collect_program_address_fingerprint(i) for i in range(num_programs)
+        }
 
+        # 3. BC response 들의 주소 집합 계산
+        response_addrs = {
+            i: self._collect_response_address_set(i) for i in range(len(self.responses))
+        }
+
+        # 4. Jaccard similarity 매트릭스 — 그리디 최고점 매칭
+        # 각 프로그램-응답 쌍의 유사도 계산
+        JACCARD_THRESHOLD = 0.1  # 낮은 threshold: 최소 10% 주소 겹침
+
+        similarities = []  # (score, prog_idx, resp_idx)
+        for prog_idx in range(num_programs):
+            prog_addrs = program_fingerprints[prog_idx]
+            if not prog_addrs:
+                continue  # 주소가 없으면 매칭 불가
+            for resp_idx, resp_addrs in response_addrs.items():
+                if not resp_addrs:
+                    continue
+                intersection = len(prog_addrs & resp_addrs)
+                union = len(prog_addrs | resp_addrs)
+                score = intersection / union if union > 0 else 0.0
+                if score >= JACCARD_THRESHOLD:
+                    similarities.append((score, prog_idx, resp_idx))
+
+        # 유사도 내림차순 정렬
+        similarities.sort(reverse=True, key=lambda x: x[0])
+
+        # 그리디 할당: 높은 유사도부터 처리, 이미 사용된 프로그램/응답 제외
+        assignments = {i: None for i in range(num_programs)}
+        used_responses = set()
+        used_programs = set()
+
+        for score, prog_idx, resp_idx in similarities:
+            if prog_idx in used_programs or resp_idx in used_responses:
+                continue
+            assignments[prog_idx] = resp_idx
+            used_responses.add(resp_idx)
+            used_programs.add(prog_idx)
+
+        # 5. 각 프로그램의 FB indices 추출
         programs = []
-        if len(fb_defs) >= 4:
-            prog_splits = [0, 1, 5, 9]  # Program_0(1), Program_1(4), Program_2(4), Program_3(6)
+        for prog_idx in range(num_programs):
+            name = il_programs[prog_idx].get('name', f'Program_{prog_idx}') if prog_idx < len(il_programs) else f'Program_{prog_idx}'
+            resp_idx = assignments[prog_idx]
 
-            for prog_idx in range(4):
-                start_fb_idx = prog_splits[prog_idx]
-                if prog_idx < 3:
-                    end_fb_idx = prog_splits[prog_idx + 1]
-                else:
-                    end_fb_idx = len(fb_defs)
-
-                if start_fb_idx < len(fb_defs):
-                    start_pos = fb_defs[start_fb_idx]['pos']
-                    start_resp = fb_defs[start_fb_idx]['response_idx']
-
-                    # 이 프로그램에 속하는 모든 FB의 끝을 찾기
-                    end_fb_last_pos = fb_defs[end_fb_idx - 1]['pos']
-                    end_resp = fb_defs[end_fb_idx - 1]['response_idx']
-
-                    programs.append({
-                        'index': prog_idx,
-                        'name': f'Program_{prog_idx}',
-                        'byte_range': [start_pos, end_fb_last_pos + 100],  # 추정 범위
-                        'boundary_marker': 'FB_DEFINITION cluster',
-                        'response_idx': start_resp,
-                        'token_count': 0,
-                        'rung_count': 0,
-                        'fb_count': end_fb_idx - start_fb_idx,
-                        'fb_indices': list(range(start_fb_idx, end_fb_idx)),  # 이 프로그램에 속하는 FB 인덱스
-                    })
-        else:
-            # fallback: 4개 프로그램으로 빈 skeleton
-            for prog_idx in range(4):
+            if resp_idx is None:
+                # 매칭 실패 — NewProgram3 같은 케이스
                 programs.append({
                     'index': prog_idx,
-                    'name': f'Program_{prog_idx}',
+                    'name': name,
                     'byte_range': [0, 0],
-                    'boundary_marker': 'skeleton',
-                    'response_idx': 0,
+                    'boundary_marker': 'NO_BYTECODE_EVIDENCE',
+                    'response_idx': None,
                     'token_count': 0,
                     'rung_count': 0,
+                    'fb_count': 0,
+                    'fb_indices': [],
                 })
+                continue
+
+            # 이 response 에 속한 FB indices 추출
+            fb_indices = [i for i, fb in enumerate(fb_defs) if fb['response_idx'] == resp_idx]
+            if fb_indices:
+                start_pos = fb_defs[fb_indices[0]]['pos']
+                end_pos = fb_defs[fb_indices[-1]]['pos'] + 100  # 추정 여유
+            else:
+                # response 는 매칭됐지만 FB 가 없는 케이스 (드물지만 가능)
+                start_pos, end_pos = 0, 0
+
+            programs.append({
+                'index': prog_idx,
+                'name': name,
+                'byte_range': [start_pos, end_pos],
+                'boundary_marker': 'FB_DEFINITION cluster' if fb_indices else 'ADDRESS_MATCH',
+                'response_idx': resp_idx,
+                'token_count': 0,
+                'rung_count': 0,
+                'fb_count': len(fb_indices),
+                'fb_indices': fb_indices,
+            })
 
         return programs
 
@@ -865,9 +963,9 @@ class ProgramASTBuilder:
                                                  'FX_FLAG', 'INSTR_LOAD', 'INSTR_NC_MOD', 'INSTR_PULSE'}:
                                     if token not in token_subset:  # 중복 제외
                                         token_subset.append(token)
-
                 else:
-                    # EMPTY_RUNG: 토큰 없음
+                    # B.5.3: NO_BYTECODE_EVIDENCE 또는 EMPTY_RUNG: 토큰 없음
+                    # IL fallback 로직이 아래에서 rung을 채울 것
                     token_subset = []
 
                 # 정렬: byte offset 순
