@@ -113,8 +113,13 @@ def scan_tokens(binary):
     return sorted(tokens, key=lambda x: x['pos'])
 
 
-def scan_pcapng(pcap_path):
-    """pcapng 파일 → PLC→PC 응답별 바이너리 + 토큰 맵."""
+def scan_pcapng(pcap_path, include_binary=False):
+    """pcapng 파일 → PLC→PC 응답별 바이너리 + 토큰 맵.
+
+    Args:
+        pcap_path: pcapng 파일 경로
+        include_binary: True면 각 response에 binary_hex (hex string) 포함
+    """
     packets = parse_pcapng_packets(pcap_path)
 
     responses = []
@@ -125,11 +130,14 @@ def scan_pcapng(pcap_path):
         if binary is None:
             continue
         tokens = scan_tokens(binary)
-        responses.append({
+        resp = {
             'binary_len': len(binary),
             'token_count': len(tokens),
             'tokens': tokens,
-        })
+        }
+        if include_binary:
+            resp['binary_hex'] = binary.hex()
+        responses.append(resp)
     return responses
 
 
