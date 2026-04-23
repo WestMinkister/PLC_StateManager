@@ -109,12 +109,13 @@ def scan_tokens(binary):
     1. FB_DEFINITION 내부 스킵
     2. ADDRESS 토큰 근처만 인정
     3. element_type 맥락 필터 (CONTACT_POS_* only)
+    B.5.3: DOTALL 플래그로 sub_type/func_id=0x0A variant 포착 (TOF func_id=10, MOVE_WORD variant).
     """
     tokens = []
 
     # S2: 1차 스캔 (기본 패턴)
     for name, pattern, group_meanings in TOKEN_PATTERNS:
-        for m in re.finditer(pattern, binary):
+        for m in re.finditer(pattern, binary, re.DOTALL):
             t = {'type': name, 'pos': m.start(), 'length': m.end() - m.start()}
             if group_meanings and m.groups():
                 for i, meaning in enumerate(group_meanings):

@@ -2,14 +2,14 @@
   "source": "docs/0423_PLC로부터열기.pcapng",
   "summary": {
     "response_count": 244,
-    "total_tokens": 167,
+    "total_tokens": 174,
     "token_type_counts": {
       "INSTR_NC_MOD": 39,
       "ADDRESS": 31,
-      "FB_BINDING": 28,
+      "FB_BINDING": 30,
       "FX_FLAG": 22,
-      "FB_END": 16,
-      "FB_DEFINITION": 15,
+      "FB_DEFINITION": 18,
+      "FB_END": 18,
       "CONTACT_POS_A": 5,
       "VAR_IN_ANCHOR": 4,
       "VAR_OUT_ANCHOR": 3,
@@ -17,6 +17,7 @@
       "CONTACT_POS_C": 2
     },
     "function_id_counts": {
+      "10": 1,
       "19": 1,
       "20": 1,
       "21": 1,
@@ -26,7 +27,7 @@
       "72": 1,
       "99": 1,
       "110": 1,
-      "118": 1,
+      "118": 3,
       "127": 1,
       "207": 1,
       "210": 1,
@@ -1083,7 +1084,7 @@
     },
     {
       "binary_len": 681,
-      "token_count": 17,
+      "token_count": 23,
       "tokens": [
         {
           "type": "INSTR_NC_MOD",
@@ -1133,6 +1134,22 @@
           "from_bzip2": true
         },
         {
+          "type": "FB_DEFINITION",
+          "pos": 217,
+          "length": 7,
+          "sub_type": 10,
+          "func_id": 118,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 236,
+          "length": 6,
+          "sub_type": 10,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
           "type": "VAR_IN_ANCHOR",
           "pos": 243,
           "length": 5,
@@ -1143,6 +1160,14 @@
           "type": "ADDRESS",
           "pos": 248,
           "addr": "%MW30",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 255,
+          "length": 6,
+          "sub_type": 10,
+          "offset": 8,
           "from_bzip2": true
         },
         {
@@ -1160,9 +1185,25 @@
           "from_bzip2": true
         },
         {
+          "type": "FB_DEFINITION",
+          "pos": 278,
+          "length": 7,
+          "sub_type": 10,
+          "func_id": 118,
+          "from_bzip2": true
+        },
+        {
           "type": "ADDRESS",
           "pos": 296,
           "addr": "%MW6000.1",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 313,
+          "length": 6,
+          "sub_type": 10,
+          "offset": 4,
           "from_bzip2": true
         },
         {
@@ -1179,6 +1220,14 @@
           "from_bzip2": true
         },
         {
+          "type": "FB_END",
+          "pos": 332,
+          "length": 6,
+          "sub_type": 10,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
           "type": "INSTR_NC_MOD",
           "pos": 380,
           "length": 1
@@ -1192,7 +1241,7 @@
     },
     {
       "binary_len": 675,
-      "token_count": 87,
+      "token_count": 88,
       "tokens": [
         {
           "type": "INSTR_NC_MOD",
@@ -1549,6 +1598,14 @@
           "pos": 848,
           "length": 5,
           "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 853,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 10,
           "from_bzip2": true
         },
         {

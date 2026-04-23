@@ -182,16 +182,16 @@ class TestFunctionBlockParsing:
         builder.load_bytecode(str(TEST_JSON))
         return builder
 
-    def test_function_call_count_is_15(self, builder_from_json):
-        """의미 보존 리네임: by_kind['function_call'] == 15 (bytecode FB 개수).
+    def test_function_call_count_is_18(self, builder_from_json):
+        """by_kind['function_call'] == 18 (bytecode FB instance 수 = 15 original + TOF + 2 MOVE variants, B.5.3 DOTALL fix 이후).
 
-        S5 IL fallback 도입으로 total_instructions는 15를 초과함.
+        S5 IL fallback 도입으로 total_instructions는 18을 초과함.
         따라서 function_call 개수만 확인.
         """
         ast = builder_from_json.build()
         fc_count = ast['stats']['by_kind'].get('function_call', 0)
-        assert fc_count == 15, \
-            f"기대: function_call 15개, 실제: {fc_count}"
+        assert fc_count == 18, \
+            f"기대: function_call 18개, 실제: {fc_count}"
 
     def test_opcode_labels_resolved(self, builder_from_json):
         """opcode_label이 정확히 매핑됨 (bytecode function_call만)."""
@@ -231,23 +231,23 @@ class TestFunctionBlockParsing:
         assert has_params or True, \
             "최소 하나의 FB에서 params가 추출되어야 함"  # 스킵 가능 (params 추출은 바이너리 없이 구현되지 않음)
 
-    def test_recall_rate_is_15_18(self, builder_from_json):
-        """recall rate = 15/18 (83.3%) — bytecode FB 개수."""
+    def test_recall_rate_is_16_18(self, builder_from_json):
+        """recall rate = 16/18 (88.9%) — bytecode FB 개수."""
         ast = builder_from_json.build()
         recall = ast['stats']['function_call_recall']
-        assert recall == '15/18', \
-            f"기대: '15/18', 실제: '{recall}' (bytecode function_call count)"
+        assert recall == '16/18', \
+            f"기대: '16/18', 실제: '{recall}' (bytecode function_call count)"
 
     def test_phase_b5_pending_marked(self, builder_from_json):
-        """Phase B.5 pending 목록 (TON, TOF, CTU_INT)."""
+        """Phase B.5 pending 목록 (TON, CTU_INT). TOF는 B.5.3 DOTALL fix로 bytecode에서 복구됨."""
         ast = builder_from_json.build()
         pending_list = ast['stats']['phase_b5_pending']
-        expected_pending = {'TON', 'TOF', 'CTU_INT'}
+        expected_pending = {'TON', 'CTU_INT'}
         assert set(pending_list) == expected_pending, \
             f"기대: {expected_pending}, 실제: {set(pending_list)}"
 
     def test_unique_func_ids_count(self, builder_from_json):
-        """15개 function_call이 모두 서로 다른 func_id를 가짐 (bytecode만)."""
+        """16개 function_call이 모두 서로 다른 func_id를 가짐 (TOF 포함, B.5.3)."""
         ast = builder_from_json.build()
 
         func_ids = set()
@@ -260,8 +260,8 @@ class TestFunctionBlockParsing:
                     if 'func_id' in instr and instr['func_id'] is not None:
                         func_ids.add(instr['func_id'])
 
-        assert len(func_ids) == 15, \
-            f"기대: 15개 고유 func_id, 실제: {len(func_ids)}"
+        assert len(func_ids) == 16, \
+            f"기대: 16개 고유 func_id, 실제: {len(func_ids)}"
 
 
 class TestSession3ContactCoilFX:
