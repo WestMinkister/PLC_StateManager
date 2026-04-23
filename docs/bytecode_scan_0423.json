@@ -2,8 +2,9 @@
   "source": "docs/0423_PLC로부터열기.pcapng",
   "summary": {
     "response_count": 244,
-    "total_tokens": 126,
+    "total_tokens": 167,
     "token_type_counts": {
+      "INSTR_NC_MOD": 39,
       "ADDRESS": 31,
       "FB_BINDING": 28,
       "FX_FLAG": 22,
@@ -12,6 +13,7 @@
       "CONTACT_POS_A": 5,
       "VAR_IN_ANCHOR": 4,
       "VAR_OUT_ANCHOR": 3,
+      "INSTR_LOAD": 2,
       "CONTACT_POS_C": 2
     },
     "function_id_counts": {
@@ -237,17 +239,74 @@
     },
     {
       "binary_len": 681,
-      "token_count": 0,
-      "tokens": []
+      "token_count": 6,
+      "tokens": [
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 307,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 450,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 527,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 529,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 653,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 667,
+          "length": 1
+        }
+      ]
     },
     {
       "binary_len": 681,
-      "token_count": 1,
+      "token_count": 6,
       "tokens": [
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 11,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 221,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 236,
+          "length": 1
+        },
+        {
+          "type": "INSTR_LOAD",
+          "pos": 320,
+          "length": 2,
+          "operand_type": 243
+        },
         {
           "type": "ADDRESS",
           "pos": 418,
           "addr": "%EN5"
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 553,
+          "length": 1
         }
       ]
     },
@@ -575,8 +634,23 @@
     },
     {
       "binary_len": 418,
-      "token_count": 1,
+      "token_count": 4,
       "tokens": [
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 216,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 306,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 336,
+          "length": 1
+        },
         {
           "type": "CONTACT_POS_A",
           "pos": 355,
@@ -785,24 +859,101 @@
     },
     {
       "binary_len": 681,
-      "token_count": 0,
-      "tokens": []
-    },
-    {
-      "binary_len": 681,
-      "token_count": 1,
+      "token_count": 7,
       "tokens": [
         {
-          "type": "ADDRESS",
-          "pos": 234,
-          "addr": "%EN5"
+          "type": "INSTR_NC_MOD",
+          "pos": 123,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 266,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 343,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 345,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 469,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 483,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 507,
+          "length": 1
         }
       ]
     },
     {
       "binary_len": 681,
-      "token_count": 16,
+      "token_count": 6,
       "tokens": [
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 37,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 52,
+          "length": 1
+        },
+        {
+          "type": "INSTR_LOAD",
+          "pos": 136,
+          "length": 2,
+          "operand_type": 243
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 234,
+          "addr": "%EN5"
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 369,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 664,
+          "length": 1
+        }
+      ]
+    },
+    {
+      "binary_len": 681,
+      "token_count": 22,
+      "tokens": [
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 38,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 432,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 444,
+          "length": 1
+        },
         {
           "type": "ADDRESS",
           "pos": 454,
@@ -814,6 +965,11 @@
           "pos": 476,
           "addr": "%MW3000.1",
           "from_bzip2": true
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 486,
+          "length": 1
         },
         {
           "type": "CONTACT_POS_C",
@@ -828,6 +984,11 @@
           "length": 5,
           "fx_id": 153,
           "from_bzip2": true
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 494,
+          "length": 1
         },
         {
           "type": "CONTACT_POS_A",
@@ -912,13 +1073,23 @@
           "sub_type": 16,
           "offset": 12,
           "from_bzip2": true
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 598,
+          "length": 1
         }
       ]
     },
     {
       "binary_len": 681,
-      "token_count": 14,
+      "token_count": 17,
       "tokens": [
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 12,
+          "length": 1
+        },
         {
           "type": "ADDRESS",
           "pos": 93,
@@ -1006,13 +1177,33 @@
           "pos": 325,
           "addr": "%MW30",
           "from_bzip2": true
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 380,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 655,
+          "length": 1
         }
       ]
     },
     {
       "binary_len": 675,
-      "token_count": 84,
+      "token_count": 87,
       "tokens": [
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 159,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 217,
+          "length": 1
+        },
         {
           "type": "FX_FLAG",
           "pos": 367,
@@ -1172,6 +1363,11 @@
           "sub_type": 4,
           "func_id": 99,
           "from_bzip2": true
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 589,
+          "length": 1
         },
         {
           "type": "ADDRESS",
@@ -1760,8 +1956,23 @@
     },
     {
       "binary_len": 418,
-      "token_count": 1,
+      "token_count": 4,
       "tokens": [
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 216,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 306,
+          "length": 1
+        },
+        {
+          "type": "INSTR_NC_MOD",
+          "pos": 336,
+          "length": 1
+        },
         {
           "type": "CONTACT_POS_A",
           "pos": 355,

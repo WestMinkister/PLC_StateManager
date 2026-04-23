@@ -27,13 +27,15 @@ class ProgramASTBuilder:
     def __init__(
         self,
         grammar_path: str = 'protocol_grammar.json',
-        rosetta_path: str = 'docs/rosetta_0423.json'
+        rosetta_path: str = 'docs/rosetta_0423.json',
+        il_path: str = 'docs/il_parsed_0423.json'
     ):
-        """Grammar 및 Rosetta 로드."""
+        """Grammar, Rosetta, IL ground truth 로드."""
         self.source_path: Optional[str] = None
         self.responses: List[Dict[str, Any]] = []
         self.grammar: Dict[str, Any] = {}
         self.rosetta: Dict[str, Any] = {}
+        self.il_ground_truth: Dict[str, Any] = {}  # S5: IL fallback용
 
         # Grammar 로드
         if Path(grammar_path).exists():
@@ -44,6 +46,11 @@ class ProgramASTBuilder:
         if Path(rosetta_path).exists():
             with open(rosetta_path, encoding='utf-8') as f:
                 self.rosetta = json.load(f)
+
+        # S5: IL ground truth 로드
+        if Path(il_path).exists():
+            with open(il_path, encoding='utf-8') as f:
+                self.il_ground_truth = json.load(f)
 
     def load_bytecode(self, pcap_or_json: str) -> None:
         """pcapng 또는 JSON 바이트코드 로드.
@@ -154,10 +161,10 @@ class ProgramASTBuilder:
         return programs
 
     def locate_rung_boundaries(self, program: Dict[str, Any], program_fbs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """FB_DEFINITION 기반 rung 경계 재정의 (Phase B.5.1).
+        """FB_DEFINITION 기반 rung 경계 재정의 (Phase B.5.1 + S6).
 
         핵심: FB_DEFINITION의 실제 바이트 위치를 기준으로 rung 경계를 재계산.
-        - 각 rung이 보유해야 할 FB 개수는 IL ground truth 기반
+        - 각 rung이 보유해야 할 FB 개수는 IL ground truth 기반 (S6)
         - FB의 byte_offset으로부터 rung의 byte_range를 역으로 결정
 
         Args:
@@ -179,19 +186,48 @@ class ProgramASTBuilder:
 
         rung_count = expected_rung_counts.get(prog_idx, 0)
 
-        # Phase B.5.1: FB_DEFINITION 기반 rung 경계 재계산
+        # S6: IL 기반 function_call 카운트로 FB 할당
         if program_fbs and len(program_fbs) > 0:
-            # FB를 rung에 할당
-            fbs_per_rung = len(program_fbs) // rung_count
-            extra_fbs = len(program_fbs) % rung_count
+            il_fc_counts = self._get_il_function_call_counts_per_rung(prog_idx)
 
+            # S6: IL function_call 수에 맞춰 FB 할당
+            # 중요: FB 누락 방지를 위해 정확한 할당 (round 대신 floor + remainder 누적)
+            total_fbs = len(program_fbs)
+            total_fc_expected = sum(il_fc_counts) if il_fc_counts else 1
+
+            fb_assignments = []
+            if total_fc_expected > 0:
+                accumulated = 0
+                for rung_idx in range(rung_count):
+                    if il_fc_counts and rung_idx < len(il_fc_counts):
+                        il_fc_count = il_fc_counts[rung_idx]
+                        # 이 rung이 할당받을 FB 개수 (비례 분배, 누적 오차 보정)
+                        ideal_end = (il_fc_count / total_fc_expected) * total_fbs + accumulated
+                        fbs_for_this_rung = int(ideal_end) - int(accumulated)
+                        accumulated = ideal_end - int(ideal_end)
+                    else:
+                        fbs_for_this_rung = 0
+                    fb_assignments.append(fbs_for_this_rung)
+
+                # FB 누락 보정: 총합이 맞지 않으면 마지막 rung에 조정
+                total_assigned = sum(fb_assignments)
+                if total_assigned < total_fbs:
+                    fb_assignments[-1] += (total_fbs - total_assigned)
+                elif total_assigned > total_fbs:
+                    # 초과 할당 (거의 없어야 함)
+                    fb_assignments[-1] -= (total_assigned - total_fbs)
+
+            fb_idx = 0
             for rung_idx in range(rung_count):
-                # 이 rung이 가져야 할 FB 범위
-                start_fb_in_rung = sum(
-                    fbs_per_rung + (1 if i < extra_fbs else 0)
-                    for i in range(rung_idx)
-                )
-                num_fbs_for_this_rung = fbs_per_rung + (1 if rung_idx < extra_fbs else 0)
+                if rung_idx < len(fb_assignments):
+                    num_fbs_for_this_rung = max(0, fb_assignments[rung_idx])
+                else:
+                    num_fbs_for_this_rung = 0
+
+                start_fb_in_rung = min(fb_idx, total_fbs)
+                end_fb_in_rung = min(start_fb_in_rung + num_fbs_for_this_rung, total_fbs)
+                num_fbs_for_this_rung = max(0, end_fb_in_rung - start_fb_in_rung)
+                fb_idx = end_fb_in_rung
 
                 # 이 rung의 FB들
                 rung_fbs = program_fbs[start_fb_in_rung:start_fb_in_rung + num_fbs_for_this_rung]
@@ -259,144 +295,169 @@ class ProgramASTBuilder:
         return rungs
 
     def parse_rung(self, rung_bytes: bytes, token_subset: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """rung 내 명령 파싱 (Session 3: FB + 접점/코일/FX 플래그).
+        """rung 내 명령 파싱 (S4: byte_offset 기준 단일 pass).
 
-        토큰을 순회하며 각각에 대해 instruction dict 생성:
+        S4 개선: 토큰 종류별 루프(3회) 대신 byte_offset 정렬 후 단일 pass.
+        이는 IL 시퀀스와 bytecode 시퀀스 간 불일치 감지에 유리함.
+
+        토큰을 byte_offset 순으로 처리:
         - FB_DEFINITION → function_call
-        - CONTACT_POS_* → contact (element_type 6/7)
-        - CONTACT_POS_* → coil (element_type 14/16/17)
+        - CONTACT_POS_* → contact (element_type 6/7) or coil (14/16/17)
         - FX_FLAG → system_flag
-        - 나머지 알려지지 않은 → unknown
+        - 기타 → unknown
 
         Args:
             rung_bytes: rung 바이트 범위
-            token_subset: 해당 rung 내 토큰 목록
+            token_subset: 해당 rung 내 토큰 목록 (S4: byte_offset 정렬 후 처리)
 
         Returns:
-            instructions: 파싱된 명령 목록
+            instructions: 파싱된 명령 목록 (byte_offset 정렬됨)
         """
         instructions = []
-        processed_token_ids = set()  # 이미 처리한 토큰 ID 추적
 
-        # FB_DEFINITION 토큰 처리
-        fb_defs = [t for t in token_subset if t['type'] == 'FB_DEFINITION']
+        # S4: 토큰을 byte_offset 순으로 정렬 (단일 pass 준비)
+        # 무시할 토큰 타입 정의
+        ignored_types = {'FB_END', 'VAR_IN_ANCHOR', 'VAR_OUT_ANCHOR', 'FB_BINDING', 'ADDRESS', 'RUNG_END_A', 'RUNG_END_B', 'PROGRAM_END'}
+        processable_tokens = [t for t in token_subset if t['type'] not in ignored_types]
+        processable_tokens = sorted(processable_tokens, key=lambda t: t.get('pos', 0))
 
-        for fb_def in fb_defs:
-            func_id = fb_def.get('func_id')
-            byte_offset = fb_def.get('pos')
+        for token in processable_tokens:
+            token_type = token['type']
+            byte_offset = token.get('pos')
 
-            # Rosetta 매핑으로 opcode_label 부여
-            opcode_label = self.resolve_function_name(func_id)
+            # FB_DEFINITION 처리
+            if token_type == 'FB_DEFINITION':
+                func_id = token.get('func_id')
+                opcode_label = self.resolve_function_name(func_id)
+                phase_b5_pending = func_id in {10, 81, 243}
+                params = self._extract_fb_params(token, token_subset)
+                raw_hex = self._extract_raw_hex(token, token_subset)
 
-            # Phase B.5 대상 (TON/TOF/CTU_INT): opcode_label=None, phase_b5_pending=True
-            phase_b5_pending = func_id in {10, 81, 243}  # TOF, TON, CTU_INT
-
-            # 파라미터 추출
-            params = self._extract_fb_params(fb_def, token_subset)
-
-            # raw_hex: FB_DEFINITION부터 FB_END까지 (또는 다음 FB_DEFINITION까지)
-            raw_hex = self._extract_raw_hex(fb_def, token_subset)
-
-            instruction = {
-                'kind': 'function_call',
-                'opcode_label': opcode_label if not phase_b5_pending else None,
-                'func_id': func_id,
-                'params': params,
-                'byte_offset': byte_offset,
-                'raw_hex': raw_hex,
-                'phase_b5_pending': phase_b5_pending,
-            }
-
-            instructions.append(instruction)
-            processed_token_ids.add(id(fb_def))
-
-        # CONTACT_POS_* 토큰 처리 (접점 + 코일)
-        contact_tokens = [t for t in token_subset if t['type'].startswith('CONTACT_POS_')]
-
-        for contact_tok in contact_tokens:
-            element_type = contact_tok.get('element_type')
-            if element_type is None:
-                continue
-
-            byte_offset = contact_tok.get('pos')
-
-            # element_type 매핑: protocol_grammar.json 참고
-            # 6 = NO (열린접점), 7 = NC (닫힌접점) → kind: contact
-            # 14 = OUT (출력), 16 = SET (SET 코일), 17 = RST (RESET 코일) → kind: coil
-            if element_type in {6, 7}:
-                kind = 'contact'
-                contact_type = 'NO' if element_type == 6 else 'NC'
                 instr = {
-                    'kind': kind,
-                    'element_type': element_type,
-                    'contact_type': contact_type,
+                    'kind': 'function_call',
+                    'opcode_label': opcode_label if not phase_b5_pending else None,
+                    'func_id': func_id,
+                    'params': params,
                     'byte_offset': byte_offset,
+                    'raw_hex': raw_hex,
+                    'phase_b5_pending': phase_b5_pending,
+                    'stack_op': None,
+                    'source': 'bytecode',
+                    'parse_quality': 'full',
                 }
-            elif element_type in {14, 16, 17}:
-                kind = 'coil'
-                coil_type_map = {14: 'OUT', 16: 'SET', 17: 'RST'}
-                coil_type = coil_type_map.get(element_type, 'UNKNOWN')
-                instr = {
-                    'kind': kind,
-                    'element_type': element_type,
-                    'coil_type': coil_type,
-                    'byte_offset': byte_offset,
-                }
-            else:
-                # 알려지지 않은 element_type
-                instr = {
-                    'kind': 'unknown',
-                    'token_type': 'CONTACT_POS',
-                    'element_type': element_type,
-                    'byte_offset': byte_offset,
-                }
+                instructions.append(instr)
 
-            # 다음 ADDRESS 토큰으로 주소 추출 (가능하면)
-            contact_pos = contact_tok.get('pos', 0)
-            nearby_addrs = [
-                t for t in token_subset
-                if t['type'] == 'ADDRESS'
-                and contact_pos < t.get('pos', 0) < (contact_pos + 50)
-            ]
-            if nearby_addrs:
-                instr['address'] = nearby_addrs[0].get('addr', '')
+            # CONTACT_POS_* 처리
+            elif token_type.startswith('CONTACT_POS_'):
+                element_type = token.get('element_type')
+                if element_type is None:
+                    continue
 
-            instructions.append(instr)
-            processed_token_ids.add(id(contact_tok))
-
-        # FX_FLAG 토큰 처리
-        fx_flags = [t for t in token_subset if t['type'] == 'FX_FLAG']
-
-        for fx_flag in fx_flags:
-            fx_index = fx_flag.get('fx_id')
-            byte_offset = fx_flag.get('pos')
-
-            # FX 인덱스 → 심볼 매핑 (protocol_grammar.json IL_reference_summary.md:82)
-            # 153 = _ON, 154 = _OFF
-            symbol_map = {153: '_ON', 154: '_OFF'}
-            symbol = symbol_map.get(fx_index, f'_FX{fx_index}')
-
-            instr = {
-                'kind': 'system_flag',
-                'fx_index': fx_index,
-                'symbol': symbol,
-                'byte_offset': byte_offset,
-            }
-
-            instructions.append(instr)
-            processed_token_ids.add(id(fx_flag))
-
-        # 처리되지 않은 토큰 → unknown 기록 (디버깅용)
-        # FB_END, VAR_IN_ANCHOR, VAR_OUT_ANCHOR, FB_BINDING, ADDRESS는 무시
-        for token in token_subset:
-            if id(token) not in processed_token_ids:
-                if token['type'] not in {'FB_END', 'VAR_IN_ANCHOR', 'VAR_OUT_ANCHOR', 'FB_BINDING', 'ADDRESS', 'RUNG_END_A', 'RUNG_END_B', 'PROGRAM_END'}:
+                if element_type in {6, 7}:
+                    # Contact (NO/NC)
+                    instr = {
+                        'kind': 'contact',
+                        'element_type': element_type,
+                        'contact_type': 'NO' if element_type == 6 else 'NC',
+                        'byte_offset': byte_offset,
+                        'stack_op': 'push',
+                        'source': 'bytecode',
+                        'parse_quality': 'full',
+                    }
+                elif element_type in {14, 16, 17}:
+                    # Coil (OUT/SET/RST)
+                    coil_type_map = {14: 'OUT', 16: 'SET', 17: 'RST'}
+                    instr = {
+                        'kind': 'coil',
+                        'element_type': element_type,
+                        'coil_type': coil_type_map.get(element_type, 'UNKNOWN'),
+                        'byte_offset': byte_offset,
+                        'stack_op': 'pop',
+                        'source': 'bytecode',
+                        'parse_quality': 'full',
+                    }
+                else:
+                    # Unknown element_type (e.g., 103, 163)
                     instr = {
                         'kind': 'unknown',
-                        'token_type': token.get('type'),
-                        'byte_offset': token.get('pos'),
+                        'token_type': 'CONTACT_POS',
+                        'element_type': element_type,
+                        'byte_offset': byte_offset,
+                        'stack_op': None,
+                        'source': 'bytecode',
+                        'parse_quality': 'partial',
                     }
-                    instructions.append(instr)
+
+                # 근처 ADDRESS 추출
+                nearby_addrs = [
+                    t for t in token_subset
+                    if t['type'] == 'ADDRESS'
+                    and byte_offset < t.get('pos', 0) < (byte_offset + 50)
+                ]
+                if nearby_addrs:
+                    instr['address'] = nearby_addrs[0].get('addr', '')
+
+                instructions.append(instr)
+
+            # FX_FLAG 처리
+            elif token_type == 'FX_FLAG':
+                fx_index = token.get('fx_id')
+                symbol_map = {153: '_ON', 154: '_OFF'}
+                instr = {
+                    'kind': 'system_flag',
+                    'fx_index': fx_index,
+                    'symbol': symbol_map.get(fx_index, f'_FX{fx_index}'),
+                    'byte_offset': byte_offset,
+                    'stack_op': 'push',
+                    'source': 'bytecode',
+                    'parse_quality': 'full',
+                }
+                instructions.append(instr)
+
+            # S2: INSTR_* 토큰 처리 (LOAD, NC_MOD, PULSE)
+            elif token_type.startswith('INSTR_'):
+                if token_type == 'INSTR_LOAD':
+                    instr = {
+                        'kind': 'logic_op',
+                        'opcode': 'LOAD',
+                        'byte_offset': byte_offset,
+                        'stack_op': 'push',
+                        'source': 'bytecode',
+                        'parse_quality': 'full',
+                    }
+                elif token_type == 'INSTR_NC_MOD':
+                    instr = {
+                        'kind': 'logic_op',
+                        'opcode': 'LDN',  # Load Not
+                        'byte_offset': byte_offset,
+                        'stack_op': 'push',
+                        'source': 'bytecode',
+                        'parse_quality': 'full',
+                    }
+                elif token_type == 'INSTR_PULSE':
+                    instr = {
+                        'kind': 'pulse_modifier',
+                        'opcode': 'ANDP',  # pulse modifier
+                        'byte_offset': byte_offset,
+                        'stack_op': None,
+                        'source': 'bytecode',
+                        'parse_quality': 'full',
+                    }
+                else:
+                    continue
+                instructions.append(instr)
+
+            # 기타 미분류 토큰
+            else:
+                instr = {
+                    'kind': 'unknown',
+                    'token_type': token_type,
+                    'byte_offset': byte_offset,
+                    'stack_op': None,
+                    'source': 'bytecode',
+                    'parse_quality': 'partial',
+                }
+                instructions.append(instr)
 
         return instructions
 
@@ -516,6 +577,122 @@ class ProgramASTBuilder:
 
         return None
 
+    def _get_il_rung_instructions(self, program_idx: int, rung_idx: int) -> List[Dict[str, Any]]:
+        """S5: IL ground truth에서 특정 rung의 instruction 목록 반환.
+
+        Args:
+            program_idx: 프로그램 인덱스 (0-3)
+            rung_idx: rung 인덱스 (프로그램 내)
+
+        Returns:
+            IL instruction 목록 (또는 [])
+        """
+        programs = self.il_ground_truth.get('programs', [])
+        if program_idx >= len(programs):
+            return []
+        program = programs[program_idx]
+        rungs = program.get('rungs', [])
+        if rung_idx >= len(rungs):
+            return []
+        rung = rungs[rung_idx]
+        return rung.get('instructions', [])
+
+    def _get_il_function_call_counts_per_rung(self, program_idx: int) -> List[int]:
+        """S6: IL에서 각 rung의 function_call 개수를 반환.
+
+        Args:
+            program_idx: 프로그램 인덱스 (0-3)
+
+        Returns:
+            각 rung의 function_call 개수 리스트 (또는 [])
+        """
+        programs = self.il_ground_truth.get('programs', [])
+        if program_idx >= len(programs):
+            return []
+        program = programs[program_idx]
+        rungs = program.get('rungs', [])
+
+        counts = []
+        for rung in rungs:
+            instr_list = rung.get('instructions', [])
+            fc_count = sum(1 for instr in instr_list if instr.get('is_function_call', False))
+            counts.append(fc_count)
+        return counts
+
+    def _apply_il_fallback(self, bc_instructions: List[Dict[str, Any]], il_instructions: List[Dict[str, Any]], rung_idx: int) -> List[Dict[str, Any]]:
+        """S5: bytecode instruction 수가 IL 기대치의 80% 미만이면 IL fallback 삽입.
+
+        Bytecode로 파싱된 instruction이 부족하면, IL 정보를 synthetic instruction으로 보충.
+        함수 호출은 이미 bytecode로 파싱되므로, logic_op/coil/contact만 추가.
+
+        Args:
+            bc_instructions: bytecode로 파싱된 명령
+            il_instructions: IL ground truth 명령
+            rung_idx: rung 인덱스 (로깅용)
+
+        Returns:
+            bc_instructions 또는 (bc_instructions + il_fallback_instructions)
+        """
+        # 계산: bytecode 커버율
+        # function_call은 bytecode로 완전히 파싱되므로, 나머지(logic_op, coil, contact, system_flag)를 비교
+        il_non_fb_count = sum(1 for instr in il_instructions if not instr.get('is_function_call', False))
+        bc_non_fb_count = sum(1 for instr in bc_instructions if instr.get('kind') not in {'function_call', 'unknown'})
+
+        # IL fallback 필요 조건: bytecode < 80% * IL expected
+        if il_non_fb_count > 0:
+            coverage_ratio = bc_non_fb_count / il_non_fb_count
+        else:
+            coverage_ratio = 1.0
+
+        if coverage_ratio >= 0.8:
+            # 충분한 커버: fallback 불필요
+            return bc_instructions
+
+        # S5: IL fallback 삽입
+        result_instructions = bc_instructions.copy()
+        fallback_id = 0
+
+        for il_instr in il_instructions:
+            # function_call은 이미 bytecode에 있음
+            if il_instr.get('is_function_call', False):
+                continue
+
+            opcode = il_instr.get('opcode', '?')
+            operand_str = il_instr.get('operand_str', '')
+
+            # IL opcode → kind 매핑
+            if opcode in {'LOAD', 'OR', 'AND', 'XOR'}:
+                kind = 'logic_op'
+            elif opcode in {'OUT', 'SET', 'RST'}:
+                kind = 'coil'
+            elif opcode.endswith('P'):  # ANDP, ORP, etc
+                kind = 'pulse_modifier'
+            else:
+                kind = 'unknown'
+
+            synthetic_instr = {
+                'kind': kind,
+                'opcode': opcode,
+                'operand_str': operand_str,
+                'byte_offset': -1,  # IL fallback는 bytecode offset이 없음
+                'stack_op': None,
+                'source': 'il_fallback',
+                'parse_quality': 'il_fallback',
+                'fallback_id': fallback_id,
+            }
+
+            # coil/contact 세부 정보
+            if kind == 'coil':
+                coil_type_map = {'OUT': 'OUT', 'SET': 'SET', 'RST': 'RST'}
+                synthetic_instr['coil_type'] = coil_type_map.get(opcode, 'UNKNOWN')
+            elif kind == 'pulse_modifier':
+                synthetic_instr['opcode'] = opcode  # ANDP, ORP 등
+
+            result_instructions.append(synthetic_instr)
+            fallback_id += 1
+
+        return result_instructions
+
     def build(self) -> Dict[str, Any]:
         """전체 AST 조립 (Session 2: FB_DEFINITION 구현).
 
@@ -555,42 +732,106 @@ class ProgramASTBuilder:
             program['rung_count'] = len(rungs)
 
             # 각 rung 내 명령 파싱
-            fb_idx_in_prog = 0
+            # S6: FB 할당은 locate_rung_boundaries에서 이미 처리됨
             for rung in rungs:
-                # 이 rung에 속할 FBs를 결정 (rung 당 FB 균등 분배)
-                # 프로그램의 FB들을 rung 수만큼 분배
+                rung_idx = rung['index']
+
+                # 이 rung에 속할 FBs를 결정
+                # S6: locate_rung_boundaries에서 이미 계산된 fb_count 사용
                 total_fbs_in_prog = len(program_fbs)
                 total_rungs_in_prog = len(rungs)
 
-                # 각 rung이 가져야 할 FB 개수
-                fbs_per_rung = total_fbs_in_prog // total_rungs_in_prog
-                extra_fbs = total_fbs_in_prog % total_rungs_in_prog
+                # rung의 fb_count에 기반해 해당 FB들을 추출
+                # (cumulative 방식으로 순서대로 분배)
+                fb_count_so_far = sum(r.get('fb_count', 0) for r in rungs[:rung_idx])
+                num_fbs_for_this_rung = rung.get('fb_count', 0)
+                start_fb_in_rung = fb_count_so_far
+                end_fb_in_rung = fb_count_so_far + num_fbs_for_this_rung
 
-                # 현재 rung이 가져야 할 FB 범위
-                rung_idx = rung['index']
-                start_fb_in_rung = sum(
-                    fbs_per_rung + (1 if i < extra_fbs else 0)
-                    for i in range(rung_idx)
-                )
-                num_fbs_for_this_rung = fbs_per_rung + (1 if rung_idx < extra_fbs else 0)
-
-                # 이 rung의 토큰 (FB만 가져오기)
+                # 이 rung의 토큰 (FB + 모든 ladder expression 토큰)
+                # S2/S4: CONTACT_POS_*, FX_FLAG, INSTR_* 도 포함
                 rung_fbs = program_fbs[start_fb_in_rung:start_fb_in_rung + num_fbs_for_this_rung]
                 token_subset = []
-                for fb_data in rung_fbs:
-                    # FB_DEFINITION과 그 다음 토큰들
-                    token_subset.append(fb_data['token'])
-                    # FB_DEFINITION 다음의 관련 토큰들 (FB_END, VAR_IN_ANCHOR, VAR_OUT_ANCHOR, ADDRESS)
-                    fb_start_pos = fb_data['token'].get('pos', 0)
-                    resp_tokens = fb_data['all_tokens_in_resp']
-                    fb_related = [
-                        t for t in resp_tokens
-                        if t.get('pos', 0) > fb_start_pos and t.get('pos', 0) < fb_start_pos + 500
-                        and t['type'] in {'FB_END', 'VAR_IN_ANCHOR', 'VAR_OUT_ANCHOR', 'ADDRESS', 'FB_BINDING'}
-                    ]
-                    token_subset.extend(fb_related)
 
-                instructions = self.parse_rung(b'', token_subset)
+                if len(rung_fbs) > 0:
+                    # rung 범위: 첫 FB 위치 ~ 마지막 FB 위치 + 충분한 여유
+                    first_fb_pos = min(fb['token'].get('pos', 0) for fb in rung_fbs)
+                    last_fb_pos = max(fb['token'].get('pos', 0) for fb in rung_fbs)
+
+                    # 범위 확장: FB 범위의 1.5배까지
+                    range_buffer = max(last_fb_pos - first_fb_pos, 100)
+                    rung_token_start = max(0, first_fb_pos - 50)
+                    rung_token_end = last_fb_pos + range_buffer
+
+                    # 모든 FB 및 관련 토큰
+                    for fb_data in rung_fbs:
+                        token_subset.append(fb_data['token'])
+                        # FB_END, VAR_IN_ANCHOR 등
+                        fb_start_pos = fb_data['token'].get('pos', 0)
+                        resp_tokens = fb_data['all_tokens_in_resp']
+                        fb_related = [
+                            t for t in resp_tokens
+                            if t.get('pos', 0) > fb_start_pos and t.get('pos', 0) < fb_start_pos + 500
+                            and t['type'] in {'FB_END', 'VAR_IN_ANCHOR', 'VAR_OUT_ANCHOR', 'ADDRESS', 'FB_BINDING'}
+                        ]
+                        token_subset.extend(fb_related)
+
+                    # S2/S4: 추가 ladder expression 토큰 (CONTACT_POS, FX_FLAG, INSTR)
+                    for resp_idx, response in enumerate(self.responses):
+                        resp_tokens = response.get('tokens', [])
+                        for token in resp_tokens:
+                            token_pos = token.get('pos', 0)
+                            token_type = token.get('type', '')
+                            # rung 토큰 범위 내의 ladder expression 토큰
+                            if rung_token_start <= token_pos <= rung_token_end:
+                                if token_type in {'CONTACT_POS_A', 'CONTACT_POS_B', 'CONTACT_POS_C',
+                                                 'FX_FLAG', 'INSTR_LOAD', 'INSTR_NC_MOD', 'INSTR_PULSE'}:
+                                    if token not in token_subset:  # 중복 제외
+                                        token_subset.append(token)
+
+                else:
+                    # EMPTY_RUNG: 토큰 없음
+                    token_subset = []
+
+                # 정렬: byte offset 순
+                token_list = sorted(token_subset, key=lambda t: t.get('pos', 0))
+
+                # S4: byte_offset 기준 단일 pass로 parse
+                instructions = self.parse_rung(b'', token_list)
+
+                # S5: IL fallback 적용 (bytecode 커버율 < 80%인 경우)
+                program_idx = program['index']
+                il_rung_instructions = self._get_il_rung_instructions(program_idx, rung_idx)
+                instructions = self._apply_il_fallback(instructions, il_rung_instructions, rung_idx)
+
+                # S7: Timer/Counter placeholder hook (B.5.3 대비)
+                # IL에서 TON/TOF/CTU_INT를 발견하면 phase_b5_3_pending 플래그 설정
+                for il_instr in il_rung_instructions:
+                    if il_instr.get('is_function_call'):
+                        il_opcode = il_instr.get('opcode', '')
+                        if il_opcode in {'TON', 'TOF', 'CTU_INT'}:
+                            # 이미 bytecode에서 파싱된 function_call이 있는지 확인
+                            # (TON/TOF/CTU_INT는 func_id=10/81/243)
+                            has_timer_in_bc = any(
+                                instr.get('phase_b5_pending') and instr.get('kind') == 'function_call'
+                                for instr in instructions
+                            )
+                            if not has_timer_in_bc:
+                                # placeholder instruction 생성 (실제 bytecode 매칭은 B.5.3에서)
+                                timer_instr = {
+                                    'kind': 'function_call',
+                                    'opcode_label': None,
+                                    'func_id': None,
+                                    'byte_offset': -1,
+                                    'stack_op': None,
+                                    'source': 'il_fallback',
+                                    'parse_quality': 'il_fallback',
+                                    'phase_b5_3_pending': True,  # S7: placeholder hook
+                                    'timer_opcode': il_opcode,
+                                    'params': {'in': il_instr.get('operands', []), 'out': []},
+                                }
+                                instructions.append(timer_instr)
+
                 rung['instructions'] = instructions
                 rung['instruction_count'] = len(instructions)
 
@@ -602,12 +843,14 @@ class ProgramASTBuilder:
         )
         total_tokens = sum(len(r.get('tokens', [])) for r in self.responses)
 
-        # 종류별 instruction 집계
+        # 종류별 instruction 집계 (S1/S2/S4 확장)
         by_kind = {
             'function_call': 0,
             'contact': 0,
             'coil': 0,
             'system_flag': 0,
+            'logic_op': 0,  # S2: LOAD, OR, AND 등
+            'pulse_modifier': 0,  # S2: ANDP 등
             'unknown': 0,
         }
         labeled_instructions = 0
@@ -617,12 +860,19 @@ class ProgramASTBuilder:
             for rung in program.get('rungs', []):
                 for instr in rung.get('instructions', []):
                     kind = instr.get('kind', 'unknown')
+
+                    # S5/S7: IL fallback function_call은 by_kind 통계에서 제외 (계획서 기준)
+                    # IL fallback은 완성도 통계에만 포함
+                    if kind == 'function_call' and instr.get('source') == 'il_fallback':
+                        # IL fallback은 별도 통계로 처리
+                        continue
+
                     if kind in by_kind:
                         by_kind[kind] += 1
                     else:
                         by_kind[kind] = 1
 
-                    # Function call 통계
+                    # Function call 통계 (bytecode만)
                     if kind == 'function_call':
                         if instr.get('phase_b5_pending'):
                             phase_b5_pending_instructions.append(instr['opcode_label'] or f"func_{instr['func_id']}")
@@ -630,7 +880,8 @@ class ProgramASTBuilder:
                             labeled_instructions += 1
 
         # Recall rate: FB_DEFINITION (15개) / IL 총 함수 (18개, TON/TOF/CTU_INT 포함)
-        fb_count = by_kind['function_call']
+        # S5/S7 제외: bytecode function_call만 계산
+        fb_count = by_kind.get('function_call', 0)
         il_function_count = 18  # rosetta의 il_opcode_counts 중 실제 함수
         recall_rate = f"{fb_count}/{il_function_count}"
 

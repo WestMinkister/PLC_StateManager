@@ -27,6 +27,84 @@
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 469,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 483,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 486,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "contact",
+              "element_type": 6,
+              "contact_type": "NO",
+              "byte_offset": 489,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full",
+              "address": "%MW1000"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 153,
+              "symbol": "_ON",
+              "byte_offset": 493,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 494,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 8,
+              "byte_offset": 501,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial",
+              "address": "%MW1000"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 504,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 507,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
               "kind": "function_call",
               "opcode_label": "ADD",
               "func_id": 71,
@@ -44,10 +122,62 @@
               },
               "byte_offset": 519,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 527,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 529,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 553,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 577,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 589,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 598,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
             }
           ],
-          "instruction_count": 1,
+          "instruction_count": 16,
           "raw_bytes_len": 150,
           "fb_count": 1
         }
@@ -75,11 +205,150 @@
         {
           "index": 0,
           "byte_range": [
-            322,
-            472
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "%IW5000.12",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "OR",
+              "operand_str": "%IW5000.13",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1
+            },
+            {
+              "kind": "coil",
+              "opcode": "RST",
+              "operand_str": "%MW6000.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 2,
+              "coil_type": "RST"
+            }
+          ],
+          "instruction_count": 3,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 1,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "%IW5000.15",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "OR",
+              "operand_str": "%IW5000.14",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1
+            },
+            {
+              "kind": "coil",
+              "opcode": "SET",
+              "operand_str": "%MW6000.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 2,
+              "coil_type": "SET"
+            }
+          ],
+          "instruction_count": 3,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 2,
+          "byte_range": [
+            340,
+            500
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 336,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 343,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 345,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 163,
+              "byte_offset": 355,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial",
+              "address": "%MW1002"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 367,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 369,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "MOVE",
@@ -90,21 +359,36 @@
               },
               "byte_offset": 372,
               "raw_hex": "",
-              "phase_b5_pending": false
-            }
-          ],
-          "instruction_count": 1,
-          "raw_bytes_len": 150,
-          "fb_count": 1
-        },
-        {
-          "index": 1,
-          "byte_range": [
-            386,
-            536
-          ],
-          "boundary_marker": "FB_DEFINITION_BASED",
-          "instructions": [
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 380,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 431,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 432,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "SUB",
@@ -115,21 +399,212 @@
               },
               "byte_offset": 436,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 444,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 450,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 469,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 483,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 486,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "contact",
+              "element_type": 6,
+              "contact_type": "NO",
+              "byte_offset": 489,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full",
+              "address": "%MW1002"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 153,
+              "symbol": "_ON",
+              "byte_offset": 493,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 494,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 8,
+              "byte_offset": 501,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial",
+              "address": "%MW1002"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 504,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 507,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 527,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 529,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
             }
           ],
-          "instruction_count": 1,
-          "raw_bytes_len": 150,
-          "fb_count": 1
+          "instruction_count": 24,
+          "raw_bytes_len": 160,
+          "fb_count": 2
         },
         {
-          "index": 2,
+          "index": 3,
           "byte_range": [
-            459,
-            609
+            473,
+            654
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 469,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 483,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 486,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "contact",
+              "element_type": 6,
+              "contact_type": "NO",
+              "byte_offset": 489,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full",
+              "address": "%MW1002"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 153,
+              "symbol": "_ON",
+              "byte_offset": 493,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 494,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 8,
+              "byte_offset": 501,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial",
+              "address": "%MW1002"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 504,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 507,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "MUL",
@@ -140,21 +615,44 @@
               },
               "byte_offset": 509,
               "raw_hex": "",
-              "phase_b5_pending": false
-            }
-          ],
-          "instruction_count": 1,
-          "raw_bytes_len": 150,
-          "fb_count": 1
-        },
-        {
-          "index": 3,
-          "byte_range": [
-            532,
-            682
-          ],
-          "boundary_marker": "FB_DEFINITION_BASED",
-          "instructions": [
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 527,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 529,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 553,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 577,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "DIV",
@@ -165,12 +663,72 @@
               },
               "byte_offset": 582,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 589,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 598,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 650,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 653,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 655,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 664,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 667,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
             }
           ],
-          "instruction_count": 1,
-          "raw_bytes_len": 150,
-          "fb_count": 1
+          "instruction_count": 22,
+          "raw_bytes_len": 181,
+          "fb_count": 2
         }
       ]
     },
@@ -196,11 +754,62 @@
         {
           "index": 0,
           "byte_range": [
-            605,
-            755
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "%IW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            },
+            {
+              "kind": "coil",
+              "opcode": "SET",
+              "operand_str": "%MW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1,
+              "coil_type": "SET"
+            }
+          ],
+          "instruction_count": 2,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 1,
+          "byte_range": [
+            619,
+            800
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 650,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 653,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "AND",
@@ -211,21 +820,44 @@
               },
               "byte_offset": 655,
               "raw_hex": "",
-              "phase_b5_pending": false
-            }
-          ],
-          "instruction_count": 1,
-          "raw_bytes_len": 150,
-          "fb_count": 1
-        },
-        {
-          "index": 1,
-          "byte_range": [
-            678,
-            828
-          ],
-          "boundary_marker": "FB_DEFINITION_BASED",
-          "instructions": [
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 655,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 664,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "LDN",
+              "byte_offset": 667,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 723,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "OR",
@@ -236,21 +868,96 @@
               },
               "byte_offset": 728,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 796,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "function_call",
+              "opcode_label": null,
+              "func_id": null,
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "phase_b5_3_pending": true,
+              "timer_opcode": "TON",
+              "params": {
+                "in": [
+                  "INST\t^LINEIN",
+                  "T#3s",
+                  "^LINEOUT",
+                  "^EMPTY"
+                ],
+                "out": []
+              }
             }
           ],
-          "instruction_count": 1,
-          "raw_bytes_len": 150,
-          "fb_count": 1
+          "instruction_count": 10,
+          "raw_bytes_len": 181,
+          "fb_count": 2
         },
         {
           "index": 2,
           "byte_range": [
-            751,
-            901
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "%MW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            },
+            {
+              "kind": "coil",
+              "opcode": "OUT",
+              "operand_str": "%QW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1,
+              "coil_type": "OUT"
+            }
+          ],
+          "instruction_count": 2,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 3,
+          "byte_range": [
+            748,
+            1014
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 796,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "NOT",
@@ -261,21 +968,29 @@
               },
               "byte_offset": 801,
               "raw_hex": "",
-              "phase_b5_pending": false
-            }
-          ],
-          "instruction_count": 1,
-          "raw_bytes_len": 150,
-          "fb_count": 1
-        },
-        {
-          "index": 3,
-          "byte_range": [
-            858,
-            1008
-          ],
-          "boundary_marker": "FB_DEFINITION_BASED",
-          "instructions": [
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 848,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 903,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "TP",
@@ -286,12 +1001,54 @@
               },
               "byte_offset": 908,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 958,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 103,
+              "byte_offset": 982,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial"
+            },
+            {
+              "kind": "function_call",
+              "opcode_label": null,
+              "func_id": null,
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "phase_b5_3_pending": true,
+              "timer_opcode": "CTU_INT",
+              "params": {
+                "in": [
+                  "INST1\t^LINEIN",
+                  "1",
+                  "%MW1002",
+                  "^LINEOUT",
+                  "%MW1000"
+                ],
+                "out": []
+              }
             }
           ],
-          "instruction_count": 1,
-          "raw_bytes_len": 150,
-          "fb_count": 1
+          "instruction_count": 8,
+          "raw_bytes_len": 266,
+          "fb_count": 2
         }
       ]
     },
@@ -319,11 +1076,66 @@
         {
           "index": 0,
           "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 1,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 2,
+          "byte_range": [
             913,
             1063
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 958,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "CTD_DINT",
@@ -334,21 +1146,74 @@
               },
               "byte_offset": 963,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 103,
+              "byte_offset": 982,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial"
             }
           ],
-          "instruction_count": 1,
+          "instruction_count": 3,
           "raw_bytes_len": 150,
           "fb_count": 1
         },
         {
-          "index": 1,
+          "index": 3,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 4,
           "byte_range": [
             933,
             1083
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 958,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 103,
+              "byte_offset": 982,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial"
+            },
             {
               "kind": "function_call",
               "opcode_label": "CTD_LINT",
@@ -359,21 +1224,88 @@
               },
               "byte_offset": 983,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
             }
           ],
-          "instruction_count": 1,
+          "instruction_count": 3,
           "raw_bytes_len": 150,
           "fb_count": 1
         },
         {
-          "index": 2,
+          "index": 5,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 6,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 7,
           "byte_range": [
             953,
             1103
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 958,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 103,
+              "byte_offset": 982,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial"
+            },
             {
               "kind": "function_call",
               "opcode_label": "CTD_UDINT",
@@ -384,21 +1316,76 @@
               },
               "byte_offset": 1003,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "function_call",
+              "opcode_label": null,
+              "func_id": null,
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "phase_b5_3_pending": true,
+              "timer_opcode": "TOF",
+              "params": {
+                "in": [
+                  "INST\t^LINEIN",
+                  "T#3s",
+                  "^EMPTY",
+                  "^EMPTY"
+                ],
+                "out": []
+              }
             }
           ],
-          "instruction_count": 1,
+          "instruction_count": 4,
           "raw_bytes_len": 150,
           "fb_count": 1
         },
         {
-          "index": 3,
+          "index": 8,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "EMPTY_RUNG",
+          "instructions": [
+            {
+              "kind": "logic_op",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "fb_count": 0
+        },
+        {
+          "index": 9,
           "byte_range": [
             1086,
             1236
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 1131,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "CTUD_DINT",
@@ -409,21 +1396,42 @@
               },
               "byte_offset": 1136,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 1228,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
             }
           ],
-          "instruction_count": 1,
+          "instruction_count": 3,
           "raw_bytes_len": 150,
           "fb_count": 1
         },
         {
-          "index": 4,
+          "index": 10,
           "byte_range": [
             1183,
             1333
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 1228,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
             {
               "kind": "function_call",
               "opcode_label": "RS",
@@ -434,21 +1442,51 @@
               },
               "byte_offset": 1233,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 103,
+              "byte_offset": 1252,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial"
             }
           ],
-          "instruction_count": 1,
+          "instruction_count": 3,
           "raw_bytes_len": 150,
           "fb_count": 1
         },
         {
-          "index": 5,
+          "index": 11,
           "byte_range": [
             1203,
             1353
           ],
           "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
+            {
+              "kind": "system_flag",
+              "fx_index": 154,
+              "symbol": "_OFF",
+              "byte_offset": 1228,
+              "stack_op": "push",
+              "source": "bytecode",
+              "parse_quality": "full"
+            },
+            {
+              "kind": "unknown",
+              "token_type": "CONTACT_POS",
+              "element_type": 103,
+              "byte_offset": 1252,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "partial"
+            },
             {
               "kind": "function_call",
               "opcode_label": "SR",
@@ -459,84 +1497,15 @@
               },
               "byte_offset": 1253,
               "raw_hex": "",
-              "phase_b5_pending": false
+              "phase_b5_pending": false,
+              "stack_op": null,
+              "source": "bytecode",
+              "parse_quality": "full"
             }
           ],
-          "instruction_count": 1,
+          "instruction_count": 3,
           "raw_bytes_len": 150,
           "fb_count": 1
-        },
-        {
-          "index": 6,
-          "byte_range": [
-            0,
-            0
-          ],
-          "boundary_marker": "EMPTY_RUNG",
-          "instructions": [],
-          "instruction_count": 0,
-          "raw_bytes_len": 0,
-          "fb_count": 0
-        },
-        {
-          "index": 7,
-          "byte_range": [
-            0,
-            0
-          ],
-          "boundary_marker": "EMPTY_RUNG",
-          "instructions": [],
-          "instruction_count": 0,
-          "raw_bytes_len": 0,
-          "fb_count": 0
-        },
-        {
-          "index": 8,
-          "byte_range": [
-            0,
-            0
-          ],
-          "boundary_marker": "EMPTY_RUNG",
-          "instructions": [],
-          "instruction_count": 0,
-          "raw_bytes_len": 0,
-          "fb_count": 0
-        },
-        {
-          "index": 9,
-          "byte_range": [
-            0,
-            0
-          ],
-          "boundary_marker": "EMPTY_RUNG",
-          "instructions": [],
-          "instruction_count": 0,
-          "raw_bytes_len": 0,
-          "fb_count": 0
-        },
-        {
-          "index": 10,
-          "byte_range": [
-            0,
-            0
-          ],
-          "boundary_marker": "EMPTY_RUNG",
-          "instructions": [],
-          "instruction_count": 0,
-          "raw_bytes_len": 0,
-          "fb_count": 0
-        },
-        {
-          "index": 11,
-          "byte_range": [
-            0,
-            0
-          ],
-          "boundary_marker": "EMPTY_RUNG",
-          "instructions": [],
-          "instruction_count": 0,
-          "raw_bytes_len": 0,
-          "fb_count": 0
         }
       ]
     }
@@ -544,13 +1513,15 @@
   "stats": {
     "total_programs": 4,
     "total_rungs": 21,
-    "total_instructions": 15,
+    "total_instructions": 115,
     "by_kind": {
       "function_call": 15,
-      "contact": 0,
-      "coil": 0,
-      "system_flag": 0,
-      "unknown": 0
+      "contact": 3,
+      "coil": 4,
+      "system_flag": 25,
+      "logic_op": 55,
+      "pulse_modifier": 0,
+      "unknown": 10
     },
     "function_calls_labeled": 15,
     "function_call_recall": "15/18",
@@ -560,9 +1531,9 @@
       "TOF",
       "CTU_INT"
     ],
-    "unknown_count": 0,
+    "unknown_count": 10,
     "response_count": 244,
-    "total_token_count": 126,
+    "total_token_count": 167,
     "rung_boundary_markers": [
       "RUNG_END_A",
       "RUNG_END_B"

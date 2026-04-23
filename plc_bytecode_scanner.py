@@ -37,7 +37,10 @@ TOKEN_PATTERNS = [
     ('RUNG_END_A',     rb'\x54\x98',                    ()),
     ('RUNG_END_B',     rb'\x54\xb0',                    ()),
     ('PROGRAM_END',    rb'\xfd\xff\x07\x4a',            ()),
-    # INSTR_LOAD는 `14 XX`인데 14가 너무 자주 나와 false positive 많음 — 별도 처리
+    # S2: Ladder Expression 토큰 (INSTR_LOAD, INSTR_NC_MOD, INSTR_PULSE) 재활성화
+    ('INSTR_LOAD',     rb'\x14(.)',                     ('operand_type',)),
+    ('INSTR_NC_MOD',   rb'\x8d',                        ()),
+    ('INSTR_PULSE',    rb'\x90\x00\xc0\x0f',            ()),
 ]
 
 # 주소는 별도 regex (ASCII 텍스트)
@@ -68,10 +71,48 @@ def decode_response_binary(payload):
         return None
 
 
+def _is_inside_fb_block(pos: int, fb_defs: list, fb_ends: list) -> bool:
+    """S2: pos가 FB_DEFINITION~FB_END 내부인지 확인 (false positive 필터 1)."""
+    for fb_def in fb_defs:
+        fb_start = fb_def['pos']
+        # 가장 가까운 FB_END 찾기
+        matching_ends = [e for e in fb_ends if e['pos'] > fb_start]
+        if matching_ends:
+            fb_end_pos = matching_ends[0]['pos'] + matching_ends[0].get('length', 7)
+            if fb_start < pos < fb_end_pos:
+                return True
+    return False
+
+
+def _has_nearby_address(pos: int, all_tokens: list, window_size: int = 100) -> bool:
+    """S2: pos 근처 window_size 바이트 내에 ADDRESS 토큰이 있는지 (false positive 필터 2)."""
+    for t in all_tokens:
+        if t['type'] == 'ADDRESS':
+            addr_pos = t.get('pos', 0)
+            if pos <= addr_pos <= pos + window_size:
+                return True
+    return False
+
+
+def _is_valid_element_type_context(element_type: int) -> bool:
+    """S2: element_type이 알려진 값인지 확인 (false positive 필터 3)."""
+    # S3에서 업데이트될 값들; 현재는 기본 + 확장 element_type
+    known_types = {6, 7, 14, 16, 17, 103, 163}  # NO, NC, OUT, SET, RST, + S3 신규
+    return element_type in known_types
+
+
 def scan_tokens(binary):
-    """주어진 바이너리에서 모든 알려진 문법 토큰을 위치와 함께 추출."""
+    """주어진 바이너리에서 모든 알려진 문법 토큰을 위치와 함께 추출.
+
+    S2: INSTR_LOAD, INSTR_NC_MOD, INSTR_PULSE 토큰 포함.
+    False positive 필터 3종 적용:
+    1. FB_DEFINITION 내부 스킵
+    2. ADDRESS 토큰 근처만 인정
+    3. element_type 맥락 필터 (CONTACT_POS_* only)
+    """
     tokens = []
 
+    # S2: 1차 스캔 (기본 패턴)
     for name, pattern, group_meanings in TOKEN_PATTERNS:
         for m in re.finditer(pattern, binary):
             t = {'type': name, 'pos': m.start(), 'length': m.end() - m.start()}
@@ -91,6 +132,37 @@ def scan_tokens(binary):
             'pos': m.start(),
             'addr': m.group().decode('ascii'),
         })
+
+    # S2: 2차 검증 — false positive 필터 적용 (INSTR_LOAD, INSTR_NC_MOD, INSTR_PULSE)
+    fb_defs = [t for t in tokens if t['type'] == 'FB_DEFINITION']
+    fb_ends = [t for t in tokens if t['type'] == 'FB_END']
+
+    instr_tokens = [t for t in tokens if t['type'].startswith('INSTR_')]
+    filtered_instr = []
+
+    for t in instr_tokens:
+        pos = t.get('pos', 0)
+
+        # 필터 1: FB_DEFINITION 내부 스킵
+        if _is_inside_fb_block(pos, fb_defs, fb_ends):
+            continue
+
+        # CONTACT_POS_*에 대해서만 필터 3 적용
+        if t['type'].startswith('CONTACT_POS_'):
+            element_type = t.get('element_type')
+            if element_type is not None and not _is_valid_element_type_context(element_type):
+                continue
+
+        # 필터 2 선택적: INSTR_LOAD는 nearby ADDRESS로 신뢰성 보강
+        if t['type'] == 'INSTR_LOAD':
+            if not _has_nearby_address(pos, tokens, window_size=100):
+                # ADDRESS 없으면 false positive일 가능성 높음 → 스킵
+                continue
+
+        filtered_instr.append(t)
+
+    # 필터링된 INSTR_* 토큰 추가
+    tokens = [t for t in tokens if not t['type'].startswith('INSTR_')] + filtered_instr
 
     # bzip2 블록 (BZh 해제 후 재스캔 — 중첩)
     pos = 0

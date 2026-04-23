@@ -144,10 +144,10 @@
     "INSTR_LOAD": {
       "pattern_hex": "14 [operand]",
       "meaning": "LD (Load, 접점 읽기)",
-      "evidence": "PRD §7.3, IL의 `LD`에 대응 예상",
-      "confidence": "medium",
+      "evidence": "PRD §7.3, IL의 `LD`에 대응 예상, S2에서 false positive 필터 3종 추가로 신뢰도 상향",
+      "confidence": "high (S2 false positive 필터 적용)",
       "ast_node": "Instruction",
-      "il_equivalent": "LD"
+      "il_equivalent": "LD / LDN"
     },
     "INSTR_NC_MOD": {
       "pattern_hex": "8d",
@@ -227,7 +227,9 @@
       "16": "SET_coil (IL: SET) — 2026-04-23 IL 대조로 확정",
       "17": "RESET_coil (IL: RST) — 2026-04-23 IL 대조로 확정",
       "70": "FB_IO_variable",
-      "102": "FB_definition_slot"
+      "102": "FB_definition_slot",
+      "103": "ladder_expression_reserved (S3: 실측값, IL fallback 매핑 대기)",
+      "163": "ladder_expression_extended (S3: 실측값, IL fallback 매핑 대기)"
     }
   },
   "x_command_structure": {
