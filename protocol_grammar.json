@@ -42,7 +42,9 @@
     "function_param_mapping_46_0d_13": 0.0,
     "udf_index_assignment": 0.0,
     "timer_counter_special_encoding": 0.0,
-    "total_estimate": 0.35
+    "total_estimate": 0.35,
+    "total_estimate_after_phase_b1_rosetta": 0.45,
+    "phase_b1_notes": "Rosetta 정렬로 FB_DEFINITION 문법 검증 + 15/18 함수 이름 매핑 확정. Timer/Counter 3개 특수 encoding 가설 확립. MOVE_WORD 다중 encoding 발견."
   },
   "grammar_tokens": {
     "FB_DEFINITION": {
@@ -169,26 +171,44 @@
     }
   },
   "name_labels_optional": {
-    "description": "Grammar 파싱에는 불필요. 디버그·표시용 인간 가독 레이블. IL 파일 확보 후 자동 확장 예정.",
-    "function_ids_observed": {
-      "10": "TOF",
-      "19": "RS",
-      "20": "AND",
-      "21": "OR",
-      "28": "SR",
-      "34": "TP",
-      "71": "ADD",
-      "72": "MUL",
-      "81": "TON",
-      "99": "DIV",
-      "110": "NOT",
-      "118": "MOVE",
-      "127": "SUB",
-      "207": "CTUD_DINT",
-      "210": "CTD_UDINT",
-      "212": "CTD_LINT",
-      "213": "CTD_DINT",
-      "243": "CTU_INT"
+    "description": "Grammar 파싱에는 불필요. 디버그·표시용 인간 가독 레이블.",
+    "rosetta_verified_2026_04_23": {
+      "method": "XML 정답지 + BC FB_DEFINITION 교차검증 (docs/rosetta_0423.json)",
+      "recall_percent": 83.3,
+      "confirmed_via_bc_fb_definition": {
+        "19": "RS",
+        "20": "AND2_WORD (XML: AND)",
+        "21": "OR2_WORD (XML: OR)",
+        "28": "SR",
+        "34": "TP",
+        "71": "ADD2_INT (XML: ADD)",
+        "72": "MUL2_INT (XML: MUL)",
+        "99": "DIV_INT (XML: DIV)",
+        "110": "NOT_WORD (XML: NOT)",
+        "118": "MOVE_WORD (XML: MOVE) — coverage 1/3 — 일부는 다른 encoding",
+        "127": "SUB_INT (XML: SUB)",
+        "207": "CTUD_DINT",
+        "210": "CTD_UDINT",
+        "212": "CTD_LINT",
+        "213": "CTD_DINT"
+      },
+      "missing_from_bc_special_encoding": {
+        "10": "TOF (XML INDEX)",
+        "81": "TON (XML INDEX)",
+        "243": "CTU_INT (XML INDEX)"
+      },
+      "notes": [
+        "BC는 INDEX 오름차순으로 저장됨 (IL 프로그램 순서와 다름).",
+        "3개 Timer/Counter(TOF/TON/CTU_INT)는 FB_DEFINITION 토큰에 나타나지 않음 — Phase B.5 특수 encoding 규명 대상.",
+        "MOVE_WORD는 IL에 3회 있으나 BC FB_DEFINITION은 1회만 — NewProgram2의 MOVE 2개는 다른 encoding으로 저장될 가능성."
+      ]
+    },
+    "function_ids_observed_legacy": {
+      "note": "rosetta_verified_2026_04_23 이후 정리됨. 참고용으로만 유지.",
+      "10": "TOF", "19": "RS", "20": "AND", "21": "OR", "28": "SR", "34": "TP",
+      "71": "ADD", "72": "MUL", "81": "TON", "99": "DIV", "110": "NOT",
+      "118": "MOVE", "127": "SUB", "207": "CTUD_DINT", "210": "CTD_UDINT",
+      "212": "CTD_LINT", "213": "CTD_DINT", "243": "CTU_INT"
     },
     "fx_index_observed": {
       "153": "_ON",

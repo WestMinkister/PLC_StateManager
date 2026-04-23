@@ -1,0 +1,280 @@
+{
+  "il_total_calls": 20,
+  "bc_total_fb_defs": 15,
+  "il_opcode_counts": {
+    "MOVE_WORD": 3,
+    "ADD2_INT": 1,
+    "TON": 1,
+    "CTU_INT": 1,
+    "SUB_INT": 1,
+    "MUL2_INT": 1,
+    "DIV_INT": 1,
+    "AND2_WORD": 1,
+    "OR2_WORD": 1,
+    "NOT_WORD": 1,
+    "TOF": 1,
+    "TP": 1,
+    "CTD_DINT": 1,
+    "CTD_LINT": 1,
+    "CTD_UDINT": 1,
+    "CTUD_DINT": 1,
+    "RS": 1,
+    "SR": 1
+  },
+  "bc_func_id_counts": {
+    "19": 1,
+    "20": 1,
+    "21": 1,
+    "28": 1,
+    "34": 1,
+    "71": 1,
+    "72": 1,
+    "99": 1,
+    "110": 1,
+    "118": 1,
+    "127": 1,
+    "207": 1,
+    "210": 1,
+    "212": 1,
+    "213": 1
+  },
+  "xml_mapping": {
+    "ADD": 71,
+    "AND": 20,
+    "CTD_DINT": 213,
+    "CTD_LINT": 212,
+    "CTD_UDINT": 210,
+    "CTUD_DINT": 207,
+    "CTU_INT": 243,
+    "DIV": 99,
+    "MOVE": 118,
+    "MUL": 72,
+    "NOT": 110,
+    "OR": 21,
+    "RS": 19,
+    "SR": 28,
+    "SUB": 127,
+    "TOF": 10,
+    "TON": 81,
+    "TP": 34
+  },
+  "il_to_xml_mapping": {
+    "ADD2_INT": {
+      "xml_name": "ADD",
+      "xml_index": 71,
+      "match_type": "prefix"
+    },
+    "AND2_WORD": {
+      "xml_name": "AND",
+      "xml_index": 20,
+      "match_type": "prefix"
+    },
+    "CTD_DINT": {
+      "xml_name": "CTD_DINT",
+      "xml_index": 213,
+      "match_type": "exact"
+    },
+    "CTD_LINT": {
+      "xml_name": "CTD_LINT",
+      "xml_index": 212,
+      "match_type": "exact"
+    },
+    "CTD_UDINT": {
+      "xml_name": "CTD_UDINT",
+      "xml_index": 210,
+      "match_type": "exact"
+    },
+    "CTUD_DINT": {
+      "xml_name": "CTUD_DINT",
+      "xml_index": 207,
+      "match_type": "exact"
+    },
+    "CTU_INT": {
+      "xml_name": "CTU_INT",
+      "xml_index": 243,
+      "match_type": "exact"
+    },
+    "DIV_INT": {
+      "xml_name": "DIV",
+      "xml_index": 99,
+      "match_type": "prefix"
+    },
+    "MOVE_WORD": {
+      "xml_name": "MOVE",
+      "xml_index": 118,
+      "match_type": "prefix"
+    },
+    "MUL2_INT": {
+      "xml_name": "MUL",
+      "xml_index": 72,
+      "match_type": "prefix"
+    },
+    "NOT_WORD": {
+      "xml_name": "NOT",
+      "xml_index": 110,
+      "match_type": "prefix"
+    },
+    "OR2_WORD": {
+      "xml_name": "OR",
+      "xml_index": 21,
+      "match_type": "prefix"
+    },
+    "RS": {
+      "xml_name": "RS",
+      "xml_index": 19,
+      "match_type": "exact"
+    },
+    "SR": {
+      "xml_name": "SR",
+      "xml_index": 28,
+      "match_type": "exact"
+    },
+    "SUB_INT": {
+      "xml_name": "SUB",
+      "xml_index": 127,
+      "match_type": "prefix"
+    },
+    "TOF": {
+      "xml_name": "TOF",
+      "xml_index": 10,
+      "match_type": "exact"
+    },
+    "TON": {
+      "xml_name": "TON",
+      "xml_index": 81,
+      "match_type": "exact"
+    },
+    "TP": {
+      "xml_name": "TP",
+      "xml_index": 34,
+      "match_type": "exact"
+    }
+  },
+  "il_unresolved": [],
+  "confirmed_il_to_bc": {
+    "ADD2_INT": {
+      "xml_index": 71,
+      "bc_func_id": 71,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "AND2_WORD": {
+      "xml_index": 20,
+      "bc_func_id": 20,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "CTD_DINT": {
+      "xml_index": 213,
+      "bc_func_id": 213,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "CTD_LINT": {
+      "xml_index": 212,
+      "bc_func_id": 212,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "CTD_UDINT": {
+      "xml_index": 210,
+      "bc_func_id": 210,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "CTUD_DINT": {
+      "xml_index": 207,
+      "bc_func_id": 207,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "DIV_INT": {
+      "xml_index": 99,
+      "bc_func_id": 99,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "MOVE_WORD": {
+      "xml_index": 118,
+      "bc_func_id": 118,
+      "il_count": 3,
+      "bc_count": 1,
+      "coverage": "1/3"
+    },
+    "MUL2_INT": {
+      "xml_index": 72,
+      "bc_func_id": 72,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "NOT_WORD": {
+      "xml_index": 110,
+      "bc_func_id": 110,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "OR2_WORD": {
+      "xml_index": 21,
+      "bc_func_id": 21,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "RS": {
+      "xml_index": 19,
+      "bc_func_id": 19,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "SR": {
+      "xml_index": 28,
+      "bc_func_id": 28,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "SUB_INT": {
+      "xml_index": 127,
+      "bc_func_id": 127,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    },
+    "TP": {
+      "xml_index": 34,
+      "bc_func_id": 34,
+      "il_count": 1,
+      "bc_count": 1,
+      "coverage": "1/1"
+    }
+  },
+  "missing_from_bc": {
+    "CTU_INT": {
+      "xml_index": 243,
+      "il_count": 1,
+      "reason_hypothesis": "special encoding (likely Timer/Counter first-instance)"
+    },
+    "TOF": {
+      "xml_index": 10,
+      "il_count": 1,
+      "reason_hypothesis": "special encoding (likely Timer/Counter first-instance)"
+    },
+    "TON": {
+      "xml_index": 81,
+      "il_count": 1,
+      "reason_hypothesis": "special encoding (likely Timer/Counter first-instance)"
+    }
+  },
+  "bc_orphan_func_ids": [],
+  "recall_il_to_bc": 83.3
+}

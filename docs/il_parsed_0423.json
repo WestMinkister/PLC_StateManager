@@ -1,0 +1,895 @@
+{
+  "source": "docs/try_again_LSPLC",
+  "programs": [
+    {
+      "name": "NewProgram",
+      "rungs": [
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "%MW3000.0",
+              "operands": [
+                "%MW3000.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "OR",
+              "operand_str": "_ON",
+              "operands": [
+                "_ON"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "OUT",
+              "operand_str": "%MW3000.1",
+              "operands": [
+                "%MW3000.1"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "ANDP",
+              "operand_str": "%MW152.0",
+              "operands": [
+                "%MW152.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "ADD2_INT",
+              "operand_str": "^LINEIN,^EMPTY,%MW1000,%MW1002,%MW1002",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "%MW1000",
+                "%MW1002",
+                "%MW1002"
+              ],
+              "instance": null,
+              "type_suffix": "_INT",
+              "is_function_call": true
+            }
+          ]
+        }
+      ],
+      "rung_count": 1,
+      "instruction_count": 5
+    },
+    {
+      "name": "NewProgram2",
+      "rungs": [
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "%IW5000.12",
+              "operands": [
+                "%IW5000.12"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "OR",
+              "operand_str": "%IW5000.13",
+              "operands": [
+                "%IW5000.13"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "RST",
+              "operand_str": "%MW6000.0",
+              "operands": [
+                "%MW6000.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "%IW5000.15",
+              "operands": [
+                "%IW5000.15"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "OR",
+              "operand_str": "%IW5000.14",
+              "operands": [
+                "%IW5000.14"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "SET",
+              "operand_str": "%MW6000.0",
+              "operands": [
+                "%MW6000.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "%MW6000.0",
+              "operands": [
+                "%MW6000.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "MOVE_WORD",
+              "operand_str": "^LINEIN,^EMPTY,1,%MW30",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "1",
+                "%MW30"
+              ],
+              "instance": null,
+              "type_suffix": "_WORD",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "OR",
+              "operand_str": "%MW6000.1",
+              "operands": [
+                "%MW6000.1"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "MOVE_WORD",
+              "operand_str": "^LINEIN,^EMPTY,0,%MW30",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "0",
+                "%MW30"
+              ],
+              "instance": null,
+              "type_suffix": "_WORD",
+              "is_function_call": true
+            }
+          ]
+        }
+      ],
+      "rung_count": 4,
+      "instruction_count": 10
+    },
+    {
+      "name": "NewProgram3",
+      "rungs": [
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "%IW1400.0",
+              "operands": [
+                "%IW1400.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "SET",
+              "operand_str": "%MW1400.0",
+              "operands": [
+                "%MW1400.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "TON",
+              "operand_str": "INST\t^LINEIN,T#3s,^LINEOUT,^EMPTY",
+              "operands": [
+                "INST\t^LINEIN",
+                "T#3s",
+                "^LINEOUT",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": true
+            },
+            {
+              "il_idx": 0,
+              "opcode": "RST",
+              "operand_str": "%MW1400.0",
+              "operands": [
+                "%MW1400.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "%MW1400.0",
+              "operands": [
+                "%MW1400.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "OUT",
+              "operand_str": "%QW1400.0",
+              "operands": [
+                "%QW1400.0"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "CTU_INT",
+              "operand_str": "INST1\t^LINEIN,1,%MW1002,^LINEOUT,%MW1000",
+              "operands": [
+                "INST1\t^LINEIN",
+                "1",
+                "%MW1002",
+                "^LINEOUT",
+                "%MW1000"
+              ],
+              "instance": null,
+              "type_suffix": "_INT",
+              "is_function_call": true
+            },
+            {
+              "il_idx": 0,
+              "opcode": "OUT",
+              "operand_str": "%QW1400.1",
+              "operands": [
+                "%QW1400.1"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            }
+          ]
+        }
+      ],
+      "rung_count": 4,
+      "instruction_count": 8
+    },
+    {
+      "name": "FUNCTION_Program",
+      "rungs": [
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "MOVE_WORD",
+              "operand_str": "^LINEIN,^EMPTY,%MW1002,%MW1000",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "%MW1002",
+                "%MW1000"
+              ],
+              "instance": null,
+              "type_suffix": "_WORD",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "SUB_INT",
+              "operand_str": "^LINEIN,^EMPTY,%MW1002,%MW1000,^EMPTY",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "%MW1002",
+                "%MW1000",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_INT",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "MUL2_INT",
+              "operand_str": "^LINEIN,^EMPTY,%MW1002,%MW1000,^EMPTY",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "%MW1002",
+                "%MW1000",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_INT",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "DIV_INT",
+              "operand_str": "^LINEIN,^EMPTY,%MW1000,%MW1002,^EMPTY",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "%MW1000",
+                "%MW1002",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_INT",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "AND2_WORD",
+              "operand_str": "^LINEIN,^EMPTY,%MW1000,%MW1002,^EMPTY",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "%MW1000",
+                "%MW1002",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_WORD",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "OR2_WORD",
+              "operand_str": "^LINEIN,^EMPTY,%MW1000,%MW1002,^EMPTY",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "%MW1000",
+                "%MW1002",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_WORD",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "NOT_WORD",
+              "operand_str": "^LINEIN,^EMPTY,%MW1000,^EMPTY",
+              "operands": [
+                "^LINEIN",
+                "^EMPTY",
+                "%MW1000",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_WORD",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "TOF",
+              "operand_str": "INST\t^LINEIN,T#3s,^EMPTY,^EMPTY",
+              "operands": [
+                "INST\t^LINEIN",
+                "T#3s",
+                "^EMPTY",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "TP",
+              "operand_str": "INST1\t^LINEIN,T#5s,^EMPTY,^EMPTY",
+              "operands": [
+                "INST1\t^LINEIN",
+                "T#5s",
+                "^EMPTY",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "CTD_DINT",
+              "operand_str": "INST2\t^LINEIN,1,1,^LINEOUT,^EMPTY",
+              "operands": [
+                "INST2\t^LINEIN",
+                "1",
+                "1",
+                "^LINEOUT",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_DINT",
+              "is_function_call": true
+            },
+            {
+              "il_idx": 0,
+              "opcode": "CTD_LINT",
+              "operand_str": "INST3\t^LINEIN,0,1,^LINEOUT,^EMPTY",
+              "operands": [
+                "INST3\t^LINEIN",
+                "0",
+                "1",
+                "^LINEOUT",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_LINT",
+              "is_function_call": true
+            },
+            {
+              "il_idx": 0,
+              "opcode": "CTD_UDINT",
+              "operand_str": "INST4\t^LINEIN,1,0,^EMPTY,^EMPTY",
+              "operands": [
+                "INST4\t^LINEIN",
+                "1",
+                "0",
+                "^EMPTY",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_UDINT",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "CTUD_DINT",
+              "operand_str": "INST5\t^LINEIN,1,1,1,1,^EMPTY,^EMPTY,^EMPTY",
+              "operands": [
+                "INST5\t^LINEIN",
+                "1",
+                "1",
+                "1",
+                "1",
+                "^EMPTY",
+                "^EMPTY",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": "_DINT",
+              "is_function_call": true
+            }
+          ]
+        },
+        {
+          "instructions": [
+            {
+              "il_idx": 0,
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "operands": [
+                "_OFF"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": false
+            },
+            {
+              "il_idx": 0,
+              "opcode": "RS",
+              "operand_str": "INST6\t^LINEIN,0,^LINEOUT",
+              "operands": [
+                "INST6\t^LINEIN",
+                "0",
+                "^LINEOUT"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": true
+            },
+            {
+              "il_idx": 0,
+              "opcode": "SR",
+              "operand_str": "INST7\t^LINEIN,1,^EMPTY",
+              "operands": [
+                "INST7\t^LINEIN",
+                "1",
+                "^EMPTY"
+              ],
+              "instance": null,
+              "type_suffix": null,
+              "is_function_call": true
+            }
+          ]
+        }
+      ],
+      "rung_count": 12,
+      "instruction_count": 27
+    }
+  ],
+  "function_call_sequence": [
+    {
+      "program": "NewProgram",
+      "opcode": "ADD2_INT",
+      "instance": null,
+      "type_suffix": "_INT"
+    },
+    {
+      "program": "NewProgram2",
+      "opcode": "MOVE_WORD",
+      "instance": null,
+      "type_suffix": "_WORD"
+    },
+    {
+      "program": "NewProgram2",
+      "opcode": "MOVE_WORD",
+      "instance": null,
+      "type_suffix": "_WORD"
+    },
+    {
+      "program": "NewProgram3",
+      "opcode": "TON",
+      "instance": null,
+      "type_suffix": null
+    },
+    {
+      "program": "NewProgram3",
+      "opcode": "CTU_INT",
+      "instance": null,
+      "type_suffix": "_INT"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "MOVE_WORD",
+      "instance": null,
+      "type_suffix": "_WORD"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "SUB_INT",
+      "instance": null,
+      "type_suffix": "_INT"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "MUL2_INT",
+      "instance": null,
+      "type_suffix": "_INT"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "DIV_INT",
+      "instance": null,
+      "type_suffix": "_INT"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "AND2_WORD",
+      "instance": null,
+      "type_suffix": "_WORD"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "OR2_WORD",
+      "instance": null,
+      "type_suffix": "_WORD"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "NOT_WORD",
+      "instance": null,
+      "type_suffix": "_WORD"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "TOF",
+      "instance": null,
+      "type_suffix": null
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "TP",
+      "instance": null,
+      "type_suffix": null
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "CTD_DINT",
+      "instance": null,
+      "type_suffix": "_DINT"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "CTD_LINT",
+      "instance": null,
+      "type_suffix": "_LINT"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "CTD_UDINT",
+      "instance": null,
+      "type_suffix": "_UDINT"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "CTUD_DINT",
+      "instance": null,
+      "type_suffix": "_DINT"
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "RS",
+      "instance": null,
+      "type_suffix": null
+    },
+    {
+      "program": "FUNCTION_Program",
+      "opcode": "SR",
+      "instance": null,
+      "type_suffix": null
+    }
+  ],
+  "stats": {
+    "program_count": 4,
+    "total_rungs": 21,
+    "total_instructions": 50,
+    "unique_opcodes": 25,
+    "opcode_vocabulary": {
+      "XGRUNGSTART": 21,
+      "LOAD": 18,
+      "OR": 4,
+      "OUT": 3,
+      "MOVE_WORD": 3,
+      "RST": 2,
+      "SET": 2,
+      "ANDP": 1,
+      "ADD2_INT": 1,
+      "TON": 1,
+      "CTU_INT": 1,
+      "SUB_INT": 1,
+      "MUL2_INT": 1,
+      "DIV_INT": 1,
+      "AND2_WORD": 1,
+      "OR2_WORD": 1,
+      "NOT_WORD": 1,
+      "TOF": 1,
+      "TP": 1,
+      "CTD_DINT": 1,
+      "CTD_LINT": 1,
+      "CTD_UDINT": 1,
+      "CTUD_DINT": 1,
+      "RS": 1,
+      "SR": 1
+    },
+    "function_call_count": 20
+  }
+}

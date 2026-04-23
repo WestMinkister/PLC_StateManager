@@ -1,0 +1,2197 @@
+{
+  "source": "docs/0423_PLC로부터열기.pcapng",
+  "summary": {
+    "response_count": 244,
+    "total_tokens": 126,
+    "token_type_counts": {
+      "ADDRESS": 31,
+      "FB_BINDING": 28,
+      "FX_FLAG": 22,
+      "FB_END": 16,
+      "FB_DEFINITION": 15,
+      "CONTACT_POS_A": 5,
+      "VAR_IN_ANCHOR": 4,
+      "VAR_OUT_ANCHOR": 3,
+      "CONTACT_POS_C": 2
+    },
+    "function_id_counts": {
+      "19": 1,
+      "20": 1,
+      "21": 1,
+      "28": 1,
+      "34": 1,
+      "71": 1,
+      "72": 1,
+      "99": 1,
+      "110": 1,
+      "118": 1,
+      "127": 1,
+      "207": 1,
+      "210": 1,
+      "212": 1,
+      "213": 1
+    },
+    "fx_id_counts": {
+      "0": 2,
+      "1": 4,
+      "5": 2,
+      "153": 2,
+      "154": 12
+    },
+    "element_type_counts": {
+      "0": 1,
+      "6": 1,
+      "8": 1,
+      "103": 2,
+      "163": 2
+    },
+    "unique_addresses": [
+      "%EN5",
+      "%IW5000.12",
+      "%IW5000.13",
+      "%IW5000.14",
+      "%IW5000.15",
+      "%MW1000",
+      "%MW1002",
+      "%MW152.0",
+      "%MW30",
+      "%MW3000.0",
+      "%MW3000.1",
+      "%MW6000.0",
+      "%MW6000.1"
+    ],
+    "unique_address_count": 13
+  },
+  "responses": [
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 5,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 11,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 5,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 2,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 5,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 73,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 113,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 65,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 513,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 13,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 13,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 5,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 17,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 33,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 5,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 5,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 5,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 73,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 161,
+      "token_count": 1,
+      "tokens": [
+        {
+          "type": "FX_FLAG",
+          "pos": 96,
+          "length": 5,
+          "fx_id": 5
+        }
+      ]
+    },
+    {
+      "binary_len": 681,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 1,
+      "tokens": [
+        {
+          "type": "ADDRESS",
+          "pos": 418,
+          "addr": "%EN5"
+        }
+      ]
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 217,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 5,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 73,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 513,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 193,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 181,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 181,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 17,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 513,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 113,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 481,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 9,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 153,
+      "token_count": 1,
+      "tokens": [
+        {
+          "type": "FX_FLAG",
+          "pos": 88,
+          "length": 5,
+          "fx_id": 5
+        }
+      ]
+    },
+    {
+      "binary_len": 25,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 29,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 430,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 378,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 274,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 418,
+      "token_count": 1,
+      "tokens": [
+        {
+          "type": "CONTACT_POS_A",
+          "pos": 355,
+          "length": 3,
+          "element_type": 163
+        }
+      ]
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 54,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 502,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 362,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 286,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 54,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 502,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 169,
+      "token_count": 2,
+      "tokens": [
+        {
+          "type": "FX_FLAG",
+          "pos": 29,
+          "length": 5,
+          "fx_id": 0
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 37,
+          "length": 5,
+          "fx_id": 0
+        }
+      ]
+    },
+    {
+      "binary_len": 417,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 217,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 681,
+      "token_count": 1,
+      "tokens": [
+        {
+          "type": "ADDRESS",
+          "pos": 234,
+          "addr": "%EN5"
+        }
+      ]
+    },
+    {
+      "binary_len": 681,
+      "token_count": 16,
+      "tokens": [
+        {
+          "type": "ADDRESS",
+          "pos": 454,
+          "addr": "%MW3000.0",
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 476,
+          "addr": "%MW3000.1",
+          "from_bzip2": true
+        },
+        {
+          "type": "CONTACT_POS_C",
+          "pos": 489,
+          "length": 3,
+          "element_type": 6,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 493,
+          "length": 5,
+          "fx_id": 153,
+          "from_bzip2": true
+        },
+        {
+          "type": "CONTACT_POS_A",
+          "pos": 501,
+          "length": 3,
+          "element_type": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 507,
+          "addr": "%MW152.0",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 519,
+          "length": 7,
+          "sub_type": 16,
+          "func_id": 71,
+          "from_bzip2": true
+        },
+        {
+          "type": "VAR_IN_ANCHOR",
+          "pos": 532,
+          "length": 5,
+          "len": 7,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 537,
+          "addr": "%MW1000",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 544,
+          "length": 6,
+          "sub_type": 16,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "VAR_OUT_ANCHOR",
+          "pos": 551,
+          "length": 5,
+          "len": 7,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 556,
+          "addr": "%MW1002",
+          "from_bzip2": true
+        },
+        {
+          "type": "VAR_IN_ANCHOR",
+          "pos": 565,
+          "length": 5,
+          "len": 7,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 570,
+          "addr": "%MW1002",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 577,
+          "length": 6,
+          "sub_type": 16,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 586,
+          "length": 6,
+          "sub_type": 16,
+          "offset": 12,
+          "from_bzip2": true
+        }
+      ]
+    },
+    {
+      "binary_len": 681,
+      "token_count": 14,
+      "tokens": [
+        {
+          "type": "ADDRESS",
+          "pos": 93,
+          "addr": "%IW5000.12",
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 113,
+          "addr": "%MW6000.0",
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 129,
+          "addr": "%IW5000.13",
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 149,
+          "addr": "%IW5000.15",
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 169,
+          "addr": "%MW6000.0",
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 185,
+          "addr": "%IW5000.14",
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 205,
+          "addr": "%MW6000.0",
+          "from_bzip2": true
+        },
+        {
+          "type": "VAR_IN_ANCHOR",
+          "pos": 243,
+          "length": 5,
+          "len": 5,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 248,
+          "addr": "%MW30",
+          "from_bzip2": true
+        },
+        {
+          "type": "CONTACT_POS_C",
+          "pos": 263,
+          "length": 3,
+          "element_type": 0,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 268,
+          "length": 5,
+          "fx_id": 153,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 296,
+          "addr": "%MW6000.1",
+          "from_bzip2": true
+        },
+        {
+          "type": "VAR_IN_ANCHOR",
+          "pos": 320,
+          "length": 5,
+          "len": 5,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 325,
+          "addr": "%MW30",
+          "from_bzip2": true
+        }
+      ]
+    },
+    {
+      "binary_len": 675,
+      "token_count": 84,
+      "tokens": [
+        {
+          "type": "FX_FLAG",
+          "pos": 367,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 372,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 118,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 390,
+          "addr": "%MW1002",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 397,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 409,
+          "addr": "%MW1000",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 418,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 431,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 436,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 127,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 454,
+          "addr": "%MW1002",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 461,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 475,
+          "addr": "%MW1000",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 482,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 491,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 12,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 504,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 509,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 72,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 527,
+          "addr": "%MW1002",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 534,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 548,
+          "addr": "%MW1000",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 555,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 564,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 12,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 577,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 582,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 99,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 600,
+          "addr": "%MW1000",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 607,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 621,
+          "addr": "%MW1002",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 628,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 637,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 12,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 650,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 655,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 20,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 673,
+          "addr": "%MW1000",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 680,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 694,
+          "addr": "%MW1002",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 701,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 710,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 12,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 723,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 728,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 21,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 746,
+          "addr": "%MW1000",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 753,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 767,
+          "addr": "%MW1002",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 774,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 783,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 12,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 796,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 801,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 110,
+          "from_bzip2": true
+        },
+        {
+          "type": "ADDRESS",
+          "pos": 819,
+          "addr": "%MW1000",
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 826,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 835,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 848,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 881,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 890,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 903,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 908,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 34,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 936,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 945,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 958,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 963,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 213,
+          "from_bzip2": true
+        },
+        {
+          "type": "CONTACT_POS_A",
+          "pos": 982,
+          "length": 3,
+          "element_type": 103,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 983,
+          "length": 7,
+          "sub_type": 13,
+          "func_id": 212,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 1003,
+          "length": 7,
+          "sub_type": 22,
+          "func_id": 210,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1028,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1041,
+          "length": 6,
+          "sub_type": 13,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "VAR_OUT_ANCHOR",
+          "pos": 1048,
+          "length": 5,
+          "len": 1,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1054,
+          "length": 6,
+          "sub_type": 22,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1069,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1082,
+          "length": 6,
+          "sub_type": 13,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "VAR_OUT_ANCHOR",
+          "pos": 1089,
+          "length": 5,
+          "len": 1,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1095,
+          "length": 6,
+          "sub_type": 22,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 1104,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 12,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 1111,
+          "length": 6,
+          "sub_type": 13,
+          "offset": 12,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 1118,
+          "length": 6,
+          "sub_type": 22,
+          "offset": 12,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 1131,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 1136,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 207,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1161,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1176,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1191,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 12,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1206,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 16,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 1215,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 20,
+          "from_bzip2": true
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 1228,
+          "length": 5,
+          "fx_id": 154,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 1233,
+          "length": 7,
+          "sub_type": 4,
+          "func_id": 19,
+          "from_bzip2": true
+        },
+        {
+          "type": "CONTACT_POS_A",
+          "pos": 1252,
+          "length": 3,
+          "element_type": 103,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_DEFINITION",
+          "pos": 1253,
+          "length": 7,
+          "sub_type": 13,
+          "func_id": 28,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1278,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_BINDING",
+          "pos": 1291,
+          "length": 6,
+          "sub_type": 13,
+          "offset": 4,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 1300,
+          "length": 6,
+          "sub_type": 4,
+          "offset": 8,
+          "from_bzip2": true
+        },
+        {
+          "type": "FB_END",
+          "pos": 1307,
+          "length": 6,
+          "sub_type": 13,
+          "offset": 8,
+          "from_bzip2": true
+        }
+      ]
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 257,
+      "token_count": 2,
+      "tokens": [
+        {
+          "type": "FX_FLAG",
+          "pos": 61,
+          "length": 5,
+          "fx_id": 1
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 69,
+          "length": 5,
+          "fx_id": 1
+        }
+      ]
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 430,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 378,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 274,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 418,
+      "token_count": 1,
+      "tokens": [
+        {
+          "type": "CONTACT_POS_A",
+          "pos": 355,
+          "length": 3,
+          "element_type": 163
+        }
+      ]
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 54,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 502,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 502,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 150,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 257,
+      "token_count": 2,
+      "tokens": [
+        {
+          "type": "FX_FLAG",
+          "pos": 61,
+          "length": 5,
+          "fx_id": 1
+        },
+        {
+          "type": "FX_FLAG",
+          "pos": 69,
+          "length": 5,
+          "fx_id": 1
+        }
+      ]
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 362,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 286,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 54,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 502,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 502,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 66,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 150,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 22,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 3,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 5,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 73,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 77,
+      "token_count": 0,
+      "tokens": []
+    },
+    {
+      "binary_len": 1,
+      "token_count": 0,
+      "tokens": []
+    }
+  ]
+}

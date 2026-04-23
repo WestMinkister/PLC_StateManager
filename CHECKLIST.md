@@ -57,13 +57,17 @@
 5. ⑤ 타이밍에 값 밀어넣기
 6. ⑥ 실패 변수 진단
 
-### 다음 세션 최우선 — Phase B.1 (IL Rosetta 구현)
+### Phase B.1 완료 체크 (2026-04-23 밤)
 
-- [ ] `plc_il_parser.py` 신규 — IL → 구조화 명령 리스트 (프로그램별, rung별, opcode/operand/type)
-- [ ] `plc_bytecode_scanner.py` 신규 — pcapng Z/X 응답 → 바이너리 스트림 + 알려진 마커 위치 맵
-- [ ] `correlate_il_bytecode.py` 신규 — IL 순서 ↔ 바이트코드 순서 정렬, 미지의 OPCODE 자동 발견
-- [ ] `protocol_grammar.json` 자동 업데이트 (새 OPCODE·INST 구조)
-- [ ] `validate_extraction.py` 확장 — AST ↔ IL 양방향 Recall 측정
+- [x] `plc_il_parser.py` — IL → 구조화 (4 programs, 21 rungs, 50 instructions, 25 OPCODE) ✅
+- [x] `plc_bytecode_scanner.py` — pcapng → 토큰 위치 맵 (FB_DEFINITION 15, FB_BINDING 28, FX_FLAG 22, VAR_IN/OUT 4+3) ✅
+- [x] `correlate_il_bytecode.py` — **XML 교차검증 Rosetta 성공** ✅
+   - **15/18 함수 이름 매핑 확정** (Recall 83.3%)
+   - 3개 미발견: TOF(10), TON(81), CTU_INT(243) — Phase B.5 특수 encoding 대상
+   - MOVE_WORD coverage 1/3 — NewProgram2의 2개가 다른 encoding (별도 탐구)
+   - 결과: `docs/rosetta_0423.json`
+- [x] `protocol_grammar.json` 업데이트 — `rosetta_verified_2026_04_23` 섹션 추가, 해독률 35→45%
+- [ ] `validate_extraction.py` 확장 — AST ↔ IL 양방향 (Phase B.3 AST builder 완성 후 의미 생김, 연기)
 
 ### 사용자 기여 필요 (중기 — Phase B.6 대비)
 - [ ] XG5000 **값 쓰기 pcapng 3종**:
