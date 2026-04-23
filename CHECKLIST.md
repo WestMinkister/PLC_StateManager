@@ -1,6 +1,6 @@
 # PLC_StateManager — 진행 체크리스트
 
-> **최종 업데이트**: 2026-04-23 밤 KST (IL 수령, Phase B 최종 로드맵 확정)
+> **최종 업데이트**: 2026-04-24 KST (Phase B.5.2 + B.5.3 완료, recall 16/18)
 > **전역 CLAUDE.md**가 이 파일을 세션 핸드오프 키파일로 사용함. 매 작업 완료 시 갱신할 것.
 > **궁극 프로젝트**: `PLC_ProcessAnalyzer` (GitHub, AI 학습/프로세스 분석 엔진) — Claude 메모리 `project_ultimate_vision.md` 참조
 > **StateManager 6단계 공식 플로우**: 메모리 `project_state_manager_flow.md` (사용자 2026-04-23 확정)
@@ -99,7 +99,43 @@
 - [x] pytest: 26/26 통과 (기존 24개 유지 + 신규 2개)
 - [x] 갱신된 AST 산출: `docs/program_ast_0423.json`
 
+### Phase B.5.2 완료 체크 (2026-04-23 밤)
+
+- [x] `plc_program_parser.py::parse_rung()` — Ladder Expression Parser S1~S7 (커밋 ec5199d)
+- [x] INSTR_LOAD / INSTR_NC_MOD / INSTR_PULSE 토큰 재활성화
+- [x] element_type 확장 (103/163 추가)
+- [x] IL synthetic fallback (bytecode 커버율 <80% 인 rung 에 IL 정보 삽입)
+- [x] FB-to-rung 할당 알고리즘 교체 (naive → IL 기반 비례 할당)
+- [x] B.5.2 reinforcement: contact/coil/pulse_modifier 집계 복원 + rung.parse_quality 태깅 (bfe309c)
+- [x] parse_quality_distribution (`full / il_fallback / partial / unknown`) 통계 추가
+- [x] pytest: 36/36 통과
+
+### Phase B.5.3 완료 체크 (2026-04-24)
+
+- [x] **B.5.3-a** DOTALL regex fix (`plc_bytecode_scanner.py:117`) — FB_DEFINITION sub_type/func_id=0x0A variant 포착 (커밋 0b37d14)
+   - TOF (func_id=10) 1개 + MOVE_WORD variant 2개 회복
+   - Recall metric 을 BC count 에서 IL-side 로 교정: 15/18 → 16/18
+- [x] **B.5.3-b** timer/counter kind 1급 도입 + TOF bytecode 파싱 (커밋 f6450da)
+   - `protocol_grammar.json::grammar_tokens.FB_DEFINITION.variants` 배열 도입 (std/timer_tof/timer_ton/counter_ctu) — 하드코딩 금지 원칙 준수
+   - `_load_timer_counter_variants()` 가 JSON 에서 동적 로드
+   - `_extract_fb_params()` 확장: `preset_time` (T# 리터럴), `preset_value` (숫자 상수), `instance` 키
+   - IL fallback 로직: `phase_b5_3_pending` → `phase_b5_3_awaiting_capture` (외부 pcapng 입력 대기 명시)
+- [x] **B.5.3-c** address-fingerprint program dispatch (커밋 90e6d59)
+   - 하드코딩 `prog_splits=[0,1,5,9]` 제거
+   - IL 주소 지문 ↔ BC response Jaccard similarity 기반 동적 매핑
+   - NewProgram3 부재 → `boundary_marker='NO_BYTECODE_EVIDENCE'`, IL fallback 으로 4 rung 생성
+- [x] **Final AST**: `docs/program_ast_0423_b53.json`
+   - `by_kind`: `function_call=17, timer=2, counter=1`
+   - `function_call_recall: 16/18`
+   - `phase_b5_pending: ['TON', 'CTU_INT']`
+   - Programs 4, Rungs 21, FB total 18
+- [x] pytest: 45/45 통과 (36 기존 + 6 timer/counter 신규 + 3 dispatch 신규)
+- [ ] **TON/CTU_INT 18/18 달성**: NewProgram3 포함 pcapng 재캡처 필요 (사용자 기여 항목으로 이동)
+
 ### 사용자 기여 필요 (중기 — Phase B.6 대비)
+- [ ] **NewProgram3 포함 PLC 재캡처 pcapng** (`docs/0424_upload_with_np3.pcapng`)
+   - TON(func_id=81), CTU_INT(func_id=243) 의 bytecode 인코딩 규명용
+   - Recall 16/18 → 18/18 완주
 - [ ] XG5000 **값 쓰기 pcapng 3종**:
    - `docs/0424_write_success.pcapng` (존재하는 MW 주소 성공)
    - `docs/0424_write_fail_no_addr.pcapng` (존재하지 않는 주소 실패)
