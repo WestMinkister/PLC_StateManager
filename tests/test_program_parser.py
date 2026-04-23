@@ -475,63 +475,67 @@ class TestPhaseB52LadderExpression:
             f"기대: ≥45, 실제: {total} (IL 50의 90%)"
 
     def test_contact_count_positive(self, builder_from_json):
-        """S2/S4: by_kind['contact'] 필드 정의 (CONTACT_POS_* 재활성화).
+        """S2/S4/B.5.2: by_kind['contact'] >= 10 (IL LOAD 기반, IL fallback 포함).
 
-        접점 파싱 인프라 준비 완료.
+        IL에 18개의 LOAD가 있음. bytecode 3개 + IL fallback 15개 = 18개 기대.
+        실제로는 약간 적을 수 있으므로 >= 10 기준.
+
+        B.5.2 보강: IL fallback이 coverage < 80% 기준으로 LOAD를 contact synthetic instruction으로 추가.
         """
         ast = builder_from_json.build()
 
-        # contact 필드가 정의되어 있으면 성공
-        assert 'contact' in ast['stats']['by_kind'], \
-            f"기대: contact 필드 정의"
+        contact_count = ast['stats']['by_kind'].get('contact', 0)
+        assert contact_count >= 10, \
+            f"기대: contact >= 10, 실제: {contact_count} (IL fallback 미작동)"
 
     def test_coil_count_positive(self, builder_from_json):
-        """S5: by_kind['coil'] > 0 (IL fallback + bytecode).
+        """S5/B.5.2: by_kind['coil'] >= 6 (IL OUT/SET/RST 기반).
 
-        IL fallback으로 coil instruction이 추가됨.
+        IL에 7개의 coil (OUT 3개, SET 2개, RST 2개)이 있음.
+        bytecode 4개 + IL fallback 3개 = 7개 기대. 최소 >= 6.
+
+        B.5.2 보강: IL fallback이 OUT/SET/RST를 coil synthetic instruction으로 추가.
         """
         ast = builder_from_json.build()
         coil_count = ast['stats']['by_kind'].get('coil', 0)
-        assert coil_count > 0, \
-            f"기대: > 0 coil (IL fallback), 실제: {coil_count}"
+        assert coil_count >= 6, \
+            f"기대: coil >= 6, 실제: {coil_count} (IL fallback 미작동)"
 
     def test_coil_types_distribution(self, builder_from_json):
-        """S2/S4: coil_type 필드가 정의됨.
+        """S2/S4/B.5.2: coil_type 분포 {OUT, SET, RST} 각각 >=1.
 
-        CONTACT_POS_* element_type으로 coil 파싱 준비 완료.
+        IL에 OUT 3개, SET 2개, RST 2개가 있음.
+        bytecode + IL fallback으로 모든 3가지 타입이 표현되어야 함.
+
+        B.5.2 보강: IL fallback에서 OUT/SET/RST를 element_type과 함께 synthetic coil로 생성.
         """
         ast = builder_from_json.build()
 
-        # 최소 하나의 instruction에 'coil_type' 필드가 정의되어야 함
-        has_coil_type_field = False
+        coil_types = set()
         for prog in ast['programs']:
             for rung in prog['rungs']:
                 for instr in rung['instructions']:
-                    if 'coil_type' in instr:
-                        has_coil_type_field = True
-                        break
+                    if instr.get('kind') == 'coil' and 'coil_type' in instr:
+                        coil_types.add(instr['coil_type'])
 
-        # by_kind에 coil 필드가 있으면 성공
-        assert 'coil' in ast['stats']['by_kind'], \
-            f"기대: coil 필드 정의"
+        expected_types = {'OUT', 'SET', 'RST'}
+        assert coil_types >= expected_types, \
+            f"기대: {expected_types} all present, 실제: {coil_types}"
 
     def test_system_flag_in_function_program(self, builder_from_json):
-        """S4: FUNCTION_Program의 system_flag > 0 (_OFF).
+        """S4/B.5.2: 전체 프로그램의 system_flag >= 9 (FX_FLAG 토큰 수집).
 
-        IL LOAD _OFF가 12 rungs에서 발생. FX_FLAG 토큰으로 파싱됨.
+        bytecode FX_FLAG 토큰 스캔 결과로 system_flag instruction이 생성됨.
+        최소 9개 이상 FX_FLAG 토큰이 감지되어야 함 (engineering data coverage).
+
+        B.5.2 보강: FX_FLAG → system_flag synthetic instruction 매핑 확인.
         """
         ast = builder_from_json.build()
-        # FUNCTION_Program = Program_3
-        program_3 = ast['programs'][3]
 
-        system_flags = 0
-        for rung in program_3['rungs']:
-            for instr in rung['instructions']:
-                if instr.get('kind') == 'system_flag':
-                    system_flags += 1
+        total_system_flags = ast['stats']['by_kind'].get('system_flag', 0)
 
-        assert system_flags > 0, \
-            f"기대: > 0 system_flag in Program_3, 실제: {system_flags}"
+        assert total_system_flags >= 9, \
+            f"기대: system_flag >= 9 (FX_FLAG 토큰), 실제: {total_system_flags}"
 
     def test_instruction_order_matches_il_kinds(self, builder_from_json):
         """S4: byte_offset 정렬로 instruction이 파싱됨.
@@ -569,17 +573,18 @@ class TestPhaseB52LadderExpression:
             f"기대: R2/R3는 >0 FB, 실제: {fb_counts[2]}/{fb_counts[3]}"
 
     def test_pulse_modifier_detected(self, builder_from_json):
-        """S2/S4: pulse_modifier 파싱 (S2 INSTR_PULSE 패턴).
+        """S2/S4/B.5.2: pulse_modifier >= 1 (ANDP/ORP IL fallback).
 
-        일부 rung에서 pulse_modifier (ANDP 등)가 파싱될 수 있음.
+        IL에 1개의 ANDP (Program 0, Rung 0)가 있음.
+        bytecode INSTR_PULSE는 감지되지 않으므로 IL fallback으로 보충.
+
+        B.5.2 보강: IL fallback에서 opcode.endswith('P') → pulse_modifier synthetic instruction 생성.
         """
         ast = builder_from_json.build()
 
-        # 전체에서 pulse_modifier 개수 확인
         pulse_count = ast['stats']['by_kind'].get('pulse_modifier', 0)
-        # pulse_modifier가 없을 수도 있으므로, 단순히 파싱됨을 확인
-        assert 'pulse_modifier' in ast['stats']['by_kind'], \
-            f"기대: pulse_modifier 필드 존재"
+        assert pulse_count >= 1, \
+            f"기대: pulse_modifier >= 1 (IL fallback ANDP/ORP), 실제: {pulse_count}"
 
     def test_rosetta_func_id_mapping_unchanged(self, builder_from_json):
         """S6: rosetta 테이블 회귀 방지 (func_id → opcode_label 매핑 불변).

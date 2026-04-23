@@ -623,7 +623,10 @@ class ProgramASTBuilder:
         """S5: bytecode instruction 수가 IL 기대치의 80% 미만이면 IL fallback 삽입.
 
         Bytecode로 파싱된 instruction이 부족하면, IL 정보를 synthetic instruction으로 보충.
-        함수 호출은 이미 bytecode로 파싱되므로, logic_op/coil/contact만 추가.
+        함수 호출은 이미 bytecode로 파싱되므로, logic_op/coil/contact/pulse_modifier만 추가.
+
+        B.5.2 보강: 커버율 계산 시 핵심 ladder expression (contact/coil/pulse_modifier)만 비교.
+        system_flag는 FX_FLAG 토큰 스캔 결과이므로 의존성 낮음. logic_op도 제외.
 
         Args:
             bc_instructions: bytecode로 파싱된 명령
@@ -634,13 +637,25 @@ class ProgramASTBuilder:
             bc_instructions 또는 (bc_instructions + il_fallback_instructions)
         """
         # 계산: bytecode 커버율
-        # function_call은 bytecode로 완전히 파싱되므로, 나머지(logic_op, coil, contact, system_flag)를 비교
-        il_non_fb_count = sum(1 for instr in il_instructions if not instr.get('is_function_call', False))
-        bc_non_fb_count = sum(1 for instr in bc_instructions if instr.get('kind') not in {'function_call', 'unknown'})
+        # B.5.2 보강: contact/coil/pulse_modifier 핵심 3가지만 비교
+        # (function_call은 bytecode로 완전히 파싱됨, system_flag는 FX_FLAG 토큰 스캔 결과로 noisy)
 
-        # IL fallback 필요 조건: bytecode < 80% * IL expected
-        if il_non_fb_count > 0:
-            coverage_ratio = bc_non_fb_count / il_non_fb_count
+        # IL에서 핵심 instruction 개수
+        il_core_count = 0
+        for instr in il_instructions:
+            if instr.get('is_function_call', False):
+                continue
+            opcode = instr.get('opcode', '')
+            if opcode in {'LOAD', 'OUT', 'SET', 'RST', 'ANDP', 'ORP'}:
+                il_core_count += 1
+
+        # BC에서 핵심 instruction 개수
+        bc_core_count = sum(1 for instr in bc_instructions
+                           if instr.get('kind') in {'contact', 'coil', 'pulse_modifier'})
+
+        # IL fallback 필요 조건: bytecode 핵심 < 80% * IL 핵심 기대
+        if il_core_count > 0:
+            coverage_ratio = bc_core_count / il_core_count
         else:
             coverage_ratio = 1.0
 
@@ -660,8 +675,10 @@ class ProgramASTBuilder:
             opcode = il_instr.get('opcode', '?')
             operand_str = il_instr.get('operand_str', '')
 
-            # IL opcode → kind 매핑
-            if opcode in {'LOAD', 'OR', 'AND', 'XOR'}:
+            # IL opcode → kind 매핑 (B.5.2 보강: LOAD를 contact로 변환)
+            if opcode == 'LOAD':
+                kind = 'contact'  # LOAD는 contact (NO type)
+            elif opcode in {'OR', 'AND', 'XOR'}:
                 kind = 'logic_op'
             elif opcode in {'OUT', 'SET', 'RST'}:
                 kind = 'coil'
@@ -681,10 +698,16 @@ class ProgramASTBuilder:
                 'fallback_id': fallback_id,
             }
 
-            # coil/contact 세부 정보
-            if kind == 'coil':
+            # contact/coil 세부 정보
+            if kind == 'contact':
+                # LOAD는 항상 NO type
+                synthetic_instr['contact_type'] = 'NO'
+                synthetic_instr['element_type'] = 6  # NO element
+            elif kind == 'coil':
                 coil_type_map = {'OUT': 'OUT', 'SET': 'SET', 'RST': 'RST'}
                 synthetic_instr['coil_type'] = coil_type_map.get(opcode, 'UNKNOWN')
+                element_type_map = {'OUT': 14, 'SET': 16, 'RST': 17}
+                synthetic_instr['element_type'] = element_type_map.get(opcode, None)
             elif kind == 'pulse_modifier':
                 synthetic_instr['opcode'] = opcode  # ANDP, ORP 등
 
@@ -832,6 +855,28 @@ class ProgramASTBuilder:
                                 }
                                 instructions.append(timer_instr)
 
+                # B.5.2 보강: rung.parse_quality 계산
+                # 이 rung의 instruction parse_quality 분포를 기반으로 rung 레벨의 parse_quality 결정
+                # 우선순위: il_fallback > full/partial > unknown
+                parse_qualities = [instr.get('parse_quality', 'unknown') for instr in instructions]
+
+                if not parse_qualities or len(instructions) == 0:
+                    rung_parse_quality = 'unknown'
+                elif 'il_fallback' in parse_qualities:
+                    # IL fallback이 하나라도 있으면 il_fallback
+                    rung_parse_quality = 'il_fallback'
+                elif 'full' in parse_qualities:
+                    # full이 있으면, partial/unknown은 무시하고 full로 간주
+                    rung_parse_quality = 'full'
+                elif 'partial' in parse_qualities:
+                    # full이 없지만 partial이 있으면 partial
+                    rung_parse_quality = 'partial'
+                else:
+                    # 모두 unknown
+                    rung_parse_quality = 'unknown'
+
+                rung['parse_quality'] = rung_parse_quality
+
                 rung['instructions'] = instructions
                 rung['instruction_count'] = len(instructions)
 
@@ -853,24 +898,44 @@ class ProgramASTBuilder:
             'pulse_modifier': 0,  # S2: ANDP 등
             'unknown': 0,
         }
+        by_source = {
+            'bytecode': 0,
+            'il_fallback': 0,
+        }
         labeled_instructions = 0
         phase_b5_pending_instructions = []
+        parse_quality_distribution = {
+            'full': 0,
+            'il_fallback': 0,
+            'partial': 0,
+            'unknown': 0,
+        }
 
         for program in programs_list:
             for rung in program.get('rungs', []):
+                # rung 레벨 parse_quality 집계
+                rung_pq = rung.get('parse_quality', 'unknown')
+                if rung_pq in parse_quality_distribution:
+                    parse_quality_distribution[rung_pq] += 1
+
                 for instr in rung.get('instructions', []):
                     kind = instr.get('kind', 'unknown')
+                    source = instr.get('source', 'unknown')
 
                     # S5/S7: IL fallback function_call은 by_kind 통계에서 제외 (계획서 기준)
                     # IL fallback은 완성도 통계에만 포함
                     if kind == 'function_call' and instr.get('source') == 'il_fallback':
                         # IL fallback은 별도 통계로 처리
-                        continue
-
-                    if kind in by_kind:
-                        by_kind[kind] += 1
+                        pass  # by_kind에는 추가 안 함
                     else:
-                        by_kind[kind] = 1
+                        if kind in by_kind:
+                            by_kind[kind] += 1
+                        else:
+                            by_kind[kind] = 1
+
+                    # source 집계 (모든 instruction)
+                    if source in by_source:
+                        by_source[source] += 1
 
                     # Function call 통계 (bytecode만)
                     if kind == 'function_call':
@@ -894,6 +959,8 @@ class ProgramASTBuilder:
                 'total_rungs': total_rungs,
                 'total_instructions': total_instructions,
                 'by_kind': by_kind,
+                'by_source': by_source,  # B.5.2 보강: source 분포
+                'parse_quality_distribution': parse_quality_distribution,  # B.5.2 보강: rung parse_quality 분포
                 'function_calls_labeled': labeled_instructions,
                 'function_call_recall': recall_rate,
                 'unresolved_moves': 2,  # IL MOVE 3 vs BC MOVE 1

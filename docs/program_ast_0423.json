@@ -175,11 +175,56 @@
               "stack_op": "push",
               "source": "bytecode",
               "parse_quality": "full"
+            },
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "%MW3000.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "OR",
+              "operand_str": "_ON",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1
+            },
+            {
+              "kind": "coil",
+              "opcode": "OUT",
+              "operand_str": "%MW3000.1",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 2,
+              "coil_type": "OUT",
+              "element_type": 14
+            },
+            {
+              "kind": "pulse_modifier",
+              "opcode": "ANDP",
+              "operand_str": "%MW152.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 3
             }
           ],
-          "instruction_count": 16,
+          "instruction_count": 20,
           "raw_bytes_len": 150,
-          "fb_count": 1
+          "fb_count": 1,
+          "parse_quality": "il_fallback"
         }
       ]
     },
@@ -211,14 +256,16 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "%IW5000.12",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             },
             {
               "kind": "logic_op",
@@ -239,12 +286,14 @@
               "source": "il_fallback",
               "parse_quality": "il_fallback",
               "fallback_id": 2,
-              "coil_type": "RST"
+              "coil_type": "RST",
+              "element_type": 17
             }
           ],
           "instruction_count": 3,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 1,
@@ -255,14 +304,16 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "%IW5000.15",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             },
             {
               "kind": "logic_op",
@@ -283,12 +334,14 @@
               "source": "il_fallback",
               "parse_quality": "il_fallback",
               "fallback_id": 2,
-              "coil_type": "SET"
+              "coil_type": "SET",
+              "element_type": 16
             }
           ],
           "instruction_count": 3,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 2,
@@ -517,7 +570,8 @@
           ],
           "instruction_count": 24,
           "raw_bytes_len": 160,
-          "fb_count": 2
+          "fb_count": 2,
+          "parse_quality": "full"
         },
         {
           "index": 3,
@@ -728,7 +782,8 @@
           ],
           "instruction_count": 22,
           "raw_bytes_len": 181,
-          "fb_count": 2
+          "fb_count": 2,
+          "parse_quality": "full"
         }
       ]
     },
@@ -760,14 +815,16 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "%IW1400.0",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             },
             {
               "kind": "coil",
@@ -778,12 +835,14 @@
               "source": "il_fallback",
               "parse_quality": "il_fallback",
               "fallback_id": 1,
-              "coil_type": "SET"
+              "coil_type": "SET",
+              "element_type": 16
             }
           ],
           "instruction_count": 2,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 1,
@@ -883,6 +942,18 @@
               "parse_quality": "full"
             },
             {
+              "kind": "coil",
+              "opcode": "RST",
+              "operand_str": "%MW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "coil_type": "RST",
+              "element_type": 17
+            },
+            {
               "kind": "function_call",
               "opcode_label": null,
               "func_id": null,
@@ -903,9 +974,10 @@
               }
             }
           ],
-          "instruction_count": 10,
+          "instruction_count": 11,
           "raw_bytes_len": 181,
-          "fb_count": 2
+          "fb_count": 2,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 2,
@@ -916,14 +988,16 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "%MW1400.0",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             },
             {
               "kind": "coil",
@@ -934,12 +1008,14 @@
               "source": "il_fallback",
               "parse_quality": "il_fallback",
               "fallback_id": 1,
-              "coil_type": "OUT"
+              "coil_type": "OUT",
+              "element_type": 14
             }
           ],
           "instruction_count": 2,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 3,
@@ -1025,6 +1101,18 @@
               "parse_quality": "partial"
             },
             {
+              "kind": "coil",
+              "opcode": "OUT",
+              "operand_str": "%QW1400.1",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "coil_type": "OUT",
+              "element_type": 14
+            },
+            {
               "kind": "function_call",
               "opcode_label": null,
               "func_id": null,
@@ -1046,9 +1134,10 @@
               }
             }
           ],
-          "instruction_count": 8,
+          "instruction_count": 9,
           "raw_bytes_len": 266,
-          "fb_count": 2
+          "fb_count": 2,
+          "parse_quality": "il_fallback"
         }
       ]
     },
@@ -1082,19 +1171,22 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "_OFF",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
           "instruction_count": 1,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 1,
@@ -1105,19 +1197,22 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "_OFF",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
           "instruction_count": 1,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 2,
@@ -1159,11 +1254,24 @@
               "stack_op": null,
               "source": "bytecode",
               "parse_quality": "partial"
+            },
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
-          "instruction_count": 3,
+          "instruction_count": 4,
           "raw_bytes_len": 150,
-          "fb_count": 1
+          "fb_count": 1,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 3,
@@ -1174,19 +1282,22 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "_OFF",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
           "instruction_count": 1,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 4,
@@ -1228,11 +1339,24 @@
               "stack_op": null,
               "source": "bytecode",
               "parse_quality": "full"
+            },
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
-          "instruction_count": 3,
+          "instruction_count": 4,
           "raw_bytes_len": 150,
-          "fb_count": 1
+          "fb_count": 1,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 5,
@@ -1243,19 +1367,22 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "_OFF",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
           "instruction_count": 1,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 6,
@@ -1266,19 +1393,22 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "_OFF",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
           "instruction_count": 1,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 7,
@@ -1322,6 +1452,18 @@
               "parse_quality": "full"
             },
             {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            },
+            {
               "kind": "function_call",
               "opcode_label": null,
               "func_id": null,
@@ -1342,9 +1484,10 @@
               }
             }
           ],
-          "instruction_count": 4,
+          "instruction_count": 5,
           "raw_bytes_len": 150,
-          "fb_count": 1
+          "fb_count": 1,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 8,
@@ -1355,19 +1498,22 @@
           "boundary_marker": "EMPTY_RUNG",
           "instructions": [
             {
-              "kind": "logic_op",
+              "kind": "contact",
               "opcode": "LOAD",
               "operand_str": "_OFF",
               "byte_offset": -1,
               "stack_op": null,
               "source": "il_fallback",
               "parse_quality": "il_fallback",
-              "fallback_id": 0
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
           "instruction_count": 1,
           "raw_bytes_len": 0,
-          "fb_count": 0
+          "fb_count": 0,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 9,
@@ -1409,11 +1555,24 @@
               "stack_op": "push",
               "source": "bytecode",
               "parse_quality": "full"
+            },
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
-          "instruction_count": 3,
+          "instruction_count": 4,
           "raw_bytes_len": 150,
-          "fb_count": 1
+          "fb_count": 1,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 10,
@@ -1455,11 +1614,24 @@
               "stack_op": null,
               "source": "bytecode",
               "parse_quality": "partial"
+            },
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
-          "instruction_count": 3,
+          "instruction_count": 4,
           "raw_bytes_len": 150,
-          "fb_count": 1
+          "fb_count": 1,
+          "parse_quality": "il_fallback"
         },
         {
           "index": 11,
@@ -1501,11 +1673,24 @@
               "stack_op": null,
               "source": "bytecode",
               "parse_quality": "full"
+            },
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
             }
           ],
-          "instruction_count": 3,
+          "instruction_count": 4,
           "raw_bytes_len": 150,
-          "fb_count": 1
+          "fb_count": 1,
+          "parse_quality": "il_fallback"
         }
       ]
     }
@@ -1513,15 +1698,25 @@
   "stats": {
     "total_programs": 4,
     "total_rungs": 21,
-    "total_instructions": 115,
+    "total_instructions": 127,
     "by_kind": {
       "function_call": 15,
-      "contact": 3,
-      "coil": 4,
+      "contact": 20,
+      "coil": 7,
       "system_flag": 25,
-      "logic_op": 55,
-      "pulse_modifier": 0,
+      "logic_op": 46,
+      "pulse_modifier": 1,
       "unknown": 10
+    },
+    "by_source": {
+      "bytecode": 96,
+      "il_fallback": 31
+    },
+    "parse_quality_distribution": {
+      "full": 2,
+      "il_fallback": 19,
+      "partial": 0,
+      "unknown": 0
     },
     "function_calls_labeled": 15,
     "function_call_recall": "15/18",
