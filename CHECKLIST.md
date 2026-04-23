@@ -69,6 +69,13 @@
 - [x] `protocol_grammar.json` 업데이트 — `rosetta_verified_2026_04_23` 섹션 추가, 해독률 35→45%
 - [ ] `validate_extraction.py` 확장 — AST ↔ IL 양방향 (Phase B.3 AST builder 완성 후 의미 생김, 연기)
 
+### Phase B.2.1 완료 체크 (2026-04-23 밤, 같은 세션)
+
+- [x] X 명령 134 요청·응답 페어 파싱 + 분포 분석 ✅
+- [x] X 응답 3종 분기 발견: sub=0x00 (48개, 벌크), sub=0xaa (44개, "UD" 상태), sub=0x58 (42개, ACK)
+- [x] `protocol_grammar.json`에 `x_command_structure` 섹션 추가, 해독률 45→~48%
+- [x] 이전 의문 해결: BC 스캐너가 X 응답에서 토큰 거의 못 찾은 이유 규명 (42개 빈 응답 + 44개 2B 상태 + 48개 중 2개만 BZh)
+
 ### 사용자 기여 필요 (중기 — Phase B.6 대비)
 - [ ] XG5000 **값 쓰기 pcapng 3종**:
    - `docs/0424_write_success.pcapng` (존재하는 MW 주소 성공)
