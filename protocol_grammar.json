@@ -54,7 +54,43 @@
       "meaning": "함수블록 정의 시작. func_id 바이트는 XML의 INDEX 값과 일치",
       "evidence": "완전 업로드 캡처 0423에서 15/18 함수 매칭",
       "confidence": "high",
-      "ast_node": "FunctionDefinition"
+      "ast_node": "FunctionDefinition",
+      "variants": [
+        {
+          "name": "std",
+          "sub_type": 4,
+          "func_id_range": "any",
+          "kind": "function_call",
+          "note": "표준 FB_DEFINITION (B.1 Rosetta 15종 + DOTALL recovered variants)"
+        },
+        {
+          "name": "timer_tof",
+          "sub_type": 4,
+          "func_id": 10,
+          "parameter_hint": "T# literal in VAR_IN_ANCHOR block",
+          "kind": "timer",
+          "evidence": "resp 140 pos 492 (docs/0423_PLC로부터열기.pcapng) — T#3s preset 확인",
+          "opcode_label": "TOF"
+        },
+        {
+          "name": "timer_ton",
+          "sub_type": "hypothesis",
+          "func_id": 81,
+          "parameter_hint": "T# literal",
+          "kind": "timer",
+          "evidence": "pending: NewProgram3 포함 pcapng 재캡처 필요",
+          "opcode_label": "TON"
+        },
+        {
+          "name": "counter_ctu",
+          "sub_type": "hypothesis",
+          "func_id": 243,
+          "parameter_hint": "numeric preset value",
+          "kind": "counter",
+          "evidence": "pending: NewProgram3 포함 pcapng 재캡처 필요",
+          "opcode_label": "CTU_INT"
+        }
+      ]
     },
     "FB_BINDING": {
       "pattern_hex": "68 [sub] 00 [offset] 00 00",
@@ -176,8 +212,9 @@
     "description": "Grammar 파싱에는 불필요. 디버그·표시용 인간 가독 레이블.",
     "rosetta_verified_2026_04_23": {
       "method": "XML 정답지 + BC FB_DEFINITION 교차검증 (docs/rosetta_0423.json)",
-      "recall_percent": 83.3,
+      "recall_percent": 88.9,
       "confirmed_via_bc_fb_definition": {
+        "10": "TOF (XML INDEX) — B.5.3 DOTALL fix 로 복구",
         "19": "RS",
         "20": "AND2_WORD (XML: AND)",
         "21": "OR2_WORD (XML: OR)",
@@ -187,7 +224,7 @@
         "72": "MUL2_INT (XML: MUL)",
         "99": "DIV_INT (XML: DIV)",
         "110": "NOT_WORD (XML: NOT)",
-        "118": "MOVE_WORD (XML: MOVE) — coverage 1/3 — 일부는 다른 encoding",
+        "118": "MOVE_WORD (XML: MOVE) — B.5.3 DOTALL fix 로 3/3 회복 (sub_type=0x0a variant 포함)",
         "127": "SUB_INT (XML: SUB)",
         "207": "CTUD_DINT",
         "210": "CTD_UDINT",
@@ -195,14 +232,13 @@
         "213": "CTD_DINT"
       },
       "missing_from_bc_special_encoding": {
-        "10": "TOF (XML INDEX)",
-        "81": "TON (XML INDEX)",
-        "243": "CTU_INT (XML INDEX)"
+        "81": "TON (XML INDEX) — NewProgram3 미포함 0423 pcapng, 재캡처 대기",
+        "243": "CTU_INT (XML INDEX) — NewProgram3 미포함 0423 pcapng, 재캡처 대기"
       },
       "notes": [
         "BC는 INDEX 오름차순으로 저장됨 (IL 프로그램 순서와 다름).",
-        "3개 Timer/Counter(TOF/TON/CTU_INT)는 FB_DEFINITION 토큰에 나타나지 않음 — Phase B.5 특수 encoding 규명 대상.",
-        "MOVE_WORD는 IL에 3회 있으나 BC FB_DEFINITION은 1회만 — NewProgram2의 MOVE 2개는 다른 encoding으로 저장될 가능성."
+        "TOF 는 B.5.3 DOTALL fix 로 복구. TON/CTU_INT 는 NewProgram3 부재로 awaiting capture.",
+        "MOVE_WORD: B.5.3 DOTALL fix 로 3/3 회복 (sub_type=0x0a variant 포함)."
       ]
     },
     "function_ids_observed_legacy": {

@@ -182,16 +182,16 @@ class TestFunctionBlockParsing:
         builder.load_bytecode(str(TEST_JSON))
         return builder
 
-    def test_function_call_count_is_18(self, builder_from_json):
-        """by_kind['function_call'] == 18 (bytecode FB instance 수 = 15 original + TOF + 2 MOVE variants, B.5.3 DOTALL fix 이후).
+    def test_function_call_count_is_17(self, builder_from_json):
+        """by_kind['function_call'] == 17 (TOF가 kind='timer'로 이동했으므로, 15 원본 + 2 MOVE variants, B.5.3 DOTALL fix 이후).
 
         S5 IL fallback 도입으로 total_instructions는 18을 초과함.
-        따라서 function_call 개수만 확인.
+        TOF가 kind='timer'로 이동하여 function_call은 17이 됨.
         """
         ast = builder_from_json.build()
         fc_count = ast['stats']['by_kind'].get('function_call', 0)
-        assert fc_count == 18, \
-            f"기대: function_call 18개, 실제: {fc_count}"
+        assert fc_count == 17, \
+            f"기대: function_call 17개, 실제: {fc_count}"
 
     def test_opcode_labels_resolved(self, builder_from_json):
         """opcode_label이 정확히 매핑됨 (bytecode function_call만)."""
@@ -247,21 +247,21 @@ class TestFunctionBlockParsing:
             f"기대: {expected_pending}, 실제: {set(pending_list)}"
 
     def test_unique_func_ids_count(self, builder_from_json):
-        """16개 function_call이 모두 서로 다른 func_id를 가짐 (TOF 포함, B.5.3)."""
+        """15개 function_call이 모두 서로 다른 func_id를 가짐 (TOF는 kind='timer'로 이동, B.5.3)."""
         ast = builder_from_json.build()
 
         func_ids = set()
         for prog in ast['programs']:
             for rung in prog['rungs']:
                 for instr in rung['instructions']:
-                    # S5: bytecode function_call만 확인
+                    # S5: bytecode function_call만 확인 (timer/counter 제외)
                     if instr.get('kind') != 'function_call' or instr.get('source') != 'bytecode':
                         continue
                     if 'func_id' in instr and instr['func_id'] is not None:
                         func_ids.add(instr['func_id'])
 
-        assert len(func_ids) == 16, \
-            f"기대: 16개 고유 func_id, 실제: {len(func_ids)}"
+        assert len(func_ids) == 15, \
+            f"기대: 15개 고유 func_id, 실제: {len(func_ids)}"
 
 
 class TestSession3ContactCoilFX:
@@ -420,10 +420,11 @@ class TestPhaseB51RungBoundaryRealignment:
                 f"기대: FB 대부분 적중, 실제: {mismatches}/{total_fb} (>5%)"
 
     def test_rung_fb_assignment_consistency(self, builder_from_json):
-        """Phase B.5.1/S6: 각 rung의 bytecode function_call 개수가 FB 개수와 일치.
+        """Phase B.5.1/S6: 각 rung의 bytecode FB 개수(function_call + timer + counter)가 FB 개수와 일치.
 
         S5 IL fallback 도입으로 총 instruction 개수는 FB 개수를 초과할 수 있음.
-        따라서 bytecode function_call 개수만 비교.
+        B.5.3: timer/counter가 독립 kind로 추가되어, 이들도 FB 대응 instruction으로 간주.
+        따라서 bytecode function_call + timer + counter 개수를 비교.
         """
         ast = builder_from_json.build()
 
@@ -431,17 +432,17 @@ class TestPhaseB51RungBoundaryRealignment:
         for prog in ast['programs']:
             for rung in prog['rungs']:
                 fb_count = rung.get('fb_count', 0)
-                # bytecode function_call 개수만 세기
-                bc_fc_count = sum(
+                # bytecode FB 개수: function_call + timer + counter
+                bc_fb_count = sum(
                     1 for instr in rung.get('instructions', [])
-                    if instr.get('kind') == 'function_call' and instr.get('source') == 'bytecode'
+                    if instr.get('kind') in {'function_call', 'timer', 'counter'} and instr.get('source') == 'bytecode'
                 )
                 # EMPTY_RUNG은 제외
                 marker = rung.get('boundary_marker', '')
                 if marker == 'FB_DEFINITION_BASED':
-                    if fb_count != bc_fc_count:
+                    if fb_count != bc_fb_count:
                         inconsistencies.append(
-                            f"{prog['name']}/Rung_{rung['index']}: fb_count={fb_count}, bc_fc_count={bc_fc_count}"
+                            f"{prog['name']}/Rung_{rung['index']}: fb_count={fb_count}, bc_fb_count={bc_fb_count}"
                         )
 
         assert len(inconsistencies) == 0, \
@@ -643,6 +644,90 @@ class TestPhaseB52LadderExpression:
         # FB들은 대부분 rung 범위에 포함되어야 함
         assert mismatches == 0, \
             f"기대: FB 100% 적중, 실제: {mismatches}/{total_fb_instructions} 오정렬"
+
+
+class TestPhaseB53TimerCounter:
+    """Phase B.5.3: timer/counter kind 도입 + TOF bytecode 파싱."""
+
+    @pytest.fixture
+    def builder_from_json(self):
+        if not TEST_JSON.exists():
+            pytest.skip(f'JSON 없음: {TEST_JSON}')
+        builder = ProgramASTBuilder()
+        builder.load_bytecode(str(TEST_JSON))
+        return builder
+
+    def test_tof_resolved_from_bytecode(self, builder_from_json):
+        """TOF 는 bytecode 에서 복구됨 (kind='timer', source='bytecode')."""
+        ast = builder_from_json.build()
+        tof_instances = [
+            instr
+            for prog in ast['programs']
+            for rung in prog['rungs']
+            for instr in rung['instructions']
+            if instr.get('opcode_label') == 'TOF'
+        ]
+        assert len(tof_instances) >= 1, "TOF 인스턴스 최소 1개 존재"
+        tof = tof_instances[0]
+        assert tof['kind'] == 'timer', f"TOF kind: {tof['kind']}"
+        assert tof['source'] == 'bytecode', f"TOF source: {tof['source']}"
+        assert tof['parse_quality'] == 'full', f"TOF parse_quality: {tof['parse_quality']}"
+
+    def test_ton_ctu_il_fallback_labeled(self, builder_from_json):
+        """TON/CTU_INT 는 il_fallback 로 태깅됨 (phase_b5_3_awaiting_capture=True)."""
+        ast = builder_from_json.build()
+        fallback_opcodes = set()
+        for prog in ast['programs']:
+            for rung in prog['rungs']:
+                for instr in rung['instructions']:
+                    if instr.get('phase_b5_3_awaiting_capture'):
+                        assert instr['source'] == 'il_fallback'
+                        fallback_opcodes.add(instr.get('opcode_label'))
+        assert 'TON' in fallback_opcodes or 'CTU_INT' in fallback_opcodes, \
+            f"IL fallback 최소 하나 존재해야 함. 실제: {fallback_opcodes}"
+
+    def test_timer_counter_kinds_present(self, builder_from_json):
+        """by_kind 에 'timer', 'counter' 가 존재 (>= 1)."""
+        ast = builder_from_json.build()
+        by_kind = ast['stats']['by_kind']
+        assert by_kind.get('timer', 0) >= 1, f"timer kind: {by_kind.get('timer', 0)}"
+        assert by_kind.get('counter', 0) >= 1, f"counter kind: {by_kind.get('counter', 0)}"
+
+    def test_timer_counter_params_shape(self, builder_from_json):
+        """timer 는 preset_time, counter 는 preset_value 키 구조."""
+        ast = builder_from_json.build()
+        for prog in ast['programs']:
+            for rung in prog['rungs']:
+                for instr in rung['instructions']:
+                    if instr.get('kind') == 'timer':
+                        params = instr.get('params', {})
+                        assert 'preset_time' in params, f"timer 에 preset_time 키 누락"
+                    elif instr.get('kind') == 'counter':
+                        params = instr.get('params', {})
+                        assert 'preset_value' in params, f"counter 에 preset_value 키 누락"
+
+    def test_no_phase_b5_3_pending_placeholder(self, builder_from_json):
+        """phase_b5_3_pending (구 명칭) 키 가진 instruction 은 0개 (awaiting_capture 로 변경)."""
+        ast = builder_from_json.build()
+        old_pending = [
+            instr
+            for prog in ast['programs']
+            for rung in prog['rungs']
+            for instr in rung['instructions']
+            if 'phase_b5_3_pending' in instr
+        ]
+        assert len(old_pending) == 0, f"구 phase_b5_3_pending 키 잔존: {len(old_pending)}"
+
+    def test_variants_loaded_from_grammar(self, builder_from_json):
+        """_load_timer_counter_variants() 가 grammar JSON 에서 variant 3개 로드."""
+        variants = builder_from_json._load_timer_counter_variants()
+        # timer_tof(10), timer_ton(81), counter_ctu(243)
+        assert 10 in variants, "TOF variant 누락"
+        assert 81 in variants, "TON variant 누락"
+        assert 243 in variants, "CTU_INT variant 누락"
+        assert variants[10]['kind'] == 'timer'
+        assert variants[81]['kind'] == 'timer'
+        assert variants[243]['kind'] == 'counter'
 
 
 if __name__ == '__main__':

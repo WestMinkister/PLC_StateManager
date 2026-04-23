@@ -329,18 +329,28 @@ class ProgramASTBuilder:
             if token_type == 'FB_DEFINITION':
                 func_id = token.get('func_id')
                 opcode_label = self.resolve_function_name(func_id)
-                phase_b5_pending = func_id in {81, 243}  # TOF(10)는 B.5.3 DOTALL fix로 bytecode 매칭 성공
+                phase_b5_3_awaiting_capture = func_id in {81, 243}  # TON, CTU_INT 만 awaiting_capture
                 params = self._extract_fb_params(token, token_subset)
                 raw_hex = self._extract_raw_hex(token, token_subset)
 
+                # B.5.3: variant 테이블 조회로 kind 결정
+                variants = self._load_timer_counter_variants()
+                variant = variants.get(func_id)
+                if variant:
+                    kind = variant['kind']  # 'timer' or 'counter'
+                    if variant.get('opcode_label'):
+                        opcode_label = variant['opcode_label']  # e.g. "TOF"
+                else:
+                    kind = 'function_call'
+
                 instr = {
-                    'kind': 'function_call',
-                    'opcode_label': opcode_label if not phase_b5_pending else None,
+                    'kind': kind,
+                    'opcode_label': opcode_label if not phase_b5_3_awaiting_capture else None,
                     'func_id': func_id,
                     'params': params,
                     'byte_offset': byte_offset,
                     'raw_hex': raw_hex,
-                    'phase_b5_pending': phase_b5_pending,
+                    'phase_b5_3_awaiting_capture': phase_b5_3_awaiting_capture,
                     'stack_op': None,
                     'source': 'bytecode',
                     'parse_quality': 'full',
@@ -461,6 +471,33 @@ class ProgramASTBuilder:
 
         return instructions
 
+    def _load_timer_counter_variants(self) -> Dict[int, Dict[str, Any]]:
+        """protocol_grammar.json 에서 timer/counter variant 테이블 로드.
+
+        Returns:
+            {func_id: {'kind': 'timer'|'counter', 'opcode_label': str, 'parameter_hint': str}}
+        """
+        if hasattr(self, '_variant_cache'):
+            return self._variant_cache
+
+        variants = {}
+        try:
+            grammar_path = Path(__file__).parent / 'protocol_grammar.json'
+            grammar = json.loads(grammar_path.read_text(encoding='utf-8'))
+            fb_variants = grammar.get('grammar_tokens', {}).get('FB_DEFINITION', {}).get('variants', [])
+            for v in fb_variants:
+                if v.get('kind') in ('timer', 'counter') and 'func_id' in v and isinstance(v['func_id'], int):
+                    variants[v['func_id']] = {
+                        'kind': v['kind'],
+                        'opcode_label': v.get('opcode_label'),
+                        'parameter_hint': v.get('parameter_hint', ''),
+                    }
+        except Exception:
+            pass  # 파일 없거나 변종 없으면 빈 딕셔너리
+
+        self._variant_cache = variants
+        return variants
+
     def _extract_fb_params(
         self,
         fb_def_token: Dict[str, Any],
@@ -523,9 +560,26 @@ class ProgramASTBuilder:
                 if 'addr' in addr_token:
                     out_addrs.append(addr_token['addr'])
 
+        # B.5.3: preset_time / preset_value 추출 (raw_hex 가 있으면)
+        preset_time = None
+        preset_value = None
+        raw_hex = self._extract_raw_hex(fb_def_token, tokens_in_range)
+        if raw_hex:
+            try:
+                raw_bytes = bytes.fromhex(raw_hex)
+                # 'T#...s' 또는 'T#...ms' ASCII 리터럴 탐색 (Timer preset)
+                match = re.search(rb'T#\d+(?:\.\d+)?(?:ms|s|m|h|d)', raw_bytes)
+                if match:
+                    preset_time = match.group(0).decode('ascii', errors='replace')
+            except Exception:
+                pass
+
         return {
             'in': in_addrs,
             'out': out_addrs,
+            'preset_time': preset_time,
+            'preset_value': preset_value,
+            'instance': None,  # Phase B.5.3-post 에서 INST 바인딩 해결
         }
 
     def _extract_raw_hex(
@@ -827,33 +881,61 @@ class ProgramASTBuilder:
                 il_rung_instructions = self._get_il_rung_instructions(program_idx, rung_idx)
                 instructions = self._apply_il_fallback(instructions, il_rung_instructions, rung_idx)
 
-                # S7: Timer/Counter placeholder hook (B.5.3 대비)
-                # IL에서 TON/CTU_INT를 발견하면 phase_b5_3_pending 플래그 설정 (TOF는 bytecode에서 복구됨, B.5.3 DOTALL fix)
+                # B.5.3: Timer/Counter IL fallback (NewProgram3 부재 시)
+                # TON/CTU_INT 같이 bytecode 에 없는 Timer/Counter OPCODE 를 IL 정보 기반으로 생성
                 for il_instr in il_rung_instructions:
-                    if il_instr.get('is_function_call'):
-                        il_opcode = il_instr.get('opcode', '')
-                        if il_opcode in {'TON', 'CTU_INT'}:
-                            # 이미 bytecode에서 파싱된 function_call이 있는지 확인
-                            # (TON/CTU_INT는 func_id=81/243; TOF(10)는 bytecode 매칭 성공)
-                            has_timer_in_bc = any(
-                                instr.get('phase_b5_pending') and instr.get('kind') == 'function_call'
-                                for instr in instructions
-                            )
-                            if not has_timer_in_bc:
-                                # placeholder instruction 생성 (실제 bytecode 매칭은 B.5.3에서)
-                                timer_instr = {
-                                    'kind': 'function_call',
-                                    'opcode_label': None,
-                                    'func_id': None,
-                                    'byte_offset': -1,
-                                    'stack_op': None,
-                                    'source': 'il_fallback',
-                                    'parse_quality': 'il_fallback',
-                                    'phase_b5_3_pending': True,  # S7: placeholder hook
-                                    'timer_opcode': il_opcode,
-                                    'params': {'in': il_instr.get('operands', []), 'out': []},
-                                }
-                                instructions.append(timer_instr)
+                    if not il_instr.get('is_function_call'):
+                        continue
+                    il_opcode = il_instr.get('opcode', '')
+                    if il_opcode not in {'TON', 'CTU_INT'}:
+                        continue
+
+                    # 이미 bytecode 에서 매칭된 instruction 이 있는지 체크 (func_id=81/243)
+                    target_func_id = {'TON': 81, 'CTU_INT': 243}[il_opcode]
+                    has_in_bc = any(
+                        instr.get('func_id') == target_func_id and instr.get('source') == 'bytecode'
+                        for instr in instructions
+                    )
+                    if has_in_bc:
+                        continue  # 이미 bytecode 에 있으면 fallback 생성 안 함
+
+                    # IL fallback instruction 생성 (kind 는 timer/counter)
+                    kind = 'timer' if il_opcode == 'TON' else 'counter'
+
+                    # IL operand 에서 preset 추출 (T# 패턴 또는 숫자)
+                    operands = il_instr.get('operands', [])
+                    preset_time = None
+                    preset_value = None
+                    for op in operands:
+                        op_str = str(op)
+                        m = re.search(r'T#\d+(?:\.\d+)?(?:ms|s|m|h|d)', op_str)
+                        if m:
+                            preset_time = m.group(0)
+                            break
+                        # 숫자 상수 (counter 용)
+                        if kind == 'counter' and op_str.strip().isdigit():
+                            preset_value = int(op_str.strip())
+
+                    fallback_instr = {
+                        'kind': kind,
+                        'opcode_label': il_opcode,
+                        'func_id': target_func_id,
+                        'byte_offset': -1,
+                        'stack_op': None,
+                        'source': 'il_fallback',
+                        'parse_quality': 'il_fallback',
+                        'phase_b5_3_awaiting_capture': True,  # 명칭 변경: 외부 pcapng 입력 대기
+                        'timer_opcode': il_opcode if kind == 'timer' else None,
+                        'counter_opcode': il_opcode if kind == 'counter' else None,
+                        'params': {
+                            'in': operands,
+                            'out': [],
+                            'preset_time': preset_time,
+                            'preset_value': preset_value,
+                            'instance': None,
+                        },
+                    }
+                    instructions.append(fallback_instr)
 
                 # B.5.2 보강: rung.parse_quality 계산
                 # 이 rung의 instruction parse_quality 분포를 기반으로 rung 레벨의 parse_quality 결정
@@ -891,6 +973,8 @@ class ProgramASTBuilder:
         # 종류별 instruction 집계 (S1/S2/S4 확장)
         by_kind = {
             'function_call': 0,
+            'timer': 0,  # B.5.3: Timer kind 도입
+            'counter': 0,  # B.5.3: Counter kind 도입
             'contact': 0,
             'coil': 0,
             'system_flag': 0,
