@@ -294,6 +294,45 @@ python3 plc_semantic_diff.py --values values_1.json values_2.json
 - 쓰기 명령어 (W/0xE1) 지원
 - 단일 변수 값 변경 기능
 
+## 통합 CLI — `plc_state_manager.py` (Phase B.7)
+
+6단계 플로우 ①②③④ 를 단일 CLI 로 묶어 실행. ⑤⑥ 은 B.6 이후 추가 예정.
+
+### Sub-commands
+
+| 명령 | 설명 | 대응 플로우 |
+|:---:|---|:---:|
+| `extract` | pcapng/JSON → 프로그램 AST 추출 | ① |
+| `compare` | 두 AST 를 rung·instruction 수준에서 비교 | ②③ |
+| `backup`  | PLC 변수 값 백업 (`plc_value_backup.py` 래핑) | ④ |
+| `flow`    | ①②③④ 한 번에 순차 실행 | ①~④ |
+
+### 사용 예
+
+```bash
+# ① pcapng 에서 AST 추출
+python plc_state_manager.py extract docs/0423.pcapng -o ast.json -v
+
+# ②③ AST 비교 (ADD↔SUB, 주소 변경, Timer preset 등 감지)
+python plc_state_manager.py compare ast_a.json ast_b.json \
+    --json-out diff.json --verbose
+
+# ④ 값 백업 (자동 주소 발견)
+python plc_state_manager.py backup --read 192.168.1.100 --auto \
+    --out snapshots/values.json
+
+# 통합 워크플로 (①②③④ 한 번에)
+python plc_state_manager.py flow \
+    --pcapng docs/0423.pcapng \
+    --xg5000-ast docs/program_ast_0423_b53.json \
+    --read 192.168.1.100 \
+    --output-dir results/ \
+    --verbose
+```
+
+각 sub-command 는 `--help` 로 세부 옵션 확인 가능.
+기존 독립 도구 (`plc_program_parser.py`, `plc_ast_diff.py`, `plc_value_backup.py`) 는 그대로 유지되어 단독 실행도 가능.
+
 ## 다음 마일스톤
 
 - Milestone 3.x: 변수 파라미터화 + 읽기 주기 설정

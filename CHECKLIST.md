@@ -1,6 +1,6 @@
 # PLC_StateManager — 진행 체크리스트
 
-> **최종 업데이트**: 2026-04-24 KST (공식 XGT 명세 반영 + Phase B.4 완료)
+> **최종 업데이트**: 2026-04-24 KST (Phase B.7 통합 CLI 완료, 6단계 ①~④ 단일 진입점)
 > **전역 CLAUDE.md**가 이 파일을 세션 핸드오프 키파일로 사용함. 매 작업 완료 시 갱신할 것.
 > **궁극 프로젝트**: `PLC_ProcessAnalyzer` (GitHub, AI 학습/프로세스 분석 엔진) — Claude 메모리 `project_ultimate_vision.md` 참조
 > **StateManager 6단계 공식 플로우**: 메모리 `project_state_manager_flow.md` (사용자 2026-04-23 확정)
@@ -50,12 +50,14 @@
 | **B.7** | 통합 CLI `plc_state_manager.py` | 전 단계 | 1-2 |
 
 ### 사용자 6단계 공식 플로우
-1. ① PLC로부터 프로그램 구조 가져오기 ✅ **Phase B.1~B.5.3 완료**
-2. ② 현 XG5000 프로젝트와 비교 ✅ **Phase B.4 완료** (plc_ast_diff.py)
+1. ① PLC로부터 프로그램 구조 가져오기 ✅ **Phase B.1~B.5.3 완료** (`plc_state_manager.py extract`)
+2. ② 현 XG5000 프로젝트와 비교 ✅ **Phase B.4 완료** (`plc_state_manager.py compare`)
 3. ③ 일치/불일치 판별 ✅ **Phase B.4 완료** (rung·instruction 수준)
-4. ④ 값 백업 ✅ **M3 완료**
-5. ⑤ 타이밍에 값 밀어넣기
-6. ⑥ 실패 변수 진단
+4. ④ 값 백업 ✅ **M3 완료** (`plc_state_manager.py backup`)
+5. ⑤ 타이밍에 값 밀어넣기 ⏳ **Phase B.6 대기** (사용자 write pcapng 필요)
+6. ⑥ 실패 변수 진단 ⏳ **Phase B.6+/M4 이후**
+
+**통합 CLI (Phase B.7)**: ①②③④ 를 `python plc_state_manager.py flow --pcapng X --xg5000-ast Y --read Z` 한 번에 실행 가능.
 
 ### Phase B.1 완료 체크 (2026-04-23 밤)
 
@@ -162,6 +164,43 @@
    - G. FB instance 변경 (params.instance)
 - [x] pytest: 90/90 통과 (45 기존 + 45 ast_diff) → **B.4-4 추가 후 45/45로 유지**
 - [x] **6단계 플로우 ③ 일치/불일치 판별 단계 활성화**
+
+### Phase B.7 완료 체크 (2026-04-24)
+
+- [x] 신규 모듈 `plc_state_manager.py` — 6단계 플로우 단일 CLI orchestrator
+- [x] **B.7-1** skeleton + extract + compare (커밋 c01b8ae)
+   - `extract` (①): pcapng → AST 추출 (ProgramASTBuilder 래핑)
+   - `compare` (②③): AST rung·instruction 수준 비교 (diff_ast 래핑)
+   - argparse sub_parsers 패턴, 기존 모듈 단독 실행 보존
+- [x] **B.7-2** backup + flow orchestrator (커밋 0e6a1ac)
+   - `backup` (④): `plc_value_backup.py` subprocess wrap (8개 옵션 승계)
+   - `flow`: ①②③④ 순차 실행 (부분 성공 허용, skipped 메시지)
+- [x] CLI 사용 예:
+   ```bash
+   # ① AST 추출
+   python plc_state_manager.py extract docs/0423.pcapng -o ast.json
+   
+   # ②③ AST 비교
+   python plc_state_manager.py compare a.json b.json --json-out diff.json
+   
+   # ④ 값 백업 (live PLC)
+   python plc_state_manager.py backup --read 192.168.1.100 --auto --out values.json
+   
+   # ①②③④ 한 번에
+   python plc_state_manager.py flow --pcapng docs/0423.pcapng \
+       --xg5000-ast docs/program_ast_0423_b53.json \
+       --read 192.168.1.100 \
+       --output-dir results/
+   ```
+- [x] pytest: 100/100 통과 (90 기존 + 10 state_manager 신규)
+- [x] **사용자 6단계 플로우 ①②③④ 단일 CLI 활성화**
+
+### Phase B.7 후속 (Out of Scope, B.6 완료 후)
+
+- [ ] **⑤ replay sub-command** — `plc_write_replay.py` subprocess wrap 추가
+- [ ] **⑥ diagnose sub-command** — 쓰기 실패 원인 진단 (신규 `plc_diagnose.py` 필요)
+- [ ] **XML → AST 자동 합성** — `--xg5000-xml` 직접 지원 (현재는 `--xg5000-ast` 만)
+- [ ] **실시간 캡처** — `--live-capture --interface eth0` (tcpdump 통합)
 
 ### Phase B.4 후속 (Out of Scope, 향후 세션)
 
