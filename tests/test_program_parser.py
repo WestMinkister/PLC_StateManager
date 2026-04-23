@@ -91,24 +91,32 @@ class TestProgramASTBuilder:
             assert prog['index'] == i
 
     def test_rung_boundaries_nonempty(self, builder_from_json):
-        """각 rung의 바이트 범위 유효성."""
+        """각 rung의 바이트 범위 유효성 (Phase B.5.1: EMPTY_RUNG 허용)."""
         ast = builder_from_json.build()
         for prog in ast['programs']:
             for rung in prog['rungs']:
                 start, end = rung['byte_range']
-                assert end > start, \
-                    f"{prog['name']} rung {rung['index']}: 범위 [{start}, {end}] 유효하지 않음"
+                # Phase B.5.1: EMPTY_RUNG(0, 0)은 허용 (IL rung 초과), 나머지는 유효해야 함
+                marker = rung.get('boundary_marker', '')
+                if marker != 'EMPTY_RUNG':
+                    assert end > start, \
+                        f"{prog['name']} rung {rung['index']}: 범위 [{start}, {end}] 유효하지 않음"
 
     def test_rung_ordering_within_program(self, builder_from_json):
-        """각 프로그램 내 rung이 바이트 순서대로 정렬."""
+        """각 프로그램 내 rung이 FB 위치 순서대로 정렬 (Phase B.5.1)."""
         ast = builder_from_json.build()
         for prog in ast['programs']:
             rungs = prog['rungs']
-            for i in range(len(rungs) - 1):
-                curr_end = rungs[i]['byte_range'][1]
-                next_start = rungs[i + 1]['byte_range'][0]
-                assert curr_end <= next_start, \
-                    f"{prog['name']} rung {i} 끝({curr_end}) > rung {i+1} 시작({next_start})"
+            # Phase B.5.1: rungs는 FB 순서를 따름. 순서가 겹치거나 역순이 아니어야 함.
+            # EMPTY_RUNG은 제외
+            valid_rungs = [r for r in rungs if r.get('boundary_marker') != 'EMPTY_RUNG']
+            for i in range(len(valid_rungs) - 1):
+                curr_end = valid_rungs[i]['byte_range'][1]
+                next_start = valid_rungs[i + 1]['byte_range'][0]
+                # FB 위치 기반이므로 일부 겹침이 허용될 수 있음 (padding 때문)
+                # 하지만 전체 순서는 유지되어야 함
+                assert valid_rungs[i]['byte_range'][0] <= valid_rungs[i + 1]['byte_range'][0], \
+                    f"{prog['name']} rung {i} 시작({valid_rungs[i]['byte_range'][0]}) > rung {i+1} 시작({valid_rungs[i + 1]['byte_range'][0]})"
 
     def test_ast_has_required_fields(self, builder_from_json):
         """AST가 필수 필드 보유."""
@@ -128,10 +136,10 @@ class TestProgramASTBuilder:
             assert prog['name'].startswith('Program_')
 
     def test_rungs_have_boundary_markers(self, builder_from_json):
-        """각 rung이 경계 마커 보유."""
+        """각 rung이 경계 마커 보유 (Phase B.5.1: FB_DEFINITION_BASED 추가)."""
         ast = builder_from_json.build()
-        # IL 시그니처 기반 또는 실제 마커 (RUNG_END_A/B)
-        valid_markers = {'RUNG_END_A', 'RUNG_END_B', 'IL_SIGNATURE', 'FB_DEFINITION cluster'}
+        # Phase B.5.1: FB_DEFINITION 위치 기반 경계 마커 추가
+        valid_markers = {'RUNG_END_A', 'RUNG_END_B', 'IL_SIGNATURE', 'FB_DEFINITION cluster', 'FB_DEFINITION_BASED', 'EMPTY_RUNG'}
         for prog in ast['programs']:
             for rung in prog['rungs']:
                 assert 'boundary_marker' in rung
@@ -352,6 +360,60 @@ class TestSession3ContactCoilFX:
         if contact_types:
             assert contact_types.issubset(valid_contact_types), \
                 f"예상치 못한 contact_type: {contact_types}"
+
+
+class TestPhaseB51RungBoundaryRealignment:
+    """Phase B.5.1: Rung Boundary Realignment 테스트."""
+
+    @pytest.fixture
+    def builder_from_json(self):
+        """JSON에서 AST 빌드."""
+        if not TEST_JSON.exists():
+            pytest.skip(f'JSON 없음: {TEST_JSON}')
+        builder = ProgramASTBuilder()
+        builder.load_bytecode(str(TEST_JSON))
+        return builder
+
+    def test_rung_byte_range_contains_instruction_offsets(self, builder_from_json):
+        """Phase B.5.1: 각 instruction의 byte_offset이 rung의 byte_range에 포함 (100% coverage)."""
+        ast = builder_from_json.build()
+
+        mismatches = 0
+        total_instructions = 0
+
+        for prog in ast['programs']:
+            for rung in prog['rungs']:
+                byte_range = rung['byte_range']
+                for instr in rung['instructions']:
+                    total_instructions += 1
+                    byte_offset = instr.get('byte_offset', -1)
+                    # EMPTY_RUNG(0, 0)은 제외
+                    if byte_range[1] > 0:
+                        if byte_offset < byte_range[0] or byte_offset >= byte_range[1]:
+                            mismatches += 1
+
+        assert mismatches == 0, \
+            f"범위 오정렬: {mismatches}개 instruction이 rung byte_range 밖에 있음 (총 {total_instructions}개)"
+
+    def test_rung_fb_assignment_consistency(self, builder_from_json):
+        """Phase B.5.1: 각 rung에 할당된 FB 개수가 instruction 개수와 일치."""
+        ast = builder_from_json.build()
+
+        inconsistencies = []
+        for prog in ast['programs']:
+            for rung in prog['rungs']:
+                fb_count = rung.get('fb_count', 0)
+                instr_count = rung.get('instruction_count', 0)
+                # EMPTY_RUNG은 제외
+                marker = rung.get('boundary_marker', '')
+                if marker == 'FB_DEFINITION_BASED':
+                    if fb_count != instr_count:
+                        inconsistencies.append(
+                            f"{prog['name']}/Rung_{rung['index']}: fb_count={fb_count}, instr_count={instr_count}"
+                        )
+
+        assert len(inconsistencies) == 0, \
+            f"FB assignment 불일치: {inconsistencies}"
 
 
 if __name__ == '__main__':

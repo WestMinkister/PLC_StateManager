@@ -1,5 +1,5 @@
 {
-  "source": "/Users/kangminki/Desktop/Important/AI/SmartFactory/PLC_StateManager/docs/0423_PLC로부터열기.pcapng",
+  "source": "/Users/kangminki/Desktop/Important/AI/SmartFactory/PLC_StateManager/docs/bytecode_scan_0423.json",
   "grammar_version": "2026-04-23",
   "programs": [
     {
@@ -21,10 +21,10 @@
         {
           "index": 0,
           "byte_range": [
-            519,
+            469,
             619
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -48,7 +48,8 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 100
+          "raw_bytes_len": 150,
+          "fb_count": 1
         }
       ]
     },
@@ -74,10 +75,10 @@
         {
           "index": 0,
           "byte_range": [
-            372,
-            449
+            322,
+            472
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -93,15 +94,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 77
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 1,
           "byte_range": [
-            449,
-            527
+            386,
+            536
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -117,15 +119,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 78
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 2,
           "byte_range": [
-            527,
-            604
+            459,
+            609
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -141,15 +144,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 77
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 3,
           "byte_range": [
-            604,
+            532,
             682
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -165,7 +169,8 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 78
+          "raw_bytes_len": 150,
+          "fb_count": 1
         }
       ]
     },
@@ -191,10 +196,10 @@
         {
           "index": 0,
           "byte_range": [
-            655,
-            743
+            605,
+            755
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -210,15 +215,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 88
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 1,
           "byte_range": [
-            743,
-            831
+            678,
+            828
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -234,15 +240,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 88
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 2,
           "byte_range": [
-            831,
-            919
+            751,
+            901
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -258,15 +265,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 88
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 3,
           "byte_range": [
-            919,
+            858,
             1008
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -282,7 +290,8 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 89
+          "raw_bytes_len": 150,
+          "fb_count": 1
         }
       ]
     },
@@ -310,10 +319,10 @@
         {
           "index": 0,
           "byte_range": [
-            963,
-            995
+            913,
+            1063
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -329,15 +338,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 32
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 1,
           "byte_range": [
-            995,
-            1028
+            933,
+            1083
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -353,15 +363,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 33
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 2,
           "byte_range": [
-            1028,
-            1060
+            953,
+            1103
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -377,15 +388,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 32
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 3,
           "byte_range": [
-            1060,
-            1093
+            1086,
+            1236
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -401,15 +413,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 33
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 4,
           "byte_range": [
-            1093,
-            1125
+            1183,
+            1333
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -425,15 +438,16 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 32
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 5,
           "byte_range": [
-            1125,
-            1158
+            1203,
+            1353
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "FB_DEFINITION_BASED",
           "instructions": [
             {
               "kind": "function_call",
@@ -449,73 +463,80 @@
             }
           ],
           "instruction_count": 1,
-          "raw_bytes_len": 33
+          "raw_bytes_len": 150,
+          "fb_count": 1
         },
         {
           "index": 6,
           "byte_range": [
-            1158,
-            1190
+            0,
+            0
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "EMPTY_RUNG",
           "instructions": [],
           "instruction_count": 0,
-          "raw_bytes_len": 32
+          "raw_bytes_len": 0,
+          "fb_count": 0
         },
         {
           "index": 7,
           "byte_range": [
-            1190,
-            1223
+            0,
+            0
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "EMPTY_RUNG",
           "instructions": [],
           "instruction_count": 0,
-          "raw_bytes_len": 33
+          "raw_bytes_len": 0,
+          "fb_count": 0
         },
         {
           "index": 8,
           "byte_range": [
-            1223,
-            1255
+            0,
+            0
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "EMPTY_RUNG",
           "instructions": [],
           "instruction_count": 0,
-          "raw_bytes_len": 32
+          "raw_bytes_len": 0,
+          "fb_count": 0
         },
         {
           "index": 9,
           "byte_range": [
-            1255,
-            1288
+            0,
+            0
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "EMPTY_RUNG",
           "instructions": [],
           "instruction_count": 0,
-          "raw_bytes_len": 33
+          "raw_bytes_len": 0,
+          "fb_count": 0
         },
         {
           "index": 10,
           "byte_range": [
-            1288,
-            1320
+            0,
+            0
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "EMPTY_RUNG",
           "instructions": [],
           "instruction_count": 0,
-          "raw_bytes_len": 32
+          "raw_bytes_len": 0,
+          "fb_count": 0
         },
         {
           "index": 11,
           "byte_range": [
-            1320,
-            1353
+            0,
+            0
           ],
-          "boundary_marker": "IL_SIGNATURE",
+          "boundary_marker": "EMPTY_RUNG",
           "instructions": [],
           "instruction_count": 0,
-          "raw_bytes_len": 33
+          "raw_bytes_len": 0,
+          "fb_count": 0
         }
       ]
     }

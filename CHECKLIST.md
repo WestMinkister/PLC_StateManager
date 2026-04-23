@@ -88,6 +88,17 @@
 - [x] pytest: 24/24 통과 (18기존 + 6신규)
 - [x] validate_extraction.py 리포트: Program 4/4 ✓, Rung 21 ✓, Function recall 15/18 ✓
 
+### Phase B.5.1 완료 체크 (2026-04-23 저녁)
+
+- [x] `plc_program_parser.py::locate_rung_boundaries()` 재설계 (FB_DEFINITION 위치 기반)
+- [x] rung byte_range를 FB 위치로부터 역으로 계산 (padding 휴리스틱)
+- [x] `build()` 메서드에서 `program_fbs` 인자 추가 및 전달
+- [x] 테스트 업데이트 (EMPTY_RUNG, FB_DEFINITION_BASED 마커)
+- [x] 신규 pytest 2개 추가 (rung boundary 정합성 검증)
+- [x] **범위 적중률: 26.7% → 100% (11개 오정렬 instruction 해결)**
+- [x] pytest: 26/26 통과 (기존 24개 유지 + 신규 2개)
+- [x] 갱신된 AST 산출: `docs/program_ast_0423.json`
+
 ### 사용자 기여 필요 (중기 — Phase B.6 대비)
 - [ ] XG5000 **값 쓰기 pcapng 3종**:
    - `docs/0424_write_success.pcapng` (존재하는 MW 주소 성공)

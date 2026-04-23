@@ -153,10 +153,16 @@ class ProgramASTBuilder:
 
         return programs
 
-    def locate_rung_boundaries(self, program: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """IL 시그니처 기반 rung 경계 생성.
+    def locate_rung_boundaries(self, program: Dict[str, Any], program_fbs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """FB_DEFINITION 기반 rung 경계 재정의 (Phase B.5.1).
 
-        Protocol 바이트 마커(RUNG_END)가 없으므로 IL 분포(1+4+4+12)로 rung 경계 확정.
+        핵심: FB_DEFINITION의 실제 바이트 위치를 기준으로 rung 경계를 재계산.
+        - 각 rung이 보유해야 할 FB 개수는 IL ground truth 기반
+        - FB의 byte_offset으로부터 rung의 byte_range를 역으로 결정
+
+        Args:
+            program: 프로그램 정의
+            program_fbs: 이 프로그램에 속하는 FB_DEFINITION 객체 리스트
 
         반환: [{'index': 0, 'byte_range': [s,e], 'boundary_marker': '...', 'instructions': [], 'instruction_count': 0}]
         """
@@ -172,28 +178,83 @@ class ProgramASTBuilder:
         }
 
         rung_count = expected_rung_counts.get(prog_idx, 0)
-        byte_range = program['byte_range']
 
-        # rung을 byte_range 내에서 균등하게 분할
-        start_pos = byte_range[0]
-        end_pos = byte_range[1]
-        total_bytes = max(end_pos - start_pos, 1)
+        # Phase B.5.1: FB_DEFINITION 기반 rung 경계 재계산
+        if program_fbs and len(program_fbs) > 0:
+            # FB를 rung에 할당
+            fbs_per_rung = len(program_fbs) // rung_count
+            extra_fbs = len(program_fbs) % rung_count
 
-        for rung_idx in range(rung_count):
-            rung_start = start_pos + (total_bytes * rung_idx) // rung_count
-            if rung_idx < rung_count - 1:
-                rung_end = start_pos + (total_bytes * (rung_idx + 1)) // rung_count
-            else:
-                rung_end = end_pos
+            for rung_idx in range(rung_count):
+                # 이 rung이 가져야 할 FB 범위
+                start_fb_in_rung = sum(
+                    fbs_per_rung + (1 if i < extra_fbs else 0)
+                    for i in range(rung_idx)
+                )
+                num_fbs_for_this_rung = fbs_per_rung + (1 if rung_idx < extra_fbs else 0)
 
-            rungs.append({
-                'index': rung_idx,
-                'byte_range': [rung_start, rung_end],
-                'boundary_marker': 'IL_SIGNATURE',
-                'instructions': [],  # Session 2에서 채움
-                'instruction_count': 0,
-                'raw_bytes_len': max(rung_end - rung_start, 0),
-            })
+                # 이 rung의 FB들
+                rung_fbs = program_fbs[start_fb_in_rung:start_fb_in_rung + num_fbs_for_this_rung]
+
+                if rung_fbs:
+                    # FB 위치로부터 rung 경계 결정
+                    # rung_start: 첫 FB의 시작 - 여유(padding)
+                    # rung_end: 마지막 FB의 시작 + 충분한 여유
+                    first_fb_pos = min(fb['token']['pos'] for fb in rung_fbs)
+                    last_fb_pos = max(fb['token']['pos'] for fb in rung_fbs)
+
+                    # padding: 단순 휴리스틱 (FB 간 거리의 절반)
+                    if len(rung_fbs) > 1:
+                        avg_gap = (last_fb_pos - first_fb_pos) // (len(rung_fbs) - 1)
+                        padding = max(avg_gap // 2, 20)
+                    else:
+                        padding = 50
+
+                    rung_start = max(0, first_fb_pos - padding)
+                    rung_end = last_fb_pos + padding * 2
+
+                    rungs.append({
+                        'index': rung_idx,
+                        'byte_range': [rung_start, rung_end],
+                        'boundary_marker': 'FB_DEFINITION_BASED',
+                        'instructions': [],
+                        'instruction_count': 0,
+                        'raw_bytes_len': max(rung_end - rung_start, 0),
+                        'fb_count': len(rung_fbs),  # 디버깅용
+                    })
+                else:
+                    # 이 rung에 할당된 FB가 없음 (초과된 IL rung)
+                    rungs.append({
+                        'index': rung_idx,
+                        'byte_range': [0, 0],
+                        'boundary_marker': 'EMPTY_RUNG',
+                        'instructions': [],
+                        'instruction_count': 0,
+                        'raw_bytes_len': 0,
+                        'fb_count': 0,
+                    })
+        else:
+            # fallback: IL 기반 균등 분할 (프로그램이 FB가 없을 때)
+            byte_range = program['byte_range']
+            start_pos = byte_range[0]
+            end_pos = byte_range[1]
+            total_bytes = max(end_pos - start_pos, 1)
+
+            for rung_idx in range(rung_count):
+                rung_start = start_pos + (total_bytes * rung_idx) // rung_count
+                if rung_idx < rung_count - 1:
+                    rung_end = start_pos + (total_bytes * (rung_idx + 1)) // rung_count
+                else:
+                    rung_end = end_pos
+
+                rungs.append({
+                    'index': rung_idx,
+                    'byte_range': [rung_start, rung_end],
+                    'boundary_marker': 'IL_SIGNATURE',
+                    'instructions': [],
+                    'instruction_count': 0,
+                    'raw_bytes_len': max(rung_end - rung_start, 0),
+                })
 
         return rungs
 
@@ -484,13 +545,14 @@ class ProgramASTBuilder:
 
         # 각 프로그램 내 rung 추출
         for program in programs_list:
-            rungs = self.locate_rung_boundaries(program)
-            program['rungs'] = rungs
-            program['rung_count'] = len(rungs)
-
             # 이 프로그램에 속하는 FB 인덱스
             fb_indices = program.get('fb_indices', [])
             program_fbs = [all_fb_defs[i] for i in fb_indices if i < len(all_fb_defs)]
+
+            # Phase B.5.1: FB 위치 기반 rung 경계 재계산
+            rungs = self.locate_rung_boundaries(program, program_fbs)
+            program['rungs'] = rungs
+            program['rung_count'] = len(rungs)
 
             # 각 rung 내 명령 파싱
             fb_idx_in_prog = 0
