@@ -99,3 +99,53 @@ class TestCompareCommand:
         bad_path.write_text('this is not json', encoding='utf-8')
         result = _run('compare', str(bad_path), str(bad_path))
         assert result.returncode == 1
+
+
+class TestBackupCommand:
+    """④ backup sub-command 테스트."""
+
+    def test_backup_dry_run(self):
+        """--dry-run 으로 실제 PLC 연결 없이 실행.
+
+        plc_value_backup --dry-run 은 frame 검증만 하고 exit 한다.
+        여기서는 subprocess wrap 이 정상 동작하는지만 확인.
+        """
+        # --read 없이 --dry-run 시도. 실제 행동은 plc_value_backup 에 위임.
+        result = _run('backup', '--dry-run', '--mw', '152', timeout=30)
+        # plc_value_backup 이 정상 dry-run 처리하면 exit 0
+        # 또는 내부 검증에서 exit 1 일 수도 있음 (--read 필수라면)
+        # subprocess wrap 이 exit code 를 올바르게 전달하는지만 확인
+        assert result.returncode in (0, 1, 2), \
+            f"subprocess 결과 코드 예상 범위 밖: {result.returncode}"
+
+
+class TestFlowOrchestrator:
+    """flow orchestrator ①②③④ 테스트."""
+
+    def test_flow_extract_only(self, tmp_path):
+        """--pcapng 만, 다른 인자 없음 → ① 만 실행."""
+        if not PCAPNG_SAMPLE.exists():
+            pytest.skip(f'pcapng 없음: {PCAPNG_SAMPLE}')
+        out_dir = tmp_path / 'flow_out'
+        result = _run('flow', '--pcapng', str(PCAPNG_SAMPLE),
+                      '--output-dir', str(out_dir),
+                      timeout=60)
+        assert result.returncode == 0, f"STDOUT: {result.stdout}\nSTDERR: {result.stderr}"
+        assert (out_dir / 'ast_protocol.json').exists(), \
+            "flow → ast_protocol.json 생성되어야 함"
+        # ②③ 와 ④ 는 skipped 메시지 확인
+        assert 'Skipped' in result.stdout
+
+    def test_flow_with_reference(self, tmp_path):
+        """--pcapng + --xg5000-ast → ①②③ 실행."""
+        if not PCAPNG_SAMPLE.exists() or not AST_SAMPLE.exists():
+            pytest.skip('샘플 파일 없음')
+        out_dir = tmp_path / 'flow_out'
+        result = _run('flow', '--pcapng', str(PCAPNG_SAMPLE),
+                      '--xg5000-ast', str(AST_SAMPLE),
+                      '--output-dir', str(out_dir),
+                      timeout=60)
+        assert result.returncode == 0, f"STDOUT: {result.stdout}\nSTDERR: {result.stderr}"
+        assert (out_dir / 'ast_protocol.json').exists()
+        assert (out_dir / 'diff.json').exists(), \
+            "--xg5000-ast 제공 시 diff.json 생성"

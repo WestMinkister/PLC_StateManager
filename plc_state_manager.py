@@ -18,6 +18,7 @@ import argparse
 import json
 import sys
 import os
+import subprocess
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -45,7 +46,14 @@ def make_parser() -> argparse.ArgumentParser:
   # ②③ 두 AST 비교 (rung·instruction 수준)
   python plc_state_manager.py compare ast_a.json ast_b.json --json-out diff.json
 
-  # (Commit 2 예정) ④ 값 백업 / flow orchestrator
+  # ④ PLC 값 백업 (plc_value_backup 래핑)
+  python plc_state_manager.py backup --read 192.168.1.100 --auto --out values.json
+
+  # ①②③④ 한 번에 (flow orchestrator)
+  python plc_state_manager.py flow \\
+      --pcapng docs/0423.pcapng \\
+      --xg5000-ast docs/program_ast_0423_b53.json \\
+      --output-dir results/
 """,
     )
     subparsers = parser.add_subparsers(dest='command', help='sub-command')
@@ -80,6 +88,45 @@ def make_parser() -> argparse.ArgumentParser:
     p_compare.add_argument('--ignore-il-fallback', action='store_true',
                            help='source=il_fallback instruction 변경을 무시')
     p_compare.set_defaults(func=cmd_compare)
+
+    # ④ backup
+    p_backup = subparsers.add_parser(
+        'backup',
+        help='④ PLC 변수 값 백업 (plc_value_backup 래핑)',
+    )
+    p_backup.add_argument('--read', type=str, metavar='IP',
+                          help='실기 PLC IP (live read)')
+    p_backup.add_argument('--config', type=str, metavar='JSON',
+                          help='변수 설정 JSON')
+    p_backup.add_argument('--mw', nargs='+', type=int, metavar='ADDR',
+                          help='MW 주소 목록')
+    p_backup.add_argument('--auto', action='store_true',
+                          help='자동 발견 모드')
+    p_backup.add_argument('--out', type=str, default='snapshots/values.json',
+                          help='출력 파일 (기본: snapshots/values.json)')
+    p_backup.add_argument('--port', type=int, default=2004,
+                          help='PLC 포트 (기본: 2004)')
+    p_backup.add_argument('--samples', type=int, default=1,
+                          help='샘플 개수 (기본: 1)')
+    p_backup.add_argument('--dry-run', action='store_true',
+                          help='실제 연결 없이 frame 검증만')
+    p_backup.set_defaults(func=cmd_backup)
+
+    # flow orchestrator
+    p_flow = subparsers.add_parser(
+        'flow',
+        help='①②③④ 순차 실행 (full workflow)',
+    )
+    p_flow.add_argument('--pcapng', required=True,
+                        help='입력 pcapng (① 필수)')
+    p_flow.add_argument('--xg5000-ast', dest='xg5000_ast',
+                        help='참조 AST JSON (②③ 비교용, 없으면 skip)')
+    p_flow.add_argument('--read', type=str, metavar='IP',
+                        help='실기 PLC IP (④ 값 백업, 없으면 skip)')
+    p_flow.add_argument('--output-dir', dest='output_dir', default='results',
+                        help='결과 디렉토리 (기본: results)')
+    p_flow.add_argument('--verbose', action='store_true')
+    p_flow.set_defaults(func=cmd_flow)
 
     return parser
 
@@ -138,6 +185,104 @@ def cmd_compare(args: argparse.Namespace) -> int:
         write_json_diff(diff, args.json_out)
         print(f"\n✓ JSON 저장: {args.json_out}")
 
+    return 0
+
+
+def cmd_backup(args: argparse.Namespace) -> int:
+    """④ plc_value_backup.py 를 subprocess 로 실행 (CLI surface 승계).
+
+    이유: plc_value_backup 의 로직이 main() 안에 위치하고 인자 surface 가
+    풍부하므로 subprocess wrap 이 BC 가장 안전.
+    """
+    script_path = Path(__file__).parent / 'plc_value_backup.py'
+    if not script_path.exists():
+        print(f"오류: plc_value_backup.py 없음: {script_path}", file=sys.stderr)
+        return 1
+
+    cmd = [sys.executable, str(script_path)]
+    if args.read:     cmd.extend(['--read', args.read])
+    if args.config:   cmd.extend(['--config', args.config])
+    if args.mw:       cmd.extend(['--mw'] + [str(x) for x in args.mw])
+    if args.auto:     cmd.append('--auto')
+    if args.out:      cmd.extend(['--out', args.out])
+    if args.port:     cmd.extend(['--port', str(args.port)])
+    if args.samples:  cmd.extend(['--samples', str(args.samples)])
+    if args.dry_run:  cmd.append('--dry-run')
+
+    # subprocess 실행. capture_output=False → 실시간 출력 투과
+    result = subprocess.run(cmd)
+    return result.returncode
+
+
+def cmd_flow(args: argparse.Namespace) -> int:
+    """①②③④ 순차 실행 orchestrator.
+
+    동작:
+      ① --pcapng 로부터 AST 추출 → output_dir/ast_protocol.json (필수)
+      ②③ --xg5000-ast 제공 시 diff 수행 → output_dir/diff.json
+      ④ --read IP 제공 시 값 백업 → output_dir/values.json
+
+    각 단계는 실패해도 다음 단계 시도 (부분 성공 허용).
+    """
+    out_dir = Path(args.output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # ① Extract AST
+    print("\n=== ① AST 추출 ===")
+    pcapng_path = Path(args.pcapng)
+    if not pcapng_path.exists():
+        print(f"✗ pcapng 없음: {pcapng_path}", file=sys.stderr)
+        return 1
+
+    try:
+        builder = ProgramASTBuilder()
+        builder.load_bytecode(str(pcapng_path))
+        ast_prot = builder.build()
+    except Exception as e:
+        print(f"✗ AST 생성 실패: {e}", file=sys.stderr)
+        return 1
+
+    ast_prot_path = out_dir / 'ast_protocol.json'
+    with ast_prot_path.open('w', encoding='utf-8') as f:
+        json.dump(ast_prot, f, indent=2, ensure_ascii=False)
+    print(f"✓ {ast_prot_path}")
+    if args.verbose:
+        stats = ast_prot.get('stats', {})
+        print(f"  Programs: {stats.get('total_programs', '?')}")
+        print(f"  Rungs:    {stats.get('total_rungs', '?')}")
+
+    # ②③ Compare (optional)
+    if args.xg5000_ast:
+        print("\n=== ②③ AST 비교 ===")
+        try:
+            ast_ref = load_ast(args.xg5000_ast)
+            diff = diff_ast(ast_prot, ast_ref, opts=DiffOptions())
+            print_ast_diff(diff, verbose=args.verbose, summary_only=not args.verbose)
+            diff_path = out_dir / 'diff.json'
+            write_json_diff(diff, str(diff_path))
+            print(f"✓ {diff_path}")
+        except Exception as e:
+            print(f"⚠ 비교 실패 (다음 단계 진행): {e}", file=sys.stderr)
+    else:
+        print("\n=== ②③ Skipped (--xg5000-ast 없음) ===")
+
+    # ④ Backup (optional)
+    if args.read:
+        print("\n=== ④ 값 백업 ===")
+        backup_out = out_dir / 'values.json'
+        script_path = Path(__file__).parent / 'plc_value_backup.py'
+        cmd = [sys.executable, str(script_path),
+               '--read', args.read, '--auto',
+               '--out', str(backup_out)]
+        result = subprocess.run(cmd)
+        if result.returncode == 0:
+            print(f"✓ {backup_out}")
+        else:
+            print(f"⚠ 백업 실패 (exit={result.returncode})")
+    else:
+        print("\n=== ④ Skipped (--read 없음) ===")
+
+    print(f"\n✓ Flow 완료: {out_dir}")
     return 0
 
 
