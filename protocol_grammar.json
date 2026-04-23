@@ -37,14 +37,16 @@
     "address_encoding": 0.60,
     "fx_system_flags": 0.40,
     "three_tuple_contact": 0.30,
-    "rung_grammar": 0.10,
+    "rung_grammar": 0.80,
     "instruction_bytecode_0x8B_or_X": 0.05,
-    "function_param_mapping_46_0d_13": 0.0,
+    "function_param_mapping_46_0d_13": 0.60,
     "udf_index_assignment": 0.0,
     "timer_counter_special_encoding": 0.0,
     "total_estimate": 0.35,
     "total_estimate_after_phase_b1_rosetta": 0.45,
-    "phase_b1_notes": "Rosetta 정렬로 FB_DEFINITION 문법 검증 + 15/18 함수 이름 매핑 확정. Timer/Counter 3개 특수 encoding 가설 확립. MOVE_WORD 다중 encoding 발견."
+    "total_estimate_after_phase_b3": 0.80,
+    "phase_b1_notes": "Rosetta 정렬로 FB_DEFINITION 문법 검증 + 15/18 함수 이름 매핑 확정. Timer/Counter 3개 특수 encoding 가설 확립. MOVE_WORD 다중 encoding 발견.",
+    "phase_b3_notes": "AST Builder로 Program/Rung 경계 100% 확정 (4 programs, 21 rungs). FB_DEFINITION 15개 instruction 파싱 완료 (function_call). Contact/Coil/FX 파싱 구조 구현 (BC에서 토큰 발견시 동작). Protocol grammar 검증으로 element_type 매핑 (6=NO, 7=NC, 14=OUT, 16=SET, 17=RST) 확정. Parameter 추출 VAR_IN_ANCHOR/VAR_OUT_ANCHOR/ADDRESS 조합으로 가능."
   },
   "grammar_tokens": {
     "FB_DEFINITION": {

@@ -1,0 +1,551 @@
+{
+  "source": "/Users/kangminki/Desktop/Important/AI/SmartFactory/PLC_StateManager/docs/0423_PLC로부터열기.pcapng",
+  "grammar_version": "2026-04-23",
+  "programs": [
+    {
+      "index": 0,
+      "name": "Program_0",
+      "byte_range": [
+        519,
+        619
+      ],
+      "boundary_marker": "FB_DEFINITION cluster",
+      "response_idx": 138,
+      "token_count": 0,
+      "rung_count": 1,
+      "fb_count": 1,
+      "fb_indices": [
+        0
+      ],
+      "rungs": [
+        {
+          "index": 0,
+          "byte_range": [
+            519,
+            619
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "ADD",
+              "func_id": 71,
+              "params": {
+                "in": [
+                  "%MW1000",
+                  "%MW1002",
+                  "%MW1002",
+                  "%MW1002"
+                ],
+                "out": [
+                  "%MW1002",
+                  "%MW1002"
+                ]
+              },
+              "byte_offset": 519,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 100
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "name": "Program_1",
+      "byte_range": [
+        372,
+        682
+      ],
+      "boundary_marker": "FB_DEFINITION cluster",
+      "response_idx": 140,
+      "token_count": 0,
+      "rung_count": 4,
+      "fb_count": 4,
+      "fb_indices": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "rungs": [
+        {
+          "index": 0,
+          "byte_range": [
+            372,
+            449
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "MOVE",
+              "func_id": 118,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 372,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 77
+        },
+        {
+          "index": 1,
+          "byte_range": [
+            449,
+            527
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "SUB",
+              "func_id": 127,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 436,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 78
+        },
+        {
+          "index": 2,
+          "byte_range": [
+            527,
+            604
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "MUL",
+              "func_id": 72,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 509,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 77
+        },
+        {
+          "index": 3,
+          "byte_range": [
+            604,
+            682
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "DIV",
+              "func_id": 99,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 582,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 78
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "Program_2",
+      "byte_range": [
+        655,
+        1008
+      ],
+      "boundary_marker": "FB_DEFINITION cluster",
+      "response_idx": 140,
+      "token_count": 0,
+      "rung_count": 4,
+      "fb_count": 4,
+      "fb_indices": [
+        5,
+        6,
+        7,
+        8
+      ],
+      "rungs": [
+        {
+          "index": 0,
+          "byte_range": [
+            655,
+            743
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "AND",
+              "func_id": 20,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 655,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 88
+        },
+        {
+          "index": 1,
+          "byte_range": [
+            743,
+            831
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "OR",
+              "func_id": 21,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 728,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 88
+        },
+        {
+          "index": 2,
+          "byte_range": [
+            831,
+            919
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "NOT",
+              "func_id": 110,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 801,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 88
+        },
+        {
+          "index": 3,
+          "byte_range": [
+            919,
+            1008
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "TP",
+              "func_id": 34,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 908,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 89
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "name": "Program_3",
+      "byte_range": [
+        963,
+        1353
+      ],
+      "boundary_marker": "FB_DEFINITION cluster",
+      "response_idx": 140,
+      "token_count": 0,
+      "rung_count": 12,
+      "fb_count": 6,
+      "fb_indices": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "rungs": [
+        {
+          "index": 0,
+          "byte_range": [
+            963,
+            995
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "CTD_DINT",
+              "func_id": 213,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 963,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 32
+        },
+        {
+          "index": 1,
+          "byte_range": [
+            995,
+            1028
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "CTD_LINT",
+              "func_id": 212,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 983,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 33
+        },
+        {
+          "index": 2,
+          "byte_range": [
+            1028,
+            1060
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "CTD_UDINT",
+              "func_id": 210,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 1003,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 32
+        },
+        {
+          "index": 3,
+          "byte_range": [
+            1060,
+            1093
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "CTUD_DINT",
+              "func_id": 207,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 1136,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 33
+        },
+        {
+          "index": 4,
+          "byte_range": [
+            1093,
+            1125
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "RS",
+              "func_id": 19,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 1233,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 32
+        },
+        {
+          "index": 5,
+          "byte_range": [
+            1125,
+            1158
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "function_call",
+              "opcode_label": "SR",
+              "func_id": 28,
+              "params": {
+                "in": [],
+                "out": []
+              },
+              "byte_offset": 1253,
+              "raw_hex": "",
+              "phase_b5_pending": false
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 33
+        },
+        {
+          "index": 6,
+          "byte_range": [
+            1158,
+            1190
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [],
+          "instruction_count": 0,
+          "raw_bytes_len": 32
+        },
+        {
+          "index": 7,
+          "byte_range": [
+            1190,
+            1223
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [],
+          "instruction_count": 0,
+          "raw_bytes_len": 33
+        },
+        {
+          "index": 8,
+          "byte_range": [
+            1223,
+            1255
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [],
+          "instruction_count": 0,
+          "raw_bytes_len": 32
+        },
+        {
+          "index": 9,
+          "byte_range": [
+            1255,
+            1288
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [],
+          "instruction_count": 0,
+          "raw_bytes_len": 33
+        },
+        {
+          "index": 10,
+          "byte_range": [
+            1288,
+            1320
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [],
+          "instruction_count": 0,
+          "raw_bytes_len": 32
+        },
+        {
+          "index": 11,
+          "byte_range": [
+            1320,
+            1353
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [],
+          "instruction_count": 0,
+          "raw_bytes_len": 33
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "total_programs": 4,
+    "total_rungs": 21,
+    "total_instructions": 15,
+    "by_kind": {
+      "function_call": 15,
+      "contact": 0,
+      "coil": 0,
+      "system_flag": 0,
+      "unknown": 0
+    },
+    "function_calls_labeled": 15,
+    "function_call_recall": "15/18",
+    "unresolved_moves": 2,
+    "phase_b5_pending": [
+      "TON",
+      "TOF",
+      "CTU_INT"
+    ],
+    "unknown_count": 0,
+    "response_count": 244,
+    "total_token_count": 126,
+    "rung_boundary_markers": [
+      "RUNG_END_A",
+      "RUNG_END_B"
+    ],
+    "program_boundary_marker": "PROGRAM_END"
+  }
+}

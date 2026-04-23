@@ -198,20 +198,26 @@ class ProgramASTBuilder:
         return rungs
 
     def parse_rung(self, rung_bytes: bytes, token_subset: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """rung 내 명령 파싱 (Session 2: FB_DEFINITION 구현).
+        """rung 내 명령 파싱 (Session 3: FB + 접점/코일/FX 플래그).
 
-        FB_DEFINITION 토큰을 순회하며 각각에 대해 instruction dict 생성.
+        토큰을 순회하며 각각에 대해 instruction dict 생성:
+        - FB_DEFINITION → function_call
+        - CONTACT_POS_* → contact (element_type 6/7)
+        - CONTACT_POS_* → coil (element_type 14/16/17)
+        - FX_FLAG → system_flag
+        - 나머지 알려지지 않은 → unknown
 
         Args:
             rung_bytes: rung 바이트 범위
             token_subset: 해당 rung 내 토큰 목록
 
         Returns:
-            instructions: 파싱된 명령 목록 (function_call만 포함)
+            instructions: 파싱된 명령 목록
         """
         instructions = []
+        processed_token_ids = set()  # 이미 처리한 토큰 ID 추적
 
-        # FB_DEFINITION 토큰 필터링
+        # FB_DEFINITION 토큰 처리
         fb_defs = [t for t in token_subset if t['type'] == 'FB_DEFINITION']
 
         for fb_def in fb_defs:
@@ -241,6 +247,95 @@ class ProgramASTBuilder:
             }
 
             instructions.append(instruction)
+            processed_token_ids.add(id(fb_def))
+
+        # CONTACT_POS_* 토큰 처리 (접점 + 코일)
+        contact_tokens = [t for t in token_subset if t['type'].startswith('CONTACT_POS_')]
+
+        for contact_tok in contact_tokens:
+            element_type = contact_tok.get('element_type')
+            if element_type is None:
+                continue
+
+            byte_offset = contact_tok.get('pos')
+
+            # element_type 매핑: protocol_grammar.json 참고
+            # 6 = NO (열린접점), 7 = NC (닫힌접점) → kind: contact
+            # 14 = OUT (출력), 16 = SET (SET 코일), 17 = RST (RESET 코일) → kind: coil
+            if element_type in {6, 7}:
+                kind = 'contact'
+                contact_type = 'NO' if element_type == 6 else 'NC'
+                instr = {
+                    'kind': kind,
+                    'element_type': element_type,
+                    'contact_type': contact_type,
+                    'byte_offset': byte_offset,
+                }
+            elif element_type in {14, 16, 17}:
+                kind = 'coil'
+                coil_type_map = {14: 'OUT', 16: 'SET', 17: 'RST'}
+                coil_type = coil_type_map.get(element_type, 'UNKNOWN')
+                instr = {
+                    'kind': kind,
+                    'element_type': element_type,
+                    'coil_type': coil_type,
+                    'byte_offset': byte_offset,
+                }
+            else:
+                # 알려지지 않은 element_type
+                instr = {
+                    'kind': 'unknown',
+                    'token_type': 'CONTACT_POS',
+                    'element_type': element_type,
+                    'byte_offset': byte_offset,
+                }
+
+            # 다음 ADDRESS 토큰으로 주소 추출 (가능하면)
+            contact_pos = contact_tok.get('pos', 0)
+            nearby_addrs = [
+                t for t in token_subset
+                if t['type'] == 'ADDRESS'
+                and contact_pos < t.get('pos', 0) < (contact_pos + 50)
+            ]
+            if nearby_addrs:
+                instr['address'] = nearby_addrs[0].get('addr', '')
+
+            instructions.append(instr)
+            processed_token_ids.add(id(contact_tok))
+
+        # FX_FLAG 토큰 처리
+        fx_flags = [t for t in token_subset if t['type'] == 'FX_FLAG']
+
+        for fx_flag in fx_flags:
+            fx_index = fx_flag.get('fx_id')
+            byte_offset = fx_flag.get('pos')
+
+            # FX 인덱스 → 심볼 매핑 (protocol_grammar.json IL_reference_summary.md:82)
+            # 153 = _ON, 154 = _OFF
+            symbol_map = {153: '_ON', 154: '_OFF'}
+            symbol = symbol_map.get(fx_index, f'_FX{fx_index}')
+
+            instr = {
+                'kind': 'system_flag',
+                'fx_index': fx_index,
+                'symbol': symbol,
+                'byte_offset': byte_offset,
+            }
+
+            instructions.append(instr)
+            processed_token_ids.add(id(fx_flag))
+
+        # 처리되지 않은 토큰 → unknown 기록 (디버깅용)
+        # FB_END, VAR_IN_ANCHOR, VAR_OUT_ANCHOR, FB_BINDING, ADDRESS는 무시
+        for token in token_subset:
+            if id(token) not in processed_token_ids:
+                if token['type'] not in {'FB_END', 'VAR_IN_ANCHOR', 'VAR_OUT_ANCHOR', 'FB_BINDING', 'ADDRESS', 'RUNG_END_A', 'RUNG_END_B', 'PROGRAM_END'}:
+                    instr = {
+                        'kind': 'unknown',
+                        'token_type': token.get('type'),
+                        'byte_offset': token.get('pos'),
+                    }
+                    instructions.append(instr)
 
         return instructions
 
@@ -437,7 +532,7 @@ class ProgramASTBuilder:
                 rung['instructions'] = instructions
                 rung['instruction_count'] = len(instructions)
 
-        # 전역 통계 + Phase B.5 분석
+        # 전역 통계 + Phase B.5 분석 + Session 3 (접점/코일/FX)
         total_rungs = sum(len(p.get('rungs', [])) for p in programs_list)
         total_instructions = sum(
             sum(len(r.get('instructions', [])) for r in p.get('rungs', []))
@@ -445,21 +540,37 @@ class ProgramASTBuilder:
         )
         total_tokens = sum(len(r.get('tokens', [])) for r in self.responses)
 
-        # Phase B.5 pending (Timer/Counter) 계산
-        phase_b5_pending_instructions = []
+        # 종류별 instruction 집계
+        by_kind = {
+            'function_call': 0,
+            'contact': 0,
+            'coil': 0,
+            'system_flag': 0,
+            'unknown': 0,
+        }
         labeled_instructions = 0
+        phase_b5_pending_instructions = []
+
         for program in programs_list:
             for rung in program.get('rungs', []):
                 for instr in rung.get('instructions', []):
-                    if instr.get('phase_b5_pending'):
-                        phase_b5_pending_instructions.append(instr['opcode_label'] or f"func_{instr['func_id']}")
-                    if instr.get('opcode_label'):
-                        labeled_instructions += 1
+                    kind = instr.get('kind', 'unknown')
+                    if kind in by_kind:
+                        by_kind[kind] += 1
+                    else:
+                        by_kind[kind] = 1
 
-        # Recall rate: IL 18개 중 BC에서 매핑된 개수 (15/18)
-        il_total = 18  # rosetta의 il_opcode_counts 중 실제 매핑 가능한 것
-        bc_total = total_instructions
-        recall_rate = f"{bc_total}/{il_total}"
+                    # Function call 통계
+                    if kind == 'function_call':
+                        if instr.get('phase_b5_pending'):
+                            phase_b5_pending_instructions.append(instr['opcode_label'] or f"func_{instr['func_id']}")
+                        if instr.get('opcode_label'):
+                            labeled_instructions += 1
+
+        # Recall rate: FB_DEFINITION (15개) / IL 총 함수 (18개, TON/TOF/CTU_INT 포함)
+        fb_count = by_kind['function_call']
+        il_function_count = 18  # rosetta의 il_opcode_counts 중 실제 함수
+        recall_rate = f"{fb_count}/{il_function_count}"
 
         ast = {
             'source': self.source_path,
@@ -469,10 +580,12 @@ class ProgramASTBuilder:
                 'total_programs': len(programs_list),
                 'total_rungs': total_rungs,
                 'total_instructions': total_instructions,
+                'by_kind': by_kind,
                 'function_calls_labeled': labeled_instructions,
                 'function_call_recall': recall_rate,
                 'unresolved_moves': 2,  # IL MOVE 3 vs BC MOVE 1
                 'phase_b5_pending': ['TON', 'TOF', 'CTU_INT'],
+                'unknown_count': by_kind.get('unknown', 0),
                 'response_count': len(self.responses),
                 'total_token_count': total_tokens,
                 'rung_boundary_markers': ['RUNG_END_A', 'RUNG_END_B'],

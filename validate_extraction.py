@@ -90,6 +90,86 @@ def compare(xml_truth, extracted):
     return report
 
 
+def compare_with_ast(xml_truth, ast):
+    """AST vs XML 정답지 대조 (Phase B.3).
+
+    Program count, rung count, instruction 분포, address set intersection을 검증.
+    """
+    # Program/Rung 개수 검증
+    ast_program_count = ast['stats']['total_programs']
+    ast_rung_count = ast['stats']['total_rungs']
+    xml_rung_count = xml_truth['stats']['rung_count']
+
+    # Instruction 종류별 분포
+    by_kind = ast['stats'].get('by_kind', {})
+    function_calls = by_kind.get('function_call', 0)
+    contacts = by_kind.get('contact', 0)
+    coils = by_kind.get('coil', 0)
+    system_flags = by_kind.get('system_flag', 0)
+    unknown = by_kind.get('unknown', 0)
+
+    # Address set intersection
+    # AST에서 params.in/out의 주소들 수집
+    ast_addresses = set()
+    for program in ast.get('programs', []):
+        for rung in program.get('rungs', []):
+            for instr in rung.get('instructions', []):
+                if 'params' in instr:
+                    ast_addresses.update(instr['params'].get('in', []))
+                    ast_addresses.update(instr['params'].get('out', []))
+                if 'address' in instr:
+                    ast_addresses.add(instr['address'])
+
+    # XML 주소
+    xml_addresses = set(xml_truth['addresses']['word_unique'])
+
+    # Intersection
+    common_addresses = ast_addresses & xml_addresses
+    only_ast = ast_addresses - xml_addresses
+    only_xml = xml_addresses - ast_addresses
+
+    # Function call recall
+    recall_str = ast['stats'].get('function_call_recall', '0/18')
+
+    report = {
+        'pass': True,
+        'program_count': {
+            'ast': ast_program_count,
+            'expected': 4,
+            'match': ast_program_count == 4,
+        },
+        'rung_count': {
+            'ast': ast_rung_count,
+            'xml': xml_rung_count,
+            'match': ast_rung_count == xml_rung_count,
+        },
+        'instruction_distribution': {
+            'function_call': function_calls,
+            'contact': contacts,
+            'coil': coils,
+            'system_flag': system_flags,
+            'unknown': unknown,
+            'total': function_calls + contacts + coils + system_flags + unknown,
+        },
+        'function_call_recall': recall_str,
+        'address_intersection': {
+            'ast_addresses': len(ast_addresses),
+            'xml_addresses': len(xml_addresses),
+            'common': len(common_addresses),
+            'only_ast': sorted(only_ast)[:10],  # 첫 10개만
+            'only_xml': sorted(only_xml)[:10],  # 첫 10개만
+            'intersection_ratio': round(len(common_addresses) / max(len(xml_addresses), 1) * 100, 1),
+        },
+        'phase_b5_pending': ast['stats'].get('phase_b5_pending', []),
+    }
+
+    # 검증 결과
+    if not (ast_program_count == 4 and ast_rung_count == 21):
+        report['pass'] = False
+
+    return report
+
+
 def print_report(rep):
     acc = rep['address_accuracy']
     print("=== 주소 대조 ===")
@@ -118,11 +198,58 @@ def print_report(rep):
     print(f"  추출: {rep['rung_status']['extracted_count']} ({rep['rung_status']['note']})")
 
 
+def print_ast_report(rep):
+    """AST vs XML 대조 리포트 출력."""
+    status = "✓ PASS" if rep['pass'] else "✗ FAIL"
+    print(f"\n{status} AST vs XML 대조\n")
+
+    print("=== Program/Rung Count ===")
+    pc = rep['program_count']
+    print(f"  Program: {pc['ast']}/{pc['expected']} {'✓' if pc['match'] else '✗'}")
+
+    rc = rep['rung_count']
+    print(f"  Rung: {rc['ast']} (XML: {rc['xml']}) {'✓' if rc['match'] else '✗'}")
+
+    print("\n=== Instruction 분포 (kind별) ===")
+    dist = rep['instruction_distribution']
+    print(f"  function_call: {dist['function_call']}")
+    print(f"  contact: {dist['contact']}")
+    print(f"  coil: {dist['coil']}")
+    print(f"  system_flag: {dist['system_flag']}")
+    print(f"  unknown: {dist['unknown']}")
+    print(f"  총합: {dist['total']}")
+
+    print("\n=== Function Call Recall ===")
+    print(f"  {rep['function_call_recall']} (IL 18개 중 BC 매핑)")
+
+    print("\n=== Address Intersection ===")
+    addr = rep['address_intersection']
+    print(f"  AST 주소: {addr['ast_addresses']}개")
+    print(f"  XML 주소: {addr['xml_addresses']}개")
+    print(f"  일치: {addr['common']}개 ({addr['intersection_ratio']}%)")
+    if addr['only_ast']:
+        print(f"  AST만: {addr['only_ast']}")
+    if addr['only_xml']:
+        print(f"  XML만: {addr['only_xml']}")
+
+    print("\n=== Phase B.5 Pending ===")
+    print(f"  {rep['phase_b5_pending']}")
+
+
 def main():
-    parser = argparse.ArgumentParser(description='Phase B.0 추출 결과 vs XML 정답지 대조')
+    parser = argparse.ArgumentParser(
+        description='프로토콜 추출 결과 vs XML/AST 정답지 대조',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python validate_extraction.py --xml docs/xg5000_full_manyfunction.json --dump snapshots/dump_20260423_101530/
+  python validate_extraction.py --xml docs/xg5000_full_manyfunction.json --snapshot snapshots/values.json
+  python validate_extraction.py --xml docs/xg5000_full_manyfunction.json --ast docs/program_ast_0423.json
+""")
     parser.add_argument('--xml', required=True, help='XG5000 XML 정답지 파일')
     parser.add_argument('--dump', help='Phase B.0 덤프 디렉토리 (snapshots/dump_<ts>/)')
     parser.add_argument('--snapshot', help='snapshots/values.json (덤프 없을 때)')
+    parser.add_argument('--ast', help='Phase B.3 Program AST JSON')
     parser.add_argument('--json-out', help='리포트를 JSON 파일로 저장')
     args = parser.parse_args()
 
@@ -137,6 +264,27 @@ def main():
           f"{xml_truth['stats']['unique_function_count']} 함수, "
           f"{xml_truth['stats']['rung_count']} rung\n")
 
+    # AST 비교 모드 (Phase B.3)
+    if args.ast:
+        ast_path = Path(args.ast)
+        if not ast_path.exists():
+            print(f"Error: AST not found: {args.ast}")
+            sys.exit(1)
+
+        print(f"AST 분석: {args.ast}")
+        with open(ast_path, encoding='utf-8') as f:
+            ast = json.load(f)
+
+        report = compare_with_ast(xml_truth, ast)
+        print_ast_report(report)
+
+        if args.json_out:
+            with open(args.json_out, 'w', encoding='utf-8') as f:
+                json.dump(report, f, indent=2, ensure_ascii=False)
+            print(f"\n✓ JSON 리포트 → {args.json_out}")
+        sys.exit(0)
+
+    # 기존 덤프/스냅샷 비교 모드
     if args.dump:
         extracted = load_extracted_from_dump(args.dump)
         print(f"덤프 분석: {args.dump}")
@@ -144,7 +292,7 @@ def main():
         extracted = load_extracted_from_snapshot(args.snapshot)
         print(f"스냅샷 분석: {args.snapshot}")
     else:
-        print("Error: --dump 또는 --snapshot 중 하나 필요")
+        print("Error: --dump, --snapshot, --ast 중 하나 필요")
         sys.exit(1)
 
     report = compare(xml_truth, extracted)

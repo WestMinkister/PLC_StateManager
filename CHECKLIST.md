@@ -76,6 +76,18 @@
 - [x] `protocol_grammar.json`에 `x_command_structure` 섹션 추가, 해독률 45→~48%
 - [x] 이전 의문 해결: BC 스캐너가 X 응답에서 토큰 거의 못 찾은 이유 규명 (42개 빈 응답 + 44개 2B 상태 + 48개 중 2개만 BZh)
 
+### Phase B.3 완료 체크 (2026-04-23 밤)
+
+- [x] `plc_program_parser.py` — parse_rung() 확장 (CONTACT_POS_*/FX_FLAG 핸들러)
+- [x] `plc_program_parser.py::build()` — stats.by_kind 추가 (function_call/contact/coil/system_flag/unknown)
+- [x] `validate_extraction.py::compare_with_ast()` 신규 메서드 (Program/Rung 검증, Address intersection)
+- [x] `validate_extraction.py` CLI `--ast` 인자 추가
+- [x] 신규 테스트 6개 (Session 3: by_kind 통계, FX 심볼 매핑, element_type 구분)
+- [x] AST 산출: `docs/program_ast_0423.json` (programs=4, rungs=21, instructions=15 FB + 0 contact/coil/FX = 15)
+- [x] Function call recall 15/18 (TON/TOF/CTU_INT 3개는 Phase B.5 이월)
+- [x] pytest: 24/24 통과 (18기존 + 6신규)
+- [x] validate_extraction.py 리포트: Program 4/4 ✓, Rung 21 ✓, Function recall 15/18 ✓
+
 ### 사용자 기여 필요 (중기 — Phase B.6 대비)
 - [ ] XG5000 **값 쓰기 pcapng 3종**:
    - `docs/0424_write_success.pcapng` (존재하는 MW 주소 성공)
