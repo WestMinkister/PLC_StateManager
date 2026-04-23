@@ -16,6 +16,12 @@ from plc_ast_diff import (
     instruction_hash,
     load_ast,
     DiffOptions,
+    align_rungs_simple,
+    align_programs_by_name,
+    detect_instruction_changes,
+    diff_instruction_list,
+    diff_rung,
+    diff_ast,
 )
 
 
@@ -195,3 +201,163 @@ class TestLoadAst:
         bad_file.write_text('{"other": "data"}')
         with pytest.raises(ValueError, match="'programs'"):
             load_ast(bad_file)
+
+
+# ============================================================================
+# Commit 2 테스트: Aligner, Detector, diff 로직
+# ============================================================================
+
+def _make_instr(kind, **fields):
+    """테스트용 instruction 생성 헬퍼."""
+    base = {'kind': kind}
+    base.update(fields)
+    return base
+
+
+def _make_rung(index, instrs, byte_range=None):
+    """테스트용 rung 생성 헬퍼."""
+    return {
+        'index': index,
+        'byte_range': byte_range or [0, 100],
+        'boundary_marker': 'TEST',
+        'instructions': instrs,
+    }
+
+
+def _make_program(index, name, rungs, fb_count=0):
+    """테스트용 program 생성 헬퍼."""
+    return {
+        'index': index,
+        'name': name,
+        'rungs': rungs,
+        'rung_count': len(rungs),
+        'fb_count': fb_count,
+        'byte_range': [0, 1000],
+        'boundary_marker': 'TEST',
+    }
+
+
+def _make_ast(programs, by_kind=None):
+    """테스트용 AST 생성 헬퍼."""
+    return {
+        'grammar_version': '2026-04-23',
+        'programs': programs,
+        'stats': {
+            'total_programs': len(programs),
+            'total_rungs': sum(p['rung_count'] for p in programs),
+            'by_kind': by_kind or {},
+        },
+    }
+
+
+class TestChangeDetection:
+    """변경 유형 A~G 7개 테스트."""
+
+    def test_diff_function_call_opcode_change(self):
+        """A. ADD → SUB 감지."""
+        ia = _make_instr('function_call', opcode_label='ADD', func_id=71, params={'in': ['%MW1'], 'out': ['%MW2']})
+        ib = _make_instr('function_call', opcode_label='SUB', func_id=127, params={'in': ['%MW1'], 'out': ['%MW2']})
+        changes = detect_instruction_changes(ia, ib, opts=DiffOptions())
+        assert 'opcode_label' in changes
+        assert changes['opcode_label'] == ('ADD', 'SUB')
+        assert 'func_id' in changes
+
+    def test_diff_timer_preset_change(self):
+        """B. T#3s → T#5s 감지."""
+        ia = _make_instr('timer', opcode_label='TOF', func_id=10, params={'in': [], 'out': [], 'preset_time': 'T#3s', 'preset_value': None})
+        ib = _make_instr('timer', opcode_label='TOF', func_id=10, params={'in': [], 'out': [], 'preset_time': 'T#5s', 'preset_value': None})
+        changes = detect_instruction_changes(ia, ib, opts=DiffOptions())
+        assert 'params.preset_time' in changes
+        # normalize_time_literal 이 float 로 변환
+        assert changes['params.preset_time'] == (3.0, 5.0)
+
+    def test_diff_counter_preset_change(self):
+        """C. 3 → 5 감지."""
+        ia = _make_instr('counter', opcode_label='CTU_INT', func_id=243, params={'in': [], 'out': [], 'preset_value': 3})
+        ib = _make_instr('counter', opcode_label='CTU_INT', func_id=243, params={'in': [], 'out': [], 'preset_value': 5})
+        changes = detect_instruction_changes(ia, ib, opts=DiffOptions())
+        assert 'params.preset_value' in changes
+        assert changes['params.preset_value'] == (3, 5)
+
+    def test_diff_contact_address_change(self):
+        """D. Contact address %MW1000 → %MW2000 감지."""
+        ia = _make_instr('contact', element_type=6, contact_type='NO', address='%MW1000')
+        ib = _make_instr('contact', element_type=6, contact_type='NO', address='%MW2000')
+        changes = detect_instruction_changes(ia, ib, opts=DiffOptions())
+        assert 'address' in changes
+        assert changes['address'] == ('%MW1000', '%MW2000')
+
+    def test_diff_rung_added(self):
+        """E. rung 추가 감지."""
+        ast_a = _make_ast([_make_program(0, 'P0', [_make_rung(0, [])])])
+        ast_b = _make_ast([_make_program(0, 'P0', [_make_rung(0, []), _make_rung(1, [])])])
+        diff = diff_ast(ast_a, ast_b)
+        assert 'P0' in diff['programs_changed']
+        assert len(diff['programs_changed']['P0']['rungs_added']) == 1
+
+    def test_diff_contact_type_change(self):
+        """F. Contact NO → NC (element_type 6 → 7) 감지."""
+        ia = _make_instr('contact', element_type=6, contact_type='NO', address='%MW1000')
+        ib = _make_instr('contact', element_type=7, contact_type='NC', address='%MW1000')
+        changes = detect_instruction_changes(ia, ib, opts=DiffOptions())
+        assert 'element_type' in changes
+        assert 'contact_type' in changes
+
+    def test_diff_fb_instance_change(self):
+        """G. FB instance INST1 → INST2 감지."""
+        ia = _make_instr('timer', opcode_label='TOF', func_id=10, params={'in': [], 'out': [], 'instance': 'INST1'})
+        ib = _make_instr('timer', opcode_label='TOF', func_id=10, params={'in': [], 'out': [], 'instance': 'INST2'})
+        changes = detect_instruction_changes(ia, ib, opts=DiffOptions())
+        assert 'params.instance' in changes
+        assert changes['params.instance'] == ('INST1', 'INST2')
+
+
+class TestAligner:
+    """Rung Aligner 단위 테스트."""
+
+    def test_align_rungs_simple_equal_length(self):
+        """같은 길이의 rung 리스트 정렬."""
+        ra = [_make_rung(0, []), _make_rung(1, [])]
+        rb = [_make_rung(0, []), _make_rung(1, [])]
+        pairs = align_rungs_simple(ra, rb)
+        assert len(pairs) == 2
+        assert all(p[0] is not None and p[1] is not None for p in pairs)
+
+    def test_align_rungs_simple_left_longer(self):
+        """왼쪽이 더 긴 경우."""
+        ra = [_make_rung(0, []), _make_rung(1, []), _make_rung(2, [])]
+        rb = [_make_rung(0, [])]
+        pairs = align_rungs_simple(ra, rb)
+        assert len(pairs) == 3
+        assert pairs[1][1] is None  # b 는 None
+        assert pairs[2][1] is None
+
+    def test_align_rungs_simple_right_longer(self):
+        """오른쪽이 더 긴 경우."""
+        ra = [_make_rung(0, [])]
+        rb = [_make_rung(0, []), _make_rung(1, [])]
+        pairs = align_rungs_simple(ra, rb)
+        assert len(pairs) == 2
+        assert pairs[1][0] is None  # a 는 None
+
+
+class TestProgramAlignment:
+    """프로그램 name 기반 alignment 단위 테스트."""
+
+    def test_program_alignment_by_name(self):
+        """이름 기반 프로그램 매칭."""
+        progs_a = [_make_program(0, 'A', []), _make_program(1, 'B', [])]
+        progs_b = [_make_program(0, 'A', []), _make_program(1, 'B', [])]
+        result = align_programs_by_name(progs_a, progs_b)
+        assert len(result['matched']) == 2
+        assert result['added_names'] == []
+        assert result['removed_names'] == []
+
+    def test_program_added_removed(self):
+        """프로그램 추가/삭제 감지."""
+        progs_a = [_make_program(0, 'A', []), _make_program(1, 'B', [])]
+        progs_b = [_make_program(0, 'A', []), _make_program(1, 'C', [])]
+        result = align_programs_by_name(progs_a, progs_b)
+        assert len(result['matched']) == 1  # A
+        assert result['added_names'] == ['C']
+        assert result['removed_names'] == ['B']

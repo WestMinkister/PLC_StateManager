@@ -234,3 +234,387 @@ def instruction_hash(instr, *, ignore_bit: bool = True) -> str:
 
     blob = json.dumps(canonical, sort_keys=True, default=str, ensure_ascii=False)
     return hashlib.sha1(blob.encode('utf-8')).hexdigest()[:16]
+
+
+# ============================================================================
+# Aligner Protocol + 구현체 (Commit 2)
+# ============================================================================
+
+class RungAligner(Protocol):
+    """Rung 매칭 인터페이스. 향후 Hybrid aligner 교체 가능."""
+    def __call__(
+        self,
+        rungs_a: List[Dict[str, Any]],
+        rungs_b: List[Dict[str, Any]],
+    ) -> List[Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]]]]:
+        ...
+
+
+def align_rungs_simple(
+    rungs_a: List[Dict[str, Any]],
+    rungs_b: List[Dict[str, Any]],
+) -> List[Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]]]]:
+    """rung index 기반 1:1 매칭. 길이 불일치 시 짧은 쪽을 None 으로 padding.
+
+    예: len(a)=3, len(b)=5 → [(a0,b0), (a1,b1), (a2,b2), (None,b3), (None,b4)]
+    """
+    max_len = max(len(rungs_a), len(rungs_b))
+    pairs = []
+    for i in range(max_len):
+        ra = rungs_a[i] if i < len(rungs_a) else None
+        rb = rungs_b[i] if i < len(rungs_b) else None
+        pairs.append((ra, rb))
+    return pairs
+
+
+def align_programs_by_name(
+    progs_a: List[Dict[str, Any]],
+    progs_b: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """프로그램 name 기반 1:1 매칭.
+
+    반환:
+      {
+        'matched': [(prog_a, prog_b), ...],         # 양쪽 모두 있는 것
+        'added_names': [name, ...],                  # b 에만 있음
+        'removed_names': [name, ...],                # a 에만 있음
+        'rename_hints': [(name_a, name_b, reason)],  # 구조 유사하지만 name 다름
+      }
+
+    rename_hints: a의 unmatched 중 b의 unmatched 와 (rung_count, fb_count) 둘 다 일치
+    하는 쌍 발견 시. 경고 용도, 자동 rematch 하지 않음.
+    """
+    by_name_a = {p.get('name'): p for p in progs_a if p.get('name')}
+    by_name_b = {p.get('name'): p for p in progs_b if p.get('name')}
+
+    names_a = set(by_name_a.keys())
+    names_b = set(by_name_b.keys())
+    common = names_a & names_b
+    added = sorted(names_b - names_a)
+    removed = sorted(names_a - names_b)
+
+    matched = []
+    for name in sorted(common):
+        matched.append((by_name_a[name], by_name_b[name]))
+
+    # rename_hints: unmatched 쌍에서 구조 유사성 체크
+    rename_hints = []
+    for name_a in removed:
+        pa = by_name_a[name_a]
+        for name_b in added:
+            pb = by_name_b[name_b]
+            if (pa.get('rung_count') == pb.get('rung_count')
+                    and pa.get('fb_count') == pb.get('fb_count')
+                    and pa.get('rung_count') is not None):
+                rename_hints.append((
+                    name_a, name_b,
+                    f"동일 구조 (rung={pa.get('rung_count')}, fb={pa.get('fb_count')})"
+                ))
+
+    return {
+        'matched': matched,
+        'added_names': added,
+        'removed_names': removed,
+        'rename_hints': rename_hints,
+    }
+
+
+# ============================================================================
+# Detector 계층 (Commit 2)
+# ============================================================================
+
+def detect_instruction_changes(
+    instr_a: Dict[str, Any],
+    instr_b: Dict[str, Any],
+    *, opts: DiffOptions,
+) -> Dict[str, Tuple[Any, Any]]:
+    """두 instruction 의 필드별 변경 탐지 (정규화 후).
+
+    반환: {'opcode_label': (before, after), 'params.in': ([...],[...]), ...}
+          변경 없으면 {}.
+
+    기준: _INSTRUCTION_COMPARABLE_FIELDS[kind] 의 필드만 검사.
+    params 는 normalize_params 적용 후 세부 서브키 비교 (params.in, params.out,
+    params.preset_time, params.preset_value, params.instance).
+    """
+    kind_a = instr_a.get('kind', 'unknown')
+    kind_b = instr_b.get('kind', 'unknown')
+    changes: Dict[str, Tuple[Any, Any]] = {}
+
+    if kind_a != kind_b:
+        changes['kind'] = (kind_a, kind_b)
+
+    # kind 가 달라도 공통 필드 비교는 진행 (유익한 정보)
+    check_kind = kind_a if kind_a in _INSTRUCTION_COMPARABLE_FIELDS else kind_b
+    fields = _INSTRUCTION_COMPARABLE_FIELDS.get(check_kind)
+    if fields is None:
+        # shallow fallback
+        keys = (set(instr_a.keys()) | set(instr_b.keys())) - _INSTRUCTION_IGNORED_FIELDS
+        for k in sorted(keys):
+            if instr_a.get(k) != instr_b.get(k):
+                changes[k] = (instr_a.get(k), instr_b.get(k))
+        return changes
+
+    for fname in fields:
+        if fname == 'params':
+            pa = normalize_params(instr_a.get('params', {}) or {}, ignore_bit=opts.ignore_addr_bit)
+            pb = normalize_params(instr_b.get('params', {}) or {}, ignore_bit=opts.ignore_addr_bit)
+            all_keys = set(pa.keys()) | set(pb.keys())
+            for pkey in sorted(all_keys):
+                if pa.get(pkey) != pb.get(pkey):
+                    changes[f'params.{pkey}'] = (pa.get(pkey), pb.get(pkey))
+        elif fname == 'address':
+            va = normalize_address(instr_a.get('address'), ignore_bit=opts.ignore_addr_bit)
+            vb = normalize_address(instr_b.get('address'), ignore_bit=opts.ignore_addr_bit)
+            if va != vb:
+                changes['address'] = (va, vb)
+        else:
+            va = instr_a.get(fname)
+            vb = instr_b.get(fname)
+            if va != vb:
+                changes[fname] = (va, vb)
+
+    return changes
+
+
+def diff_instruction_list(
+    list_a: List[Dict[str, Any]],
+    list_b: List[Dict[str, Any]],
+    *, opts: DiffOptions,
+) -> Dict[str, Any]:
+    """한 rung 내 instruction 리스트 비교.
+
+    알고리즘:
+      1. hash_a/hash_b 계산
+      2. 양쪽 모두 사용 인덱스 플래그 관리
+      3. hash 기반 매칭 우선 (순서 보존 목적으로 index 순회):
+         - a[i] 와 b[i] hash 동일 → 변경 없음
+         - 다름 → detect_instruction_changes
+      4. 한쪽 길이 초과분 → added/removed
+
+    반환:
+      {
+        'instructions_added': [instr_b_entries],
+        'instructions_removed': [instr_a_entries],
+        'instructions_changed': [{index, before, after, changes}],
+      }
+    """
+    added: List[Dict[str, Any]] = []
+    removed: List[Dict[str, Any]] = []
+    changed: List[Dict[str, Any]] = []
+
+    max_len = max(len(list_a), len(list_b))
+    for i in range(max_len):
+        ia = list_a[i] if i < len(list_a) else None
+        ib = list_b[i] if i < len(list_b) else None
+        if ia is None:
+            added.append(ib)
+            continue
+        if ib is None:
+            removed.append(ia)
+            continue
+        ha = instruction_hash(ia, ignore_bit=opts.ignore_addr_bit)
+        hb = instruction_hash(ib, ignore_bit=opts.ignore_addr_bit)
+        if ha == hb:
+            continue  # 변경 없음
+        cchanges = detect_instruction_changes(ia, ib, opts=opts)
+        if cchanges:
+            changed.append({
+                'index': i,
+                'before': ia,
+                'after': ib,
+                'changes': cchanges,
+            })
+
+    return {
+        'instructions_added': added,
+        'instructions_removed': removed,
+        'instructions_changed': changed,
+    }
+
+
+def diff_rung(
+    rung_a: Optional[Dict[str, Any]],
+    rung_b: Optional[Dict[str, Any]],
+    *, opts: DiffOptions,
+) -> Dict[str, Any]:
+    """단일 rung 쌍 비교. 한쪽이 None 이면 rung 전체 added/removed.
+
+    반환:
+      - rung_a 만 있음: {'rung_removed': True, 'rung': rung_a}
+      - rung_b 만 있음: {'rung_added': True, 'rung': rung_b}
+      - 둘 다 있음: diff_instruction_list 결과 + {'warnings': [...]}
+    """
+    if rung_a is None and rung_b is None:
+        return {}
+    if rung_a is None:
+        return {'rung_added': True, 'rung': rung_b}
+    if rung_b is None:
+        return {'rung_removed': True, 'rung': rung_a}
+
+    result = diff_instruction_list(
+        rung_a.get('instructions', []),
+        rung_b.get('instructions', []),
+        opts=opts,
+    )
+
+    # byte_range 가 >50% 차이 시 warning
+    warnings: List[str] = []
+    br_a = rung_a.get('byte_range') or [0, 0]
+    br_b = rung_b.get('byte_range') or [0, 0]
+    len_a = max(br_a[1] - br_a[0], 1)
+    len_b = max(br_b[1] - br_b[0], 1)
+    ratio = abs(len_a - len_b) / max(len_a, len_b)
+    if ratio > 0.5:
+        warnings.append(
+            f"byte_range 크기 차이 큼 ({len_a} vs {len_b} bytes, alignment 의심)"
+        )
+
+    # il_fallback 섞임 체크
+    if opts.warn_il_fallback:
+        for side, rung in (('a', rung_a), ('b', rung_b)):
+            for instr in rung.get('instructions', []):
+                if instr.get('source') == 'il_fallback':
+                    # changed/added/removed 에 해당 instruction 이 있으면 경고
+                    # (세부 매칭은 여기서 비용이 커서 간단히 "포함" 체크만)
+                    if result['instructions_changed'] or result['instructions_added'] or result['instructions_removed']:
+                        warnings.append(
+                            f"il_fallback instruction 변경 (parse_quality={instr.get('parse_quality')})"
+                        )
+                    break
+
+    result['warnings'] = warnings
+    return result
+
+
+def diff_ast(
+    ast_a: Dict[str, Any],
+    ast_b: Dict[str, Any],
+    *, opts: Optional[DiffOptions] = None,
+) -> Dict[str, Any]:
+    """최상위 AST diff 진입점.
+
+    단계:
+      1. align_programs_by_name
+      2. 각 matched 프로그램 쌍에 대해 aligner (기본 align_rungs_simple) 로 rung 정렬
+      3. 각 rung 쌍에 대해 diff_rung
+      4. stats_diff 계산 (by_kind, parse_quality_distribution, function_call_recall)
+
+    반환 구조:
+      {
+        'grammar_version_a': str,
+        'grammar_version_b': str,
+        'programs_added': [name, ...],
+        'programs_removed': [name, ...],
+        'programs_renamed': [(a, b, reason), ...],
+        'programs_changed': {
+          'NewProgram': {
+            'rungs_added': [rung, ...],
+            'rungs_removed': [rung, ...],
+            'rungs_changed': {
+              '0': {...diff_rung result...},
+            },
+          },
+        },
+        'stats_diff': {
+          'by_kind': {kind: {'before': n, 'after': m, 'delta': m-n}, ...},
+          'parse_quality_distribution': {...},
+          'function_call_recall': {'before': '16/18', 'after': '16/18'},
+        },
+        'warnings': [global warnings],
+      }
+    """
+    if opts is None:
+        opts = DiffOptions()
+    aligner: RungAligner = opts.aligner if opts.aligner else align_rungs_simple
+
+    prog_align = align_programs_by_name(
+        ast_a.get('programs', []), ast_b.get('programs', [])
+    )
+
+    programs_changed: Dict[str, Any] = {}
+    all_warnings: List[str] = []
+
+    for prog_a, prog_b in prog_align['matched']:
+        rungs_a = prog_a.get('rungs', [])
+        rungs_b = prog_b.get('rungs', [])
+        rung_pairs = aligner(rungs_a, rungs_b)
+
+        rungs_added = []
+        rungs_removed = []
+        rungs_changed: Dict[str, Any] = {}
+        for idx, (ra, rb) in enumerate(rung_pairs):
+            rd = diff_rung(ra, rb, opts=opts)
+            if not rd:
+                continue
+            if rd.get('rung_added'):
+                rungs_added.append(rd['rung'])
+            elif rd.get('rung_removed'):
+                rungs_removed.append(rd['rung'])
+            else:
+                has_change = (
+                    rd.get('instructions_added')
+                    or rd.get('instructions_removed')
+                    or rd.get('instructions_changed')
+                )
+                if has_change:
+                    rungs_changed[str(idx)] = rd
+                    if rd.get('warnings'):
+                        all_warnings.extend(
+                            f"[{prog_a.get('name')}:rung{idx}] {w}"
+                            for w in rd['warnings']
+                        )
+
+        if rungs_added or rungs_removed or rungs_changed:
+            programs_changed[prog_a.get('name')] = {
+                'rungs_added': rungs_added,
+                'rungs_removed': rungs_removed,
+                'rungs_changed': rungs_changed,
+            }
+
+    # stats_diff
+    stats_a = ast_a.get('stats', {})
+    stats_b = ast_b.get('stats', {})
+    stats_diff: Dict[str, Any] = {}
+
+    bka = stats_a.get('by_kind', {}) or {}
+    bkb = stats_b.get('by_kind', {}) or {}
+    by_kind_delta: Dict[str, Dict[str, int]] = {}
+    for kind in sorted(set(bka.keys()) | set(bkb.keys())):
+        before = bka.get(kind, 0)
+        after = bkb.get(kind, 0)
+        if before != after:
+            by_kind_delta[kind] = {'before': before, 'after': after, 'delta': after - before}
+    if by_kind_delta:
+        stats_diff['by_kind'] = by_kind_delta
+
+    pqa = stats_a.get('parse_quality_distribution', {}) or {}
+    pqb = stats_b.get('parse_quality_distribution', {}) or {}
+    pq_delta: Dict[str, Dict[str, int]] = {}
+    for k in sorted(set(pqa.keys()) | set(pqb.keys())):
+        before = pqa.get(k, 0)
+        after = pqb.get(k, 0)
+        if before != after:
+            pq_delta[k] = {'before': before, 'after': after, 'delta': after - before}
+    if pq_delta:
+        stats_diff['parse_quality_distribution'] = pq_delta
+
+    recall_a = stats_a.get('function_call_recall')
+    recall_b = stats_b.get('function_call_recall')
+    if recall_a != recall_b:
+        stats_diff['function_call_recall'] = {'before': recall_a, 'after': recall_b}
+
+    # rename_hints → warnings
+    for (na, nb, reason) in prog_align['rename_hints']:
+        all_warnings.append(f"rename 후보: {na} ↔ {nb} ({reason})")
+
+    return {
+        'grammar_version_a': ast_a.get('grammar_version'),
+        'grammar_version_b': ast_b.get('grammar_version'),
+        'programs_added': prog_align['added_names'],
+        'programs_removed': prog_align['removed_names'],
+        'programs_renamed': prog_align['rename_hints'],
+        'programs_changed': programs_changed,
+        'stats_diff': stats_diff,
+        'warnings': all_warnings,
+    }
