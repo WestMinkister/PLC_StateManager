@@ -712,3 +712,43 @@ XML은 XG5000 프로젝트(.xgwx)를 cmd 명령으로 변환한 것. 3가지 상
 - `FEnet Position` 필드 (Bit0~3 Slot + Bit4~7 Base)
 - `Source of Frame` 값으로 방향 구분 (0x22/0x11 관찰)
 - Z 명령 7개 sub-variants 리스트업
+
+---
+
+## Appendix B — PC→PLC 커맨드 인벤토리 (frame bundle 기반, 2026-04-24)
+
+### 데이터 출처
+
+- `upload_replay_frames.json` (239 frames, 업로드 세션)
+- `write_replay_frames.json` (28 frames, 쓰기/런중수정 세션, M1 커밋 5d097a7)
+
+### Upload 세션 커맨드
+
+| 1st byte | ASCII | Sub 관찰 | 빈도 | 역할 |
+|:---:|:---:|---|:---:|---|
+| 0x58 | X | XL(4C)/XM(4D)/XW(57) | 134 | burst 진입 |
+| 0x5A | Z | 13 variants (5A/6A/82/83/86/88/89/8D/8E/96/C0/C6/6E) | 65 | command flow |
+| 0x4A | J | J4 (0x34) | 19 | 중간 요청 |
+| 0x52 | R | 0xAC, 0x6E | 7 | read/response 유도 |
+
+### Write 세션 커맨드 (트랜잭션 기반)
+
+```
+CONN → T_START (T,0x53="TS") → E_WRITE × N (E + 15 sub) → T_END (T,0x45="TE") → DISC
+```
+
+- **T_START / T_END**: 트랜잭션 경계 (0x54 "T" + 0x53/"S" 또는 0x45/"E")
+- **E_WRITE**: 쓰기 본체 (E = 0x45, 가장 빈번한 sub = 0xC0)
+- E_WRITE sub 15종의 의미 개별 규명은 B.6 후속
+
+### 검증 대기 (사용자 독자 관찰, 추가 pcapng 필요)
+
+- Y 계열 (YR, Y..)
+- W 계열 (WN, WX)
+- Z 추가 printable (Z₩, Z], ZX, ZY)
+
+### 중요한 시사점
+
+1. **프로토콜 surface 는 기존 문서 (X/Z/U) 보다 훨씬 넓음** — 최소 6개 first-byte (X/Y/Z/J/R/E/T), Y/W 포함 시 8개
+2. **쓰기 프로토콜은 이미 부분 해독** — M1 에서 트랜잭션 구조 캡처. B.6 의 현재 과제는 "E_WRITE sub variant 의미 규명" 으로 축소
+3. **세션 유실 주의** — 이 지식은 frame bundle JSON 에 보존되어 있었으나 grammar 에 미반영. 이번 업데이트로 영구화

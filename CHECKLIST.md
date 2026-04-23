@@ -1,6 +1,6 @@
 # PLC_StateManager — 진행 체크리스트
 
-> **최종 업데이트**: 2026-04-24 KST (Phase B.7 통합 CLI 완료, 6단계 ①~④ 단일 진입점)
+> **최종 업데이트**: 2026-04-24 KST (Phase B.7 완료 + frame bundle 기반 command inventory 영구화)
 > **전역 CLAUDE.md**가 이 파일을 세션 핸드오프 키파일로 사용함. 매 작업 완료 시 갱신할 것.
 > **궁극 프로젝트**: `PLC_ProcessAnalyzer` (GitHub, AI 학습/프로세스 분석 엔진) — Claude 메모리 `project_ultimate_vision.md` 참조
 > **StateManager 6단계 공식 플로우**: 메모리 `project_state_manager_flow.md` (사용자 2026-04-23 확정)
@@ -35,7 +35,7 @@
 | Transport | **100%** | 공식 매뉴얼 §5.2.3 (20B Company Header) + `protocol_grammar.json::transport_layer` |
 | Session | 80% | B.2 (X 명령 파싱)로 95% |
 | Application-**Read** | 35% → **Phase B.3 완료 시 ~95%** | IL Rosetta + AST |
-| Application-**Write** | 30% | Phase B.6 (쓰기 pcapng 필요) |
+| Application-**Write** | **50%** | 트랜잭션 구조 해독 (T/E 커맨드) + frame bundle 캡처 완료. E_WRITE sub variant 개별 의미 규명 남음 |
 
 ### Phase B 로드맵 ↔ 사용자 6단계 플로우 매핑
 

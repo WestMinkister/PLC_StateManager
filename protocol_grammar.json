@@ -154,9 +154,80 @@
       "xg5000_extension": {
         "description": "XG5000 엔지니어링 툴 ↔ PLC 확장 명령. 공식 매뉴얼에 문서화되지 않음. 이 프로젝트의 주 역공학 대상.",
         "commands": {
-          "X (0x58)": "업로드/심볼 응답 (sub=0x00/0xAA/0x58 3변형 관찰. Phase B.2.1 참조)",
-          "Z (0x5A)": "Command flow (sub=0x96/0x83/0xC0/0x6E/0xC6/0x8D/0x8E 7변형 관찰)",
-          "U (0x55)": "업로드 시작 시퀀스 관찰"
+          "note": "frame bundle (upload_replay_frames.json, write_replay_frames.json) 관찰 기반. session reset 에도 보존되도록 여기에 영구 기록.",
+          "upload_session": {
+            "X_0x58": {
+              "first_byte_ascii": "X",
+              "role": "burst 진입점 — upload 시작 시 가장 먼저 연속 전송",
+              "sub_variants": {
+                "0x4C": {"ascii_pair": "XL", "count": 44},
+                "0x4D": {"ascii_pair": "XM", "count": 48, "note": "burst 키워드 후보 (사용자 관찰)"},
+                "0x57": {"ascii_pair": "XW", "count": 42}
+              },
+              "response_subs_observed": {
+                "0x00": "벌크 데이터 응답 (48개)",
+                "0xAA": "UD 상태 응답 (44개)",
+                "0x58": "ACK (42개)"
+              },
+              "evidence": "upload_replay_frames.json, Phase B.2.1"
+            },
+            "Z_0x5A": {
+              "first_byte_ascii": "Z",
+              "role": "Command flow — upload 진행 제어",
+              "sub_variants_observed": ["0x5A", "0x6A", "0x82", "0x83", "0x86", "0x88", "0x89", "0x8D", "0x8E", "0x96", "0xC0", "0xC6", "0x6E"],
+              "sub_count": 65,
+              "printable_sub_samples": {"0x5A": "ZZ (첫 burst 키워드 후보)", "0x6A": "Zj"},
+              "evidence": "upload_replay_frames.json 집계"
+            },
+            "J_0x4A": {
+              "first_byte_ascii": "J",
+              "role": "upload 중간 요청 (확인 또는 fragment 요청 추정)",
+              "sub_variants": {
+                "0x34": {"ascii_pair": "J4", "count": 19}
+              },
+              "evidence": "upload_replay_frames.json 에서 19회 관찰 — 기존 문서 미기록"
+            },
+            "R_0x52": {
+              "first_byte_ascii": "R",
+              "role": "read/response 유도 (R/0xE0 값 읽기와는 별도)",
+              "sub_variants": {
+                "0xAC": {"count": 4},
+                "0x6E": {"count": 3}
+              },
+              "evidence": "upload_replay_frames.json 에서 7회 관찰 — 기존 문서 미기록"
+            },
+            "U_0x55": {
+              "first_byte_ascii": "U",
+              "role": "업로드 시작 시퀀스 (초기 기록, frame bundle 재검증 필요)",
+              "note": "upload_replay_frames.json 집계에서 직접 관찰 안 됨. 다른 세션에 있을 수 있음."
+            }
+          },
+          "write_session": {
+            "note": "쓰기 세션은 트랜잭션 기반: CONN → T_START → E_WRITE×N → T_END → DISC. write_replay_frames.json (28 frames) 기반.",
+            "T_0x54": {
+              "first_byte_ascii": "T",
+              "role": "transaction 경계",
+              "sub_variants": {
+                "0x53": {"ascii_pair": "TS", "role": "T_START"},
+                "0x45": {"ascii_pair": "TE", "role": "T_END"}
+              },
+              "evidence": "write_replay_frames.json write_role=T_START/T_END"
+            },
+            "E_0x45": {
+              "first_byte_ascii": "E",
+              "role": "E_WRITE — 쓰기 본체 (런중수정 Online Edit 추정)",
+              "sub_variants_observed": ["0x5E", "0x6E", "0x8B", "0x8D", "0x8E", "0x96", "0x97", "0x98", "0x9E", "0xAA", "0xAD", "0xC0", "0xC9", "0xCE"],
+              "most_frequent": "0xC0 (9회, 기본 쓰기 추정)",
+              "sub_count": 20,
+              "evidence": "write_replay_frames.json write_role=E_WRITE"
+            }
+          },
+          "awaiting_verification": {
+            "note": "사용자 2026-04-24 세션 관찰. upload/write bundle 에는 없음 — 다른 pcapng 세션에서 관찰된 것으로 추정. 추가 캡처로 컨텍스트 규명 필요.",
+            "Y_families": ["YR", "Y (second byte unknown)"],
+            "W_families": ["WN", "WX"],
+            "Z_printable_extra": ["Z₩ (binary 0x5A 0x??)", "Z]", "ZX", "ZY"]
+          }
         },
         "note": "공식 h5400~h5900 과 공존. 역공학으로만 구조 규명."
       }
