@@ -48,6 +48,120 @@
     "phase_b1_notes": "Rosetta 정렬로 FB_DEFINITION 문법 검증 + 15/18 함수 이름 매핑 확정. Timer/Counter 3개 특수 encoding 가설 확립. MOVE_WORD 다중 encoding 발견.",
     "phase_b3_notes": "AST Builder로 Program/Rung 경계 100% 확정 (4 programs, 21 rungs). FB_DEFINITION 15개 instruction 파싱 완료 (function_call). Contact/Coil/FX 파싱 구조 구현 (BC에서 토큰 발견시 동작). Protocol grammar 검증으로 element_type 매핑 (6=NO, 7=NC, 14=OUT, 16=SET, 17=RST) 확정. Parameter 추출 VAR_IN_ANCHOR/VAR_OUT_ANCHOR/ADDRESS 조합으로 가능."
   },
+  "transport_layer": {
+    "description": "LS ELECTRIC XGT 전용 프로토콜 Company Header (20 bytes). 공식 명세: docs/사용설명서_XGB FEnet_국문_V2.2_20260324.pdf §5.2.3, Table 5-3",
+    "reference_manual": "XGB FEnet V2.2 §5.2.3 (p.5-3~5-4)",
+    "company_header": {
+      "total_bytes": 20,
+      "fields": [
+        {
+          "name": "company_id",
+          "offset": [0, 10],
+          "size": 10,
+          "description": "LSIS 고유번호",
+          "variants": {
+            "LSIS-XGT": "4C 53 49 53 2D 58 47 54 00 00 (XGK, XGB PLC 클라이언트)",
+            "LGIS-GLOFA": "4C 47 49 53 2D 47 4C 4F 46 41 (GM, MK 서버 응답)"
+          }
+        },
+        {
+          "name": "plc_info",
+          "offset": [10, 12],
+          "size": 2,
+          "description": "비트 필드. 클라이언트→서버: don't care(0x00). 서버→클라이언트: 아래 비트 구성.",
+          "bit_layout": {
+            "bit0_5": "CPU TYPE (01=XGK/R-CPUH, 02=XGK-CPUS, 05=XGI-CPUU)",
+            "bit6": "이중화 Master/단독=0, Slave=1",
+            "bit7": "CPU 동작 정상=0, 에러=1",
+            "bit8_12": "시스템 상태 (1=RUN, 2=STOP, 4=ERROR, 8=DEBUG)",
+            "bit13_15": "Reserved"
+          }
+        },
+        {
+          "name": "cpu_info",
+          "offset": [12],
+          "size": 1,
+          "description": "PLC CPU 시리즈 식별",
+          "values": {
+            "0xA0": "XGK",
+            "0xA4": "XGI",
+            "0xA8": "XGR",
+            "0xB0": "XGB(MK)",
+            "0xB4": "XGB(IEC)"
+          }
+        },
+        {
+          "name": "source_of_frame",
+          "offset": [13],
+          "size": 1,
+          "description": "프레임 방향 식별",
+          "official_values": {
+            "0x33": "클라이언트(HMI) → 서버(PLC)",
+            "0x11": "서버(PLC) → 클라이언트(HMI)"
+          },
+          "observed_extension": "XG5000 엔지니어링 툴은 클→서에서 0x22 사용 (공식 0x33 아님). 비공식 확장."
+        },
+        {
+          "name": "invoke_id",
+          "offset": [14, 16],
+          "size": 2,
+          "description": "프레임 순서 ID (LE16). 응답 프레임에 동일 번호 복사.",
+          "observed": "XG5000 은 0x0000 고정 관찰 (Invoke ID 미사용)"
+        },
+        {
+          "name": "length",
+          "offset": [16, 18],
+          "size": 2,
+          "description": "Application Instruction 바이트 크기 (LE16)"
+        },
+        {
+          "name": "fenet_position",
+          "offset": [18],
+          "size": 1,
+          "description": "FEnet I/F 모듈 위치",
+          "bit_layout": {
+            "bit0_3": "Slot 번호",
+            "bit4_7": "Base 번호"
+          }
+        },
+        {
+          "name": "bcc",
+          "offset": [19],
+          "size": 1,
+          "description": "Reserved2 — Application Header Byte Sum (offset 0~18 의 바이트 합)",
+          "note": "0x00 = 예약영역 (공식), 실제 체크섬 값 관찰됨 (사용자: 0xF9/0xA9)"
+        }
+      ]
+    },
+    "command_families": {
+      "official": {
+        "description": "공식 XGT 프로토콜 명령 (HMI ↔ PLC 통신, XGB FEnet V2.2 §5.2.4)",
+        "commands": {
+          "h5400": "변수 읽기 요구",
+          "h5500": "변수 읽기 응답",
+          "h5800": "변수 쓰기 요구",
+          "h5900": "변수 쓰기 응답"
+        },
+        "data_types": {
+          "h0000": "BIT",
+          "h0100": "BYTE",
+          "h0200": "WORD",
+          "h0300": "DWORD",
+          "h0400": "LWORD",
+          "h1400": "연속 BYTE"
+        }
+      },
+      "xg5000_extension": {
+        "description": "XG5000 엔지니어링 툴 ↔ PLC 확장 명령. 공식 매뉴얼에 문서화되지 않음. 이 프로젝트의 주 역공학 대상.",
+        "commands": {
+          "X (0x58)": "업로드/심볼 응답 (sub=0x00/0xAA/0x58 3변형 관찰. Phase B.2.1 참조)",
+          "Z (0x5A)": "Command flow (sub=0x96/0x83/0xC0/0x6E/0xC6/0x8D/0x8E 7변형 관찰)",
+          "U (0x55)": "업로드 시작 시퀀스 관찰"
+        },
+        "note": "공식 h5400~h5900 과 공존. 역공학으로만 구조 규명."
+      }
+    }
+  },
   "grammar_tokens": {
     "FB_DEFINITION": {
       "pattern_hex": "67 [sub] 00 00 00 00 [func_id] 00 00 00 [param_count]",

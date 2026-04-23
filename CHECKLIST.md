@@ -1,6 +1,6 @@
 # PLC_StateManager — 진행 체크리스트
 
-> **최종 업데이트**: 2026-04-24 KST (Phase B.4 AST Semantic Diff 완료, 6단계 ③ 활성화)
+> **최종 업데이트**: 2026-04-24 KST (공식 XGT 명세 반영 + Phase B.4 완료)
 > **전역 CLAUDE.md**가 이 파일을 세션 핸드오프 키파일로 사용함. 매 작업 완료 시 갱신할 것.
 > **궁극 프로젝트**: `PLC_ProcessAnalyzer` (GitHub, AI 학습/프로세스 분석 엔진) — Claude 메모리 `project_ultimate_vision.md` 참조
 > **StateManager 6단계 공식 플로우**: 메모리 `project_state_manager_flow.md` (사용자 2026-04-23 확정)
@@ -29,10 +29,10 @@
 - ✅ **SET=ElementType 16, RST=ElementType 17** IL 대조로 확정 (PRD §6.3 미확정 해결)
 - ✅ **XGRUNGSTART** = Rung 경계 IL 이름 확인
 
-### 프로토콜 해독 현황 (IL 반영 후)
-| 레이어 | IL 반영 후 | 완성 조건 |
+### 프로토콜 해독 현황 (IL 반영 + 공식 XGT 명세 후)
+| 레이어 | 상태 | 참조 |
 |---|:---:|---|
-| Transport | 95% | 현 도구 충분 |
+| Transport | **100%** | 공식 매뉴얼 §5.2.3 (20B Company Header) + `protocol_grammar.json::transport_layer` |
 | Session | 80% | B.2 (X 명령 파싱)로 95% |
 | Application-**Read** | 35% → **Phase B.3 완료 시 ~95%** | IL Rosetta + AST |
 | Application-**Write** | 30% | Phase B.6 (쓰기 pcapng 필요) |

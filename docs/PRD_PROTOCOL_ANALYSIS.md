@@ -671,3 +671,44 @@ XML은 XG5000 프로젝트(.xgwx)를 cmd 명령으로 변환한 것. 3가지 상
 | XGI CPU 매뉴얼 | `docs/XGI-CPU_Manual_V2.9_202508_KR.pdf` | 부록 1.1 시스템 플래그 일람 |
 | 프로토콜 PDF | `docs/LGIS-GLOFA.pdf` | 공식 프로토콜 사양 (16p) |
 | Wireshark 디섹터 | `github.com/ciaoly/PLC-XGT-protocol-for-Wireshark` | XGT 2004 포트용 (2002 미지원) |
+
+---
+
+## Appendix A — 공식 XGT 프로토콜 매뉴얼 반영 (2026-04-24)
+
+### 참조 자료
+
+- `docs/사용설명서_XGB FEnet_국문_V2.2_20260324.pdf` §5.2 "XGT 전용 프로토콜" (p.5-2 ~ 5-8)
+- 사용자 독자 분석 (2026-04-24 세션)
+
+### Company Header 20바이트 공식 구조
+
+| Offset | 필드 | 크기 | 의미 |
+|:---:|---|:---:|---|
+| 0:10 | Company ID | 10 | LSIS-XGT (XGK/XGI) 또는 LGIS-GLOFA (GM/MK) |
+| 10:12 | PLC Info | 2 | 비트 필드: CPU TYPE + 이중화 + RUN/STOP 상태 |
+| 12 | CPU Info | 1 | 0xA0=XGK, 0xA4=XGI, 0xA8=XGR, 0xB0=XGB(MK), 0xB4=XGB(IEC) |
+| 13 | Source of Frame | 1 | 공식 0x33 (클→서), 0x11 (서→클). XG5000 은 **0x22** 사용 (비공식 확장) |
+| 14:16 | Invoke ID | 2 | 프레임 순서 ID. 응답에 복사. XG5000 은 0x0000 고정 |
+| 16:18 | Length | 2 | Application Instruction 바이트 수 (LE16) |
+| 18 | FEnet Position | 1 | Bit0~3=Slot, Bit4~7=Base |
+| 19 | Reserved2 (BCC) | 1 | Application Header Byte Sum |
+
+### 공식 vs 확장 명령
+
+**공식 HMI 프로토콜**: h5400 (읽기 요구) / h5500 (읽기 응답) / h5800 (쓰기 요구) / h5900 (쓰기 응답)
+
+**XG5000 확장 명령 (공식 매뉴얼 외)**:
+- X (0x58) — 업로드/심볼 (3 sub-variants)
+- Z (0x5A) — 확장 command flow (7 sub-variants)
+- U (0x55) — 업로드 시작
+
+이 프로젝트 (PLC_StateManager) 의 역공학 대상은 **XG5000 확장 영역** 이며, 공식 매뉴얼에는 기재되지 않은 부분. Phase B.1~B.5.3 의 성과 (Rosetta 16/18, AST 추출, timer/counter kind) 는 전부 확장 영역의 구조 해독이다.
+
+### 사용자 기여 인정 (2026-04-24)
+
+사용자가 공식 매뉴얼을 직접 읽고 수행한 독자 분석으로 확정된 항목:
+- `BCC = Application Header Byte Sum` (사용자 가설 → 공식 확정)
+- `FEnet Position` 필드 (Bit0~3 Slot + Bit4~7 Base)
+- `Source of Frame` 값으로 방향 구분 (0x22/0x11 관찰)
+- Z 명령 7개 sub-variants 리스트업
