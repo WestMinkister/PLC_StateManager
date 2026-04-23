@@ -6,7 +6,27 @@
     "XML/IL 같은 외부 정답지는 검증용. 파서 자체는 프로토콜 바이트만으로 AST를 빌드.",
     "새 함수·UDF가 나타나도 구조 토큰만으로 '함수다'를 확정 — 이름은 사후 레이블."
   ],
-  "last_updated": "2026-04-23",
+  "last_updated": "2026-04-23 (evening, IL received)",
+  "il_reference": {
+    "source_file": "docs/try_again_LSPLC",
+    "programs": ["NewProgram", "NewProgram2", "NewProgram3", "FUNCTION_Program"],
+    "total_rungs": 21,
+    "total_instructions": 53,
+    "opcode_vocabulary_count": 25,
+    "rung_boundary_il_name": "XGRUNGSTART",
+    "param_placeholders": {
+      "^LINEIN": "rung logic line input (EN)",
+      "^LINEOUT": "rung logic line output",
+      "^EMPTY": "unused/ENO/etc"
+    },
+    "type_suffix_convention": {
+      "_INT": "Integer 16-bit",
+      "_WORD": "Bit/Word",
+      "_DINT": "Integer 32-bit",
+      "_UDINT": "Unsigned 32-bit",
+      "_LINT": "Integer 64-bit"
+    }
+  },
   "overall_protocol_decode_coverage": {
     "note": "솔직 자가평가. 숫자가 정확한 진척 지표.",
     "frame_transport": 0.95,
@@ -87,6 +107,14 @@
       "evidence": "PRD §6.3",
       "confidence": "low",
       "ast_node": "Contact"
+    },
+    "RUNG_BOUNDARY": {
+      "il_name": "XGRUNGSTART",
+      "pattern_hex_candidates": ["54 98", "54 b0"],
+      "meaning": "Rung 경계 (IL: XGRUNGSTART, 21회 발견)",
+      "evidence": "IL docs/try_again_LSPLC 전체 프로그램에서 모든 rung마다 XGRUNGSTART 시작",
+      "confidence": "high (IL) / medium (byte pattern 대조 대기)",
+      "ast_node": "RungBoundary"
     },
     "RUNG_END_MARKER_A": {
       "pattern_hex": "54 98",
@@ -170,12 +198,12 @@
       "0": "blank",
       "1": "vertical_line",
       "2": "horizontal_line",
-      "6": "NO_contact",
-      "7": "NC_contact",
-      "8": "PULSE_contact",
-      "14": "OUT_coil",
-      "16": "unknown_possibly_SET",
-      "17": "unknown_possibly_RESET",
+      "6": "NO_contact (IL: LOAD)",
+      "7": "NC_contact (IL: LOAD NOT)",
+      "8": "PULSE_contact (IL: ANDP 등 Pulse 수정자)",
+      "14": "OUT_coil (IL: OUT)",
+      "16": "SET_coil (IL: SET) — 2026-04-23 IL 대조로 확정",
+      "17": "RESET_coil (IL: RST) — 2026-04-23 IL 대조로 확정",
       "70": "FB_IO_variable",
       "102": "FB_definition_slot"
     }

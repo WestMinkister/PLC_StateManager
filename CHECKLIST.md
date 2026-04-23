@@ -1,9 +1,10 @@
 # PLC_StateManager — 진행 체크리스트
 
-> **최종 업데이트**: 2026-04-23 KST
+> **최종 업데이트**: 2026-04-23 밤 KST (IL 수령, Phase B 최종 로드맵 확정)
 > **전역 CLAUDE.md**가 이 파일을 세션 핸드오프 키파일로 사용함. 매 작업 완료 시 갱신할 것.
 > **궁극 프로젝트**: `PLC_ProcessAnalyzer` (GitHub, AI 학습/프로세스 분석 엔진) — Claude 메모리 `project_ultimate_vision.md` 참조
-> **설계 철학**: 확장 가능 프레임워크 우선, 미봉책 금지 — 메모리 `feedback_extensible_framework.md` 참조
+> **StateManager 6단계 공식 플로우**: 메모리 `project_state_manager_flow.md` (사용자 2026-04-23 확정)
+> **설계 철학**: Grammar 인식 우선 + 확장 가능 프레임워크 — `feedback_grammar_over_naming.md` + `feedback_extensible_framework.md`
 
 ## 완료된 마일스톤
 
@@ -17,31 +18,61 @@
 - [x] **M3 자동발견 완성** (2026-04-22) — Universal Priming(30 frames) + 동적 Z/0xC0 scatter-gather + GZIP/UTF-16LE 디컴프레션. 실측 증거: `docs/0422_cmd2.txt` 6 fragments → 12 symbols → R/0xE0 12개 읽기 성공, 값 변화 포착 확인 (MW1400 0→1 등). 커밋 `132bfa9`까지
 - [x] **M3 영역 확장** (2026-04-22) — AREA_MARKERS 7종 → 15종 (PDF 부록 A.1 전체: P/M/K/F/T/C/L/N/D/U/Z/R/W/I/Q). ALL_AREAS/AREA_ORDER 도입
 
-## 현재 블로커 — Phase B 세 번째 재정의 완료 (2026-04-23 저녁)
+## Phase B 최종 로드맵 (2026-04-23 밤, IL 수령 후 확정) — 6단계 플로우 매핑
 
-### Phase B 최종 관점 — "Grammar Parser"
-**이름 매핑**이 아닌 **프로토콜 문법(Grammar)** 파서가 목표. XML·IL 없이도 `67 XX 00 00 00 00 YY` 패턴을 보면 "여기는 함수다"를 즉시 인식. 사용자 지적 (2026-04-23): *"이게 어떤 함수인지는 몰라도, opcode 위치라는 걸 확실히 알기 때문에, 지금 받은 데이터도 함수인 걸 확실히 안다"*.
+### 오늘 확보된 결정적 자료
+- ✅ 완전 업로드 pcapng `docs/0423_PLC로부터열기.pcapng` (500 packets)
+- ✅ IL 파일 `docs/try_again_LSPLC` (4 programs, 21 rungs, 53 instructions, 25 OPCODE종)
+- ✅ XML 정답지 `docs/xg5000_full_manyfunction.json`
+- ✅ Grammar DB `protocol_grammar.json` (IL 발견 사항 반영)
+- ✅ IL 요약 `docs/IL_reference_summary.md`
+- ✅ **SET=ElementType 16, RST=ElementType 17** IL 대조로 확정 (PRD §6.3 미확정 해결)
+- ✅ **XGRUNGSTART** = Rung 경계 IL 이름 확인
 
-### 실증된 진척 (오늘 2026-04-23)
-- ✅ **완전 업로드 pcapng 확보**: `docs/0423_PLC로부터열기.pcapng` (500 패킷, 248 요청·응답 페어)
-- ✅ **함수 정의 토큰 `FB_DEFINITION` 15/18 매칭**: RS/AND/OR/SR/TP/ADD/MUL/DIV/NOT/MOVE/SUB/CTUD_DINT/CTD_UDINT/CTD_LINT/CTD_DINT
-- ✅ **Precision 100%** (추출 주소 12개 모두 XML 정답지에 존재, stale 0개)
-- ✅ **FX_FLAG_TOKEN** (_ON, _OFF) 확인
-- ✅ `protocol_grammar.json` 작성 — Grammar 중심 DB
+### 프로토콜 해독 현황 (IL 반영 후)
+| 레이어 | IL 반영 후 | 완성 조건 |
+|---|:---:|---|
+| Transport | 95% | 현 도구 충분 |
+| Session | 80% | B.2 (X 명령 파싱)로 95% |
+| Application-**Read** | 35% → **Phase B.3 완료 시 ~95%** | IL Rosetta + AST |
+| Application-**Write** | 30% | Phase B.6 (쓰기 pcapng 필요) |
 
-### 솔직 자가평가 (해독률)
-**전체 프로토콜 문법 약 35%**. "대돌파" 아님. 자세히는 `protocol_grammar.json` `overall_protocol_decode_coverage` 참조.
+### Phase B 로드맵 ↔ 사용자 6단계 플로우 매핑
 
-### 다음 세션 최우선 — Phase B.1 (Grammar Parser 구현)
+| Phase | 작업 | 대응 플로우 | 예상 세션 |
+|:---:|---|:---:|:---:|
+| **B.1** | IL ↔ 바이트코드 Rosetta 정렬 | ① | 2-3 |
+| **B.2** | X 명령 134 페어 파싱 | ①③ | 1-2 |
+| **B.3** | Program AST Builder (`plc_program_parser.py`) | ① 마감 | 2-3 |
+| **B.4** | Semantic Diff AST 업그레이드 | ②③ | 1 |
+| **B.5** | Timer/Counter INST 체계 해독 | ① 마감 | 1 |
+| **B.6** | 쓰기 프로토콜 캡처·분석 | ⑤⑥ | 2-3 |
+| **B.7** | 통합 CLI `plc_state_manager.py` | 전 단계 | 1-2 |
 
-- [ ] **사용자 IL 파일 수령** — XG5000에서 manyfunction 프로젝트를 IL로 export. IL은 바이트코드와 사실상 1:1이라 **OPCODE 의미 기계적 역추론의 로제타 스톤**
-- [ ] **B.1** X 명령 134 페어 파싱 — 프로토콜 대부분이 이 안. Rung 문법·MB 영역·비트 주소 확장 가능성
-- [ ] **B.2** `plc_program_parser.py` 신규 — Grammar 기반 AST 빌더 (이름 없이 구조 트리)
-- [ ] **B.3** 함수 파라미터 매핑 (`46 0d` VAR_IN / `46 13` VAR_OUT) — 사용자 요청 *"펑션별로 어떤 인풋값이 어떻게 들어가는지"*
-- [ ] **B.4** Timer/Counter 특수 구조 규명 (TON=81, CTU_INT=243, TOF=10 FB_DEFINITION 패턴 외)
-- [ ] **B.5** UDF 배정 방식 탐구
-- [ ] **B.6** `validate_extraction.py` 업그레이드 — AST vs XML·IL 대조 (정확한 Recall)
-- [ ] **B.7** MB 영역 + 비트 주소 `.N` encoding
+### 사용자 6단계 공식 플로우
+1. ① PLC로부터 프로그램 구조 가져오기
+2. ② 현 XG5000 프로젝트와 비교
+3. ③ 일치/불일치 판별
+4. ④ 값 백업 ✅ **M3 완료**
+5. ⑤ 타이밍에 값 밀어넣기
+6. ⑥ 실패 변수 진단
+
+### 다음 세션 최우선 — Phase B.1 (IL Rosetta 구현)
+
+- [ ] `plc_il_parser.py` 신규 — IL → 구조화 명령 리스트 (프로그램별, rung별, opcode/operand/type)
+- [ ] `plc_bytecode_scanner.py` 신규 — pcapng Z/X 응답 → 바이너리 스트림 + 알려진 마커 위치 맵
+- [ ] `correlate_il_bytecode.py` 신규 — IL 순서 ↔ 바이트코드 순서 정렬, 미지의 OPCODE 자동 발견
+- [ ] `protocol_grammar.json` 자동 업데이트 (새 OPCODE·INST 구조)
+- [ ] `validate_extraction.py` 확장 — AST ↔ IL 양방향 Recall 측정
+
+### 사용자 기여 필요 (중기 — Phase B.6 대비)
+- [ ] XG5000 **값 쓰기 pcapng 3종**:
+   - `docs/0424_write_success.pcapng` (존재하는 MW 주소 성공)
+   - `docs/0424_write_fail_no_addr.pcapng` (존재하지 않는 주소 실패)
+   - `docs/0424_write_fail_readonly.pcapng` (F 영역 같은 read-only 쓰기 시도)
+
+### 사용자 기여 필요 (장기 — B.1 성공 후)
+- [ ] UDF 포함 프로젝트 XML + IL — UDF INDEX 배정 방식 탐구
 
 ### XGT Port 2004 실기 검증 (우선순위 낮음, 보조 경로)
 - [ ] `PLC_XGTReader.exe --read 192.168.250.110 --mw 152 1000` 실기 1회
