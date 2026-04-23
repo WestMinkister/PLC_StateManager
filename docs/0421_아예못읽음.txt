@@ -1,0 +1,253 @@
+C:\PLC_Test>PLC_ValueBackup.exe --read 192.168.250.110 --auto
+Loaded 5 variables, 4 monitor entry frames
+Variables: 0x1770, 0x0130, 0x07d4, 0x07d0, 0x0012
+
+=== AUTO MODE: Session 1 (Program Read) ===
+  [AUTO] Session 1: Reading PLC program...
+  Connecting to PLC 192.168.250.110:2002 (Session 1)...
+Connecting to PLC at 192.168.250.110:2002...
+Connected!
+
+Replaying 229 frames (reordered: CONN → commands → DISC)...
+  # Frame                      Send    Recv  Rsp Status
+-----------------------------------------------------------------
+  0 CONN (192.168.250.110)       32B →    24B    ? - ✓
+  1    J 0x34                    27B →   180B    J 0x06 ✓
+  2    J 0x34                    27B →   180B    J 0x06 ✓
+  3    R 0x6e                    36B →    36B    R 0x06 ✓
+  4    J 0x34                    27B →   180B    J 0x06 ✓
+  5    J 0x34                    27B →   180B    J 0x06 ✓
+  6    J 0x34                    27B →   180B    J 0x06 ✓
+  7    R 0x56                    36B →    48B    R 0x06 ✓
+  8    J 0x34                    27B →   180B    J 0x06 ✓
+  9    J 0x34                    27B →   180B    J 0x06 ✓
+ 10    R 0x6e                    36B →    36B    R 0x06 ✓
+ 11    Y 0x52                    28B →    30B    Y 0x06 ✓
+ 12    J 0x34                    27B →   180B    J 0x06 ✓
+ 13    W 0x4e                    38B →    27B    6 0x15 ✓
+ 14    R 0x6e                    36B →    36B    R 0x06 ✓
+ 15    R 0xc6                    36B →   172B    R 0x06 ✓
+ 16    R 0xac                    36B →    44B    R 0x06 ✓
+ 17    R 0xac                    36B →    44B    R 0x06 ✓
+ 18    R 0xac                    36B →   252B    R 0x06 ✓
+ 19    R 0xac                    36B →   156B    R 0x06 ✓
+ 20    Z 0x5a                    38B →  1052B    Z 0x06 ✓
+ 21    Z 0x6a                    38B →    52B    Z 0x06 ✓
+ 22    Z 0x6a                    38B →    52B    Z 0x06 ✓
+ 23    Z 0x5c                    38B →    36B    Z 0x06 ✓
+ 24    Z 0x5d                    38B →    60B    Z 0x06 ✓
+ 25    Z 0xcf                    38B →    92B    Z 0x06 ✓
+ 26    J 0x34                    27B →   180B    J 0x06 ✓
+ 27    Z 0x58                    38B →    36B    Z 0x06 ✓
+ 28    Z 0x59                    38B →    36B    Z 0x06 ✓
+ 29    Z 0x6e                    38B →    36B    Z 0x06 ✓
+ 30    Z 0xc6                    38B →   172B    Z 0x06 ✓
+ 31    Z 0x96                    38B →    44B    Z 0x06 ✓
+ 32    Z 0x96                    38B →    44B    Z 0x06 ✓
+ 33    Z 0x96                    38B →   348B    Z 0x06 ✓
+ 34    Z 0x83                    38B →  1388B    Z 0x06 ✓
+ 35    Z 0x83                    38B →  1388B    Z 0x06 ✓
+ 36    Z 0x83                    38B →   460B    Z 0x06 ✓
+ 37    Z 0x6e                    38B →    36B    Z 0x06 ✓
+ 38    Z 0xc6                    38B →   172B    Z 0x06 ✓
+ 39    Z 0x5a                    38B →  1052B    Z 0x06 ✓
+ 40    Z 0x83                    38B →  1388B    Z 0x06 ✓
+ 41    Z 0x83                    38B →  1388B    Z 0x06 ✓
+ 42    Z 0x83                    38B →   412B    Z 0x06 ✓
+ 43    X 0x4c                    52B →    32B    X 0x06 ✓
+ 44    X 0x57                    80B →    28B    X 0x06 ✓
+ 45    X 0x4d                    40B →   388B    X 0x06 ✓
+ 46    X 0x4c                    52B →    32B    X 0x06 ✓
+ 47    X 0x4c                    52B →    32B    X 0x06 ✓
+ 48    X 0x57                    80B →    28B    X 0x06 ✓
+ 49    X 0x4d                    40B →   388B    X 0x06 ✓
+ 50    J 0x34                    27B →   180B    J 0x06 ✓
+ 51    X 0x4c                    52B →    32B    X 0x06 ✓
+ 52    Z 0x82                    38B →    44B    Z 0x06 ✓
+ 53    Z 0x82                    38B →    44B    Z 0x06 ✓
+ 54    Z 0x83                    38B →    60B    Z 0x06 ✓
+ 55    Z 0x5a                    38B →  1052B    Z 0x06 ✓
+ 56    Z 0x8d                    38B →    44B    Z 0x06 ✓
+ 57    Z 0x8d                    38B →   252B    Z 0x06 ✓
+ 58    Z 0x8e                    38B →    44B    Z 0x06 ✓
+ 59    Z 0x8e                    38B →   988B    Z 0x06 ✓
+ 60    Z 0x96                    38B →    44B    Z 0x06 ✓
+ 61    Z 0x96                    38B →   332B    Z 0x06 ✓
+ 62    Z 0x9b                    38B →    76B    Z 0x06 ✓
+ 63    Z 0x86                    38B →    84B    Z 0x06 ✓
+ 64    Z 0x86                    38B →    84B    Z 0x06 ✓
+ 65    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 66    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 67    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 68    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 69    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 70    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 71    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 72    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 73    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 74    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 75    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 76    Z 0x88                    38B →    84B    Z 0x06 ✓
+ 77    Z 0x89                    38B →    84B    Z 0x06 ✓
+ 78    Z 0x89                    38B →    84B    Z 0x06 ✓
+ 79    Z 0x89                    38B →    84B    Z 0x06 ✓
+ 80    Z 0x89                    38B →    84B    Z 0x06 ✓
+ 81    Z 0x89                    38B →    84B    Z 0x06 ✓
+ 82    Z 0x89                    38B →    84B    Z 0x06 ✓
+ 83    Z 0x89                    38B →    84B    Z 0x06 ✓
+ 84    Z 0x89                    38B →    84B    Z 0x06 ✓
+ 85    X 0x4c                    52B →    32B    X 0x06 ✓
+ 86    X 0x57                    88B →    28B    X 0x06 ✓
+ 87    X 0x4d                    40B →    70B    X 0x06 ✓
+ 88    X 0x57                    88B →    28B    X 0x06 ✓
+ 89    X 0x4d                    40B →   886B    X 0x06 ✓
+ 90    X 0x57                    88B →    28B    X 0x06 ✓
+ 91    X 0x4d                    40B →   782B    X 0x06 ✓
+ 92    X 0x57                    88B →    28B    X 0x06 ✓
+ 93    X 0x4d                    40B →   574B    X 0x06 ✓
+ 94    X 0x57                    88B →    28B    X 0x06 ✓
+ 95    X 0x4d                    40B →   862B    X 0x06 ✓
+ 96    X 0x57                    88B →    28B    X 0x06 ✓
+ 97    X 0x4d                    40B →   134B    X 0x06 ✓
+ 98    X 0x57                    88B →    28B    X 0x06 ✓
+ 99    X 0x4d                    40B →  1030B    X 0x06 ✓
+100    J 0x34                    27B →   180B    J 0x06 ✓
+101    X 0x4d                    40B →   158B    X 0x06 ✓
+102    X 0x57                    88B →    28B    X 0x06 ✓
+103    X 0x4d                    40B →    70B    X 0x06 ✓
+104    X 0x57                    88B →    28B    X 0x06 ✓
+105    X 0x4d                    40B →    70B    X 0x06 ✓
+106    X 0x4c                    52B →    32B    X 0x06 ✓
+107    X 0x4c                    52B →    32B    X 0x06 ✓
+108    X 0x57                    88B →    28B    X 0x06 ✓
+109    X 0x4d                    40B →    70B    X 0x06 ✓
+110    X 0x57                    88B →    28B    X 0x06 ✓
+111    X 0x4d                    40B →   750B    X 0x06 ✓
+112    X 0x57                    88B →    28B    X 0x06 ✓
+113    X 0x4d                    40B →   158B    X 0x06 ✓
+114    X 0x57                    88B →    28B    X 0x06 ✓
+115    X 0x4d                    40B →   158B    X 0x06 ✓
+116    X 0x57                    88B →    28B    X 0x06 ✓
+117    X 0x4d                    40B →   598B    X 0x06 ✓
+118    X 0x57                    88B →    28B    X 0x06 ✓
+119    X 0x4d                    40B →   134B    X 0x06 ✓
+120    X 0x57                    88B →    28B    X 0x06 ✓
+121    X 0x4d                    40B →  1030B    X 0x06 ✓
+122    X 0x4d                    40B →   158B    X 0x06 ✓
+123    X 0x57                    88B →    28B    X 0x06 ✓
+124    X 0x4d                    40B →    70B    X 0x06 ✓
+125    X 0x57                    88B →    28B    X 0x06 ✓
+126    X 0x4d                    40B →    70B    X 0x06 ✓
+127    X 0x4c                    52B →    32B    X 0x06 ✓
+128    Z 0x94                    38B →   364B    Z 0x06 ✓
+129    Z 0x82                    38B →   860B    Z 0x06 ✓
+130    Z 0x83                    38B →  1388B    Z 0x06 ✓
+131    Z 0x83                    38B →  1388B    Z 0x06 ✓
+132    Z 0x83                    38B →   460B    Z 0x06 ✓
+133    X 0x4c                    52B →    32B    X 0x06 ✓
+134    X 0x57                    88B →    28B    X 0x06 ✓
+135    X 0x4d                    40B →    70B    X 0x06 ✓
+136    X 0x4c                    52B →    32B    X 0x06 ✓
+137    Z 0x86                    38B →   540B    Z 0x06 ✓
+138    X 0x4c                    52B →    32B    X 0x06 ✓
+139    X 0x57                    88B →    28B    X 0x06 ✓
+140    X 0x4d                    40B →   886B    X 0x06 ✓
+141    X 0x4c                    52B →    32B    X 0x06 ✓
+142    X 0x4c                    52B →    32B    X 0x06 ✓
+143    X 0x57                    88B →    28B    X 0x06 ✓
+144    X 0x4d                    40B →   782B    X 0x06 ✓
+145    X 0x4c                    52B →    32B    X 0x06 ✓
+146    X 0x4c                    52B →    32B    X 0x06 ✓
+147    X 0x57                    88B →    28B    X 0x06 ✓
+148    X 0x4d                    40B →   574B    X 0x06 ✓
+149    X 0x4c                    52B →    32B    X 0x06 ✓
+150    X 0x4c                    52B →    32B    X 0x06 ✓
+151    X 0x57                    88B →    28B    X 0x06 ✓
+152    J 0x34                    27B →   180B    J 0x06 ✓
+153    X 0x4d                    40B →   862B    X 0x06 ✓
+154    X 0x4c                    52B →    32B    X 0x06 ✓
+155    X 0x4c                    52B →    32B    X 0x06 ✓
+156    X 0x57                    88B →    28B    X 0x06 ✓
+157    X 0x4d                    40B →   134B    X 0x06 ✓
+158    X 0x4c                    52B →    32B    X 0x06 ✓
+159    X 0x4c                    52B →    32B    X 0x06 ✓
+160    X 0x57                    88B →    28B    X 0x06 ✓
+161    X 0x4d                    40B →  1030B    X 0x06 ✓
+162    X 0x4d                    40B →   158B    X 0x06 ✓
+163    X 0x57                    88B →    28B    X 0x06 ✓
+164    X 0x4d                    40B →  1030B    X 0x06 ✓
+165    X 0x4d                    40B →   158B    X 0x06 ✓
+166    X 0x57                    88B →    28B    X 0x06 ✓
+167    X 0x4d                    40B →   326B    X 0x06 ✓
+168    X 0x4c                    52B →    32B    X 0x06 ✓
+169    X 0x4c                    52B →    32B    X 0x06 ✓
+170    X 0x57                    88B →    28B    X 0x06 ✓
+171    X 0x4d                    40B →    70B    X 0x06 ✓
+172    X 0x4c                    52B →    32B    X 0x06 ✓
+173    X 0x4c                    52B →    32B    X 0x06 ✓
+174    X 0x57                    88B →    28B    X 0x06 ✓
+175    X 0x4d                    40B →    70B    X 0x06 ✓
+176    X 0x4c                    52B →    32B    X 0x06 ✓
+177    X 0x4c                    52B →    32B    X 0x06 ✓
+178    X 0x57                    88B →    28B    X 0x06 ✓
+179    X 0x4d                    40B →    70B    X 0x06 ✓
+180    X 0x4c                    52B →    32B    X 0x06 ✓
+181    Z 0x86                    38B →   540B    Z 0x06 ✓
+182    X 0x4c                    52B →    32B    X 0x06 ✓
+183    X 0x57                    88B →    28B    X 0x06 ✓
+184    X 0x4d                    40B →   750B    X 0x06 ✓
+185    X 0x4c                    52B →    32B    X 0x06 ✓
+186    X 0x4c                    52B →    32B    X 0x06 ✓
+187    X 0x57                    88B →    28B    X 0x06 ✓
+188    X 0x4d                    40B →   158B    X 0x06 ✓
+189    X 0x4c                    52B →    32B    X 0x06 ✓
+190    X 0x4c                    52B →    32B    X 0x06 ✓
+191    X 0x57                    88B →    28B    X 0x06 ✓
+192    X 0x4d                    40B →   158B    X 0x06 ✓
+193    X 0x4c                    52B →    32B    X 0x06 ✓
+194    X 0x4c                    52B →    32B    X 0x06 ✓
+195    X 0x57                    88B →    28B    X 0x06 ✓
+196    X 0x4d                    40B →   598B    X 0x06 ✓
+197    X 0x4c                    52B →    32B    X 0x06 ✓
+198    X 0x4c                    52B →    32B    X 0x06 ✓
+199    X 0x57                    88B →    28B    X 0x06 ✓
+200    X 0x4d                    40B →   134B    X 0x06 ✓
+201    X 0x4c                    52B →    32B    X 0x06 ✓
+202    J 0x34                    27B →   180B    J 0x06 ✓
+203    X 0x4c                    52B →    32B    X 0x06 ✓
+204    X 0x57                    88B →    28B    X 0x06 ✓
+205    X 0x4d                    40B →  1030B    X 0x06 ✓
+206    X 0x4d                    40B →   158B    X 0x06 ✓
+207    X 0x57                    88B →    28B    X 0x06 ✓
+208    X 0x4d                    40B →  1030B    X 0x06 ✓
+209    X 0x4d                    40B →   158B    X 0x06 ✓
+210    X 0x57                    88B →    28B    X 0x06 ✓
+211    X 0x4d                    40B →   326B    X 0x06 ✓
+212    X 0x4c                    52B →    32B    X 0x06 ✓
+213    X 0x4c                    52B →    32B    X 0x06 ✓
+214    X 0x57                    88B →    28B    X 0x06 ✓
+215    X 0x4d                    40B →    70B    X 0x06 ✓
+216    X 0x4c                    52B →    32B    X 0x06 ✓
+217    X 0x4c                    52B →    32B    X 0x06 ✓
+218    X 0x57                    88B →    28B    X 0x06 ✓
+219    X 0x4d                    40B →    70B    X 0x06 ✓
+220    X 0x4c                    52B →    32B    X 0x06 ✓
+221    J 0x34                    27B →   180B    J 0x06 ✓
+222    J 0x34                    27B →   180B    J 0x06 ✓
+223    Z 0x6e                    38B →    36B    Z 0x06 ✓
+224    Z 0xc6                    38B →   172B    Z 0x06 ✓
+225    J 0x34                    27B →   180B    J 0x06 ✓
+226    J 0x34                    27B →   180B    J 0x06 ✓
+227    J 0x34                    27B →   180B    J 0x06 ✓
+228    J 0x34                    27B →   180B    J 0x06 ✓
+
+Results: 229 successful, 0 errors out of 229 frames
+  ✓ Program priming: 229 frames OK, 0 errors
+  ✓ Collected 229 responses
+  [AUTO] Discovered 0 MW addresses (parser): []
+  [AUTO] Dynamic scatter-gather (sequential Z/0xC0)...
+  [AUTO] Scatter-gather: 0 fragments → 0 symbols
+Disconnected.
+  ✗ No MW addresses found in program
+
+C:\PLC_Test>

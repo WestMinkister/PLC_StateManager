@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-04-23T13:04:09.647585",
+  "plc_ip": "192.168.250.110",
+  "port": 2002,
+  "priming_frame_count": 30,
+  "scatter_gather_fragments": 6,
+  "scatter_gather_symbols": [
+    "%IW1400",
+    "%IW5000",
+    "%MW1000",
+    "%MW1002",
+    "%MW1400",
+    "%MW152",
+    "%MW30",
+    "%MW3000",
+    "%MW6000",
+    "%QW1400"
+  ],
+  "schema_version": 1,
+  "notes": "Phase B.0 debug dump for XML ground truth comparison"
+}

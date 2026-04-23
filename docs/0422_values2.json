@@ -1,0 +1,63 @@
+{
+  "timestamp": "2026-04-22T06:25:56.402937",
+  "plc_ip": "192.168.250.110",
+  "sample_count": 1,
+  "variable_count": 5,
+  "variables": [
+    {
+      "marker_hex": "4d420200",
+      "offset": 6000,
+      "offset_hex": "0x1770"
+    },
+    {
+      "marker_hex": "4d420200",
+      "offset": 304,
+      "offset_hex": "0x0130"
+    },
+    {
+      "marker_hex": "4d420200",
+      "offset": 2004,
+      "offset_hex": "0x07d4"
+    },
+    {
+      "marker_hex": "4d420200",
+      "offset": 2000,
+      "offset_hex": "0x07d0"
+    },
+    {
+      "marker_hex": "46420200",
+      "offset": 18,
+      "offset_hex": "0x0012"
+    }
+  ],
+  "samples": [
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      2,
+      0,
+      1,
+      0,
+      1
+    ]
+  ],
+  "values_latest": {
+    "MW30": 0,
+    "MW152": 0,
+    "MW1000": 0,
+    "MW1002": 0,
+    "MW1400": 1,
+    "MW2400": 0,
+    "MW2401": 0,
+    "MW3000": 2,
+    "MW6000": 0,
+    "IW1400": 1,
+    "IW5000": 0,
+    "QW1400": 1
+  }
+}

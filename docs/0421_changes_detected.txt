@@ -1,0 +1,18 @@
+C:\PLC_Test>PLC_SemanticDiff.exe --values snapshots\before.json snapshots\after.json
+Comparing value snapshots...
+
+=== VALUE CHANGES ===
+값 추가: 0개
+값 제거: 0개
+값 변경: 7개
+
+값 변경 목록:
+  [IW5000] 16384 → 8192
+  [MW152] 1 → 0
+  [MW200] 1 → 0
+  [MW30] 0 → 1
+  [MW3000] 4 → 1
+  [MW6000] 3 → 0
+  [MW900] 1 → 2
+
+✓ Changes detected

@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-04-20T16:07:27.112488",
+  "plc_ip": "192.168.250.110",
+  "sample_count": 1,
+  "variable_count": 5,
+  "variables": [
+    {
+      "marker_hex": "4d420200",
+      "offset": 6000,
+      "offset_hex": "0x1770"
+    },
+    {
+      "marker_hex": "4d420200",
+      "offset": 304,
+      "offset_hex": "0x0130"
+    },
+    {
+      "marker_hex": "4d420200",
+      "offset": 2004,
+      "offset_hex": "0x07d4"
+    },
+    {
+      "marker_hex": "4d420200",
+      "offset": 2000,
+      "offset_hex": "0x07d0"
+    },
+    {
+      "marker_hex": "46420200",
+      "offset": 18,
+      "offset_hex": "0x0012"
+    }
+  ],
+  "samples": [
+    [
+      0,
+      0,
+      0,
+      4717
+    ]
+  ],
+  "values_latest": {
+    "4d420200_0x1770": 0,
+    "4d420200_0x0130": 0,
+    "4d420200_0x07d4": 0,
+    "4d420200_0x07d0": 4717
+  }
+}

@@ -1,0 +1,116 @@
+C:\PLC_Test>PLC_ValueBackup.exe --read 192.168.250.110 --auto
+Loaded 5 variables, 4 monitor entry frames
+Variables: 0x1770, 0x0130, 0x07d4, 0x07d0, 0x0012
+
+=== AUTO MODE: Universal Priming + Dynamic Scatter-Gather ===
+  [AUTO] Loaded 30 universal priming frames
+  Connecting to PLC 192.168.250.110:2002...
+Connecting to PLC at 192.168.250.110:2002...
+Connected!
+  ✓ Priming: 30/30 frames OK, 0 errors
+  [AUTO] Discovered 0 MW addresses (parser): []
+  [AUTO] Dynamic scatter-gather (sequential Z/0xC0)...
+    [SG] Sending Z/0xC0 offset=0... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 000000000400000000000000040000007c0100001fbd0000000000001f8b
+    [SG] Sending Z/0xC0 offset=680... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 6d00003404f44d326c80981a6862000684c26034d1a46103d0011a60000d
+    [SG] Sending Z/0xC0 offset=1360... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: abcb7bb54ea3b75ff493e51a78ee1ea01d79900698e3bf426b469279e114
+    [SG] Sending Z/0xC0 offset=2040... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 997b8c0ef6d1868ce4ee3837680ac738c1195a8a7643af14218cac1d21aa
+    [SG] Sending Z/0xC0 offset=2720... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 1b9956659bd37a2b11de7ea5de75d7355cf4cf44b16231c947446ad2a615
+    [SG] Sending Z/0xC0 offset=3400... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: e9d40f41790c122ee641a1ba9a3555c42218210df459f23037601ced13d9
+    [SG] Sending Z/0xC0 offset=4080... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 000000000000000000000000000000000000000000000000000000000000
+    [SG] All-zero head (50B) at offset 4080 — reached end of valid data
+  [AUTO] Scatter-gather: 6 fragments → 12 symbols
+  [AUTO] Symbols: ['%IW1400', '%IW5000', '%MW1000', '%MW1002', '%MW1400', '%MW152', '%MW2400', '%MW2401', '%MW30', '%MW3000', '%MW6000', '%QW1400']
+Disconnected.
+  [AUTO] Total discovered: 12 addresses (9 M, 2 I, 1 Q)
+  [AUTO] Addresses: ['MW30', 'MW152', 'MW1000', 'MW1002', 'MW1400', 'MW2400', 'MW2401', 'MW3000', 'MW6000', 'IW1400', 'IW5000', 'QW1400']
+
+=== AUTO MODE: Session 2 (Value Read) ===
+Connecting to PLC at 192.168.250.110:2002...
+Connected!
+  [SESSION] Sending CONN frame...
+  ✓ CONN OK (24B response)
+  [PRIMING] Sending J heartbeat...
+  ✓ J/0x34 OK
+  [MONITOR] Entering monitor mode...
+  Z/0x8d: OK (monitor setup 1a (00000008))
+  Z/0x8d: OK (monitor setup 1b (00000070))
+  Z/0x8e: OK (monitor setup 2a (00000008))
+  Z/0x8e: OK (monitor setup 2b (00000078))
+  [READ] Starting R/0xE0 polls...
+    [batch 1/4] {'MW30': 0, 'MW152': 0, 'MW1000': 0}
+    [batch 2/4] {'MW1002': 0, 'MW1400': 0, 'MW2400': 0}
+    [batch 3/4] {'MW2401': 0, 'MW3000': 0, 'MW6000': 0}
+    [batch 4/4] {'IW1400': 0, 'IW5000': 0, 'QW1400': 0}
+    ✓ READ OK: 12 values
+  [SESSION] Sending DISC frame...
+  ✓ DISC OK
+Disconnected.
+
+✓ Saved snapshot to snapshots\values.json
+  Samples: 1, Latest values: 12
+
+C:\PLC_Test>
+C:\PLC_Test>PLC_ValueBackup.exe --read 192.168.250.110 --auto
+Loaded 5 variables, 4 monitor entry frames
+Variables: 0x1770, 0x0130, 0x07d4, 0x07d0, 0x0012
+
+=== AUTO MODE: Universal Priming + Dynamic Scatter-Gather ===
+  [AUTO] Loaded 30 universal priming frames
+  Connecting to PLC 192.168.250.110:2002...
+Connecting to PLC at 192.168.250.110:2002...
+Connected!
+  ✓ Priming: 30/30 frames OK, 0 errors
+  [AUTO] Discovered 0 MW addresses (parser): []
+  [AUTO] Dynamic scatter-gather (sequential Z/0xC0)...
+    [SG] Sending Z/0xC0 offset=0... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 000000000400000000000000040000007c0100001fbd0000000000001f8b
+    [SG] Sending Z/0xC0 offset=680... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 6d00003404f44d326c80981a6862000684c26034d1a46103d0011a60000d
+    [SG] Sending Z/0xC0 offset=1360... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: abcb7bb54ea3b75ff493e51a78ee1ea01d79900698e3bf426b469279e114
+    [SG] Sending Z/0xC0 offset=2040... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 997b8c0ef6d1868ce4ee3837680ac738c1195a8a7643af14218cac1d21aa
+    [SG] Sending Z/0xC0 offset=2720... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 1b9956659bd37a2b11de7ea5de75d7355cf4cf44b16231c947446ad2a615
+    [SG] Sending Z/0xC0 offset=3400... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: e9d40f41790c122ee641a1ba9a3555c42218210df459f23037601ced13d9
+    [SG] Sending Z/0xC0 offset=4080... response 1388B, status=0x06
+    [SG] Decoded: 681B, hex: 000000000000000000000000000000000000000000000000000000000000
+    [SG] All-zero head (50B) at offset 4080 — reached end of valid data
+  [AUTO] Scatter-gather: 6 fragments → 12 symbols
+  [AUTO] Symbols: ['%IW1400', '%IW5000', '%MW1000', '%MW1002', '%MW1400', '%MW152', '%MW2400', '%MW2401', '%MW30', '%MW3000', '%MW6000', '%QW1400']
+Disconnected.
+  [AUTO] Total discovered: 12 addresses (9 M, 2 I, 1 Q)
+  [AUTO] Addresses: ['MW30', 'MW152', 'MW1000', 'MW1002', 'MW1400', 'MW2400', 'MW2401', 'MW3000', 'MW6000', 'IW1400', 'IW5000', 'QW1400']
+
+=== AUTO MODE: Session 2 (Value Read) ===
+Connecting to PLC at 192.168.250.110:2002...
+Connected!
+  [SESSION] Sending CONN frame...
+  ✓ CONN OK (24B response)
+  [PRIMING] Sending J heartbeat...
+  ✓ J/0x34 OK
+  [MONITOR] Entering monitor mode...
+  Z/0x8d: OK (monitor setup 1a (00000008))
+  Z/0x8d: OK (monitor setup 1b (00000070))
+  Z/0x8e: OK (monitor setup 2a (00000008))
+  Z/0x8e: OK (monitor setup 2b (00000078))
+  [READ] Starting R/0xE0 polls...
+    [batch 1/4] {'MW30': 0, 'MW152': 0, 'MW1000': 0}
+    [batch 2/4] {'MW1002': 0, 'MW1400': 1, 'MW2400': 0}
+    [batch 3/4] {'MW2401': 0, 'MW3000': 2, 'MW6000': 0}
+    [batch 4/4] {'IW1400': 1, 'IW5000': 0, 'QW1400': 1}
+    ✓ READ OK: 12 values
+  [SESSION] Sending DISC frame...
+  ✓ DISC OK
+Disconnected.
+
+✓ Saved snapshot to snapshots\values.json
+  Samples: 1, Latest values: 12

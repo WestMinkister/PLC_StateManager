@@ -1,0 +1,55 @@
+C:\PLC_Test>PLC_ValueBackup.exe --read 192.168.250.110
+Loaded 5 variables from 30 pairs
+Variables: 0x1770, 0x0130, 0x07d4, 0x07d0, 0x0012
+
+=== Connecting to PLC 192.168.250.110:2002 ===
+Connecting to PLC at 192.168.250.110:2002...
+Connected!
+  [SESSION] Sending CONN frame...
+  ✓ CONN OK (24B response)
+  [PRIMING] Sending preflight session setup (240 frames)...
+  [PRIMING] 30/240 frames...
+  [PRIMING] 60/240 frames...
+  [PRIMING] 90/240 frames...
+  [PRIMING] 120/240 frames...
+  [PRIMING] 150/240 frames...
+  [PRIMING] 180/240 frames...
+  [PRIMING] 210/240 frames...
+  [PRIMING] 240/240 frames...
+  [PRIMING] ✓ 240 successful / 0 errors
+  ⏱ Response timeout
+  [R batch 1/30] NO RESPONSE
+  [R batch 2/30] NO RESPONSE
+  [R batch 3/30] NO RESPONSE
+  [R batch 4/30] NO RESPONSE
+  [R batch 5/30] NO RESPONSE
+  [R batch 6/30] NO RESPONSE
+  [R batch 7/30] NO RESPONSE
+  [R batch 8/30] NO RESPONSE
+  [R batch 9/30] NO RESPONSE
+  [R batch 10/30] NO RESPONSE
+  [R batch 11/30] NO RESPONSE
+  [R batch 12/30] NO RESPONSE
+  [R batch 13/30] NO RESPONSE
+  [R batch 14/30] NO RESPONSE
+  [R batch 15/30] NO RESPONSE
+  [R batch 16/30] NO RESPONSE
+  [R batch 17/30] NO RESPONSE
+  [R batch 18/30] NO RESPONSE
+  [R batch 19/30] NO RESPONSE
+  [R batch 20/30] NO RESPONSE
+  [R batch 21/30] NO RESPONSE
+  [R batch 22/30] NO RESPONSE
+  [R batch 23/30] NO RESPONSE
+  [R batch 24/30] NO RESPONSE
+  [R batch 25/30] NO RESPONSE
+  [R batch 26/30] NO RESPONSE
+  [R batch 27/30] NO RESPONSE
+  [R batch 28/30] NO RESPONSE
+  [R batch 29/30] NO RESPONSE
+  [R batch 30/30] NO RESPONSE
+
+  [SESSION] Sending DISC frame...
+Disconnected.
+✓ Saved snapshot to snapshots\values.json
+  Samples: 0, Latest values: 0
