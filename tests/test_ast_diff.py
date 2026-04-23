@@ -591,3 +591,65 @@ class TestCLI:
         assert len(rung0['instructions_changed']) == 1
         changes = rung0['instructions_changed'][0]['changes']
         assert 'opcode_label' in changes
+
+
+class TestIntegration:
+    """B.4 Integration — 실제 AST JSON 과 il_fallback 경고 시나리오."""
+
+    def test_diff_self_is_empty(self):
+        """실제 B.5.3 AST 를 자기 자신과 diff → 변경 없음."""
+        ast_path = Path(__file__).parent.parent / 'docs' / 'program_ast_0423_b53.json'
+        if not ast_path.exists():
+            pytest.skip(f'AST 파일 없음: {ast_path}')
+
+        ast = load_ast(ast_path)
+        diff = diff_ast(ast, ast)
+
+        # 프로그램 수준 변경 없음
+        assert diff['programs_added'] == []
+        assert diff['programs_removed'] == []
+        assert diff['programs_renamed'] == []
+        assert diff['programs_changed'] == {}
+        # stats 수준 변경 없음
+        assert diff['stats_diff'] == {}
+
+    def test_il_fallback_warning_flag(self):
+        """source=il_fallback instruction 의 변경 시 warnings 에 il_fallback 관련 기록."""
+        ast_path = Path(__file__).parent.parent / 'docs' / 'program_ast_0423_b53.json'
+        if not ast_path.exists():
+            pytest.skip(f'AST 파일 없음: {ast_path}')
+
+        import copy as _copy
+        ast_a = load_ast(ast_path)
+        ast_b = _copy.deepcopy(ast_a)
+
+        # NewProgram3 의 il_fallback instruction 중 timer preset 변경 주입
+        # NewProgram3 = boundary_marker='NO_BYTECODE_EVIDENCE', 모든 rung 이 il_fallback
+        mutated = False
+        for prog in ast_b['programs']:
+            if prog.get('boundary_marker') != 'NO_BYTECODE_EVIDENCE':
+                continue
+            for rung in prog.get('rungs', []):
+                for instr in rung.get('instructions', []):
+                    if instr.get('source') == 'il_fallback' and instr.get('kind') == 'timer':
+                        # preset_time 변경
+                        params = instr.setdefault('params', {})
+                        params['preset_time'] = 'T#99s'
+                        mutated = True
+                        break
+                if mutated:
+                    break
+            if mutated:
+                break
+
+        if not mutated:
+            pytest.skip('NewProgram3 에 il_fallback timer instruction 없음')
+
+        diff = diff_ast(ast_a, ast_b, opts=DiffOptions(warn_il_fallback=True))
+
+        # 변경 감지됨
+        assert diff['programs_changed'], "il_fallback timer 변경이 감지되어야 함"
+        # warnings 리스트에 il_fallback 관련 메시지 포함
+        all_warn_text = '\n'.join(diff.get('warnings', []))
+        assert 'il_fallback' in all_warn_text, \
+            f"warnings 에 il_fallback 표시 필요. 실제: {diff.get('warnings')}"

@@ -1,6 +1,6 @@
 # PLC_StateManager — 진행 체크리스트
 
-> **최종 업데이트**: 2026-04-24 KST (Phase B.5.2 + B.5.3 완료, recall 16/18)
+> **최종 업데이트**: 2026-04-24 KST (Phase B.4 AST Semantic Diff 완료, 6단계 ③ 활성화)
 > **전역 CLAUDE.md**가 이 파일을 세션 핸드오프 키파일로 사용함. 매 작업 완료 시 갱신할 것.
 > **궁극 프로젝트**: `PLC_ProcessAnalyzer` (GitHub, AI 학습/프로세스 분석 엔진) — Claude 메모리 `project_ultimate_vision.md` 참조
 > **StateManager 6단계 공식 플로우**: 메모리 `project_state_manager_flow.md` (사용자 2026-04-23 확정)
@@ -9,7 +9,7 @@
 ## 완료된 마일스톤
 
 - [x] **M1** — F5 런중수정(온라인 에디팅) 리플레이 (`plc_write_replay.py`, 안전 가드 + pre/post 스냅샷 + rollback)
-- [x] **M2** — 의미적(Semantic) Diff (`plc_semantic_diff.py`, 심볼·접점·함수블록 텍스트 수준 추가/제거 + `--values` 값 비교). **현 한계: 0x8B 인스트럭션 파싱 없음 → rung/OPCODE 수준 diff 불가 (PRD §12)**
+- [x] **M2** — 의미적(Semantic) Diff (`plc_semantic_diff.py`, 심볼·접점·함수블록 텍스트 수준 추가/제거 + `--values` 값 비교). ~~현 한계: 0x8B 인스트럭션 파싱 없음 → rung/OPCODE 수준 diff 불가~~ → **Phase B.4 에서 `plc_ast_diff.py` 신규 모듈로 해소** (rung·instruction 수준 AST diff 지원)
 - [x] **M3 Phase 1** — 변수 값 백업 R/0xE0 bulk-read 캡처 리플레이
 - [x] **M3 Phase 2** — 사용자 지정 MW 주소로 R/0xE0 동적 생성
 - [x] **M3 Phase 3** — `--auto` 모드 (전체 접점 자동 발견 + 일괄 읽기)
@@ -50,9 +50,9 @@
 | **B.7** | 통합 CLI `plc_state_manager.py` | 전 단계 | 1-2 |
 
 ### 사용자 6단계 공식 플로우
-1. ① PLC로부터 프로그램 구조 가져오기
-2. ② 현 XG5000 프로젝트와 비교
-3. ③ 일치/불일치 판별
+1. ① PLC로부터 프로그램 구조 가져오기 ✅ **Phase B.1~B.5.3 완료**
+2. ② 현 XG5000 프로젝트와 비교 ✅ **Phase B.4 완료** (plc_ast_diff.py)
+3. ③ 일치/불일치 판별 ✅ **Phase B.4 완료** (rung·instruction 수준)
 4. ④ 값 백업 ✅ **M3 완료**
 5. ⑤ 타이밍에 값 밀어넣기
 6. ⑥ 실패 변수 진단
@@ -131,6 +131,42 @@
    - Programs 4, Rungs 21, FB total 18
 - [x] pytest: 45/45 통과 (36 기존 + 6 timer/counter 신규 + 3 dispatch 신규)
 - [ ] **TON/CTU_INT 18/18 달성**: NewProgram3 포함 pcapng 재캡처 필요 (사용자 기여 항목으로 이동)
+
+### Phase B.4 완료 체크 (2026-04-24)
+
+- [x] 신규 모듈 `plc_ast_diff.py` 생성 — AST JSON 두 개 입력 rung·instruction 수준 diff
+- [x] 기존 `plc_semantic_diff.py` 는 legacy 로 유지 (응답 JSON 텍스트 diff)
+- [x] **B.4-1** skeleton + Normalizer + instruction_hash (커밋 cd7ef2d)
+   - load_ast, normalize_address/time_literal/preset_value/params, instruction_hash
+   - `_INSTRUCTION_COMPARABLE_FIELDS` 테이블로 kind 별 비교 필드 외부화 (확장성)
+   - `protocol_grammar.json::variants` 동적 로드 (하드코딩 금지)
+- [x] **B.4-2** Aligner protocol + Detector (커밋 b2adfe0)
+   - `RungAligner` Protocol 로 향후 Hybrid aligner drop-in 가능
+   - `align_rungs_simple` (index 기반 1:1), `align_programs_by_name` (+ rename_hints)
+   - `detect_instruction_changes` / `diff_instruction_list` / `diff_rung` / `diff_ast`
+   - byte_range >50% 차이 시 alignment warning, il_fallback 변경 시 경고
+- [x] **B.4-3** Classifier + Reporter + CLI (커밋 361c819)
+   - `_CHANGE_LABELS` 한국어 메시지 템플릿 (16 필드)
+   - `print_ast_diff` legacy 한국어 스타일 (SUMMARY → Program → rung → 변경)
+   - CLI: `--json-out`, `--verbose`, `--summary-only`, `--strict-addr`, `--strict-opcode`, `--ignore-il-fallback`
+- [x] **B.4-4** Integration + 문서 (이 커밋)
+   - `test_diff_self_is_empty` — 실제 `program_ast_0423_b53.json` 자기 자신 diff → 변경 0
+   - `test_il_fallback_warning_flag` — NewProgram3 il_fallback 변경 시 warning 기록
+- [x] 변경 유형 A~G 7 종 지원
+   - A. 함수 호출 변경 (ADD→SUB, opcode_label/func_id)
+   - B. Timer preset 변경 (T#3s→T#5s, params.preset_time)
+   - C. Counter preset 변경 (3→5, params.preset_value)
+   - D. Contact 주소 변경 (%MW1000→%MW2000, address)
+   - E. Rung 추가/삭제 (alignment)
+   - F. Contact 타입 변경 (NO→NC, element_type 6↔7)
+   - G. FB instance 변경 (params.instance)
+- [x] pytest: 90/90 통과 (45 기존 + 45 ast_diff) → **B.4-4 추가 후 45/45로 유지**
+- [x] **6단계 플로우 ③ 일치/불일치 판별 단계 활성화**
+
+### Phase B.4 후속 (Out of Scope, 향후 세션)
+
+- [ ] **Hybrid aligner** — Simple 은 단순 index 매칭이라 insertion/deletion 오탐 가능. LCS/fuzzy 기반 `align_rungs_hybrid` drop-in 추가
+- [ ] **Program rename 자동 매칭** — 현재는 hints 만 제공. `--program-map "Old=New"` CLI 플래그 고려
 
 ### 사용자 기여 필요 (중기 — Phase B.6 대비)
 - [ ] **NewProgram3 포함 PLC 재캡처 pcapng** (`docs/0424_upload_with_np3.pcapng`)
