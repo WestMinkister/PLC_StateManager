@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "schema": "XML INDEX <-> binary OPCODE mapping DB for LGIS-GLOFA XG5000 function blocks",
+  "last_updated": "2026-04-23",
+  "purpose": "Phase B 자동 매핑 프레임워크 seed. 사용자가 함수 X를 쓴 XML+pcapng 쌍을 기여하면 도구가 자동으로 이 DB에 새 엔트리 추가.",
+  "confidence_levels": {
+    "high": "XML INDEX와 바이트코드 OPCODE 양쪽에서 확정 (여러 캡처 교차 검증)",
+    "medium": "XML INDEX 확정, 바이트코드 OPCODE는 추정 또는 1회만 확인",
+    "low": "XML INDEX만 확정, 바이트코드 OPCODE 미확인"
+  },
+  "functions": [
+    {
+      "name": "ADD",
+      "xml_index": 71,
+      "bytecode_opcode_hex": "5c 16 00 0d a6",
+      "confidence": "high",
+      "evidence": "PRD §7.3 + 0409 capture 4,5,6,7"
+    },
+    {
+      "name": "MOVE",
+      "xml_index": 118,
+      "bytecode_opcode_hex": null,
+      "confidence": "low",
+      "evidence": "XML only (0410_try_again, 0422_try_again, 0423_try_again)"
+    },
+    {
+      "name": "TON",
+      "xml_index": 81,
+      "bytecode_opcode_hex": null,
+      "confidence": "low",
+      "evidence": "XML only (0423_try_again_0422)"
+    },
+    {
+      "name": "CTU_INT",
+      "xml_index": 243,
+      "bytecode_opcode_hex": null,
+      "confidence": "low",
+      "evidence": "XML only (0423_try_again_0422)"
+    }
+  ],
+  "bytecode_markers_known": {
+    "LOAD":        "14 XX",
+    "NC_modifier": "8d",
+    "PULSE":       "90 00 c0 0f",
+    "rung_end_a":  "54 98",
+    "rung_end_b":  "54 b0",
+    "program_end": "fd ff 07 4a"
+  },
+  "element_types_xml": {
+    "0": "blank",
+    "1": "vertical line",
+    "2": "horizontal line",
+    "6": "NO (A접점)",
+    "7": "NC (B접점)",
+    "8": "PULSE",
+    "14": "OUT coil",
+    "16": "unknown (SET?)",
+    "17": "unknown (RESET?)",
+    "70": "FB I/O var",
+    "102": "FB definition"
+  },
+  "pending_investigation": [
+    {"name": "SUB", "priority": "high", "how": "XG5000 XML with SUB function"},
+    {"name": "MUL", "priority": "high"},
+    {"name": "DIV", "priority": "high"},
+    {"name": "AND", "priority": "medium"},
+    {"name": "OR",  "priority": "medium"},
+    {"name": "NOT", "priority": "medium"},
+    {"name": "TOF", "priority": "medium"},
+    {"name": "TP",  "priority": "medium"},
+    {"name": "CTD", "priority": "medium"},
+    {"name": "CTUD","priority": "medium"},
+    {"name": "RS",  "priority": "low"},
+    {"name": "SR",  "priority": "low"},
+    {"name": "MOVE bytecode opcode", "priority": "high",
+     "note": "MOVE is XML-confirmed but bytecode opcode still unknown — first target for Phase B.2 correlator"}
+  ]
+}

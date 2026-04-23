@@ -1,8 +1,9 @@
 # PLC_StateManager — 진행 체크리스트
 
-> **최종 업데이트**: 2026-04-22 KST
+> **최종 업데이트**: 2026-04-23 KST
 > **전역 CLAUDE.md**가 이 파일을 세션 핸드오프 키파일로 사용함. 매 작업 완료 시 갱신할 것.
 > **궁극 프로젝트**: `PLC_ProcessAnalyzer` (GitHub, AI 학습/프로세스 분석 엔진) — Claude 메모리 `project_ultimate_vision.md` 참조
+> **설계 철학**: 확장 가능 프레임워크 우선, 미봉책 금지 — 메모리 `feedback_extensible_framework.md` 참조
 
 ## 완료된 마일스톤
 
@@ -16,20 +17,33 @@
 - [x] **M3 자동발견 완성** (2026-04-22) — Universal Priming(30 frames) + 동적 Z/0xC0 scatter-gather + GZIP/UTF-16LE 디컴프레션. 실측 증거: `docs/0422_cmd2.txt` 6 fragments → 12 symbols → R/0xE0 12개 읽기 성공, 값 변화 포착 확인 (MW1400 0→1 등). 커밋 `132bfa9`까지
 - [x] **M3 영역 확장** (2026-04-22) — AREA_MARKERS 7종 → 15종 (PDF 부록 A.1 전체: P/M/K/F/T/C/L/N/D/U/Z/R/W/I/Q). ALL_AREAS/AREA_ORDER 도입
 
-## 현재 블로커 (다음 세션 — Phase B: Stale symbol 근본 해결)
+## 현재 블로커 — Phase B.0 (정답지 인프라) 완료 대기, B.1 사용자 기여 필요
 
-- [ ] **Phase B: 로직 파싱 Level 1 — 실사용 변수 추출**
-  - **문제**: 0422 실측에서 `%MW1400, %MW2400, %MW2401` 같은 심볼이 GZIP 워크스페이스 XML에서 발견됨. 일부는 실사용(MW1400 값 변화 포착됨), 일부는 과거 잔존 추정. 현 scatter-gather는 "프로젝트 history 전체"를 반영해 **실사용/stale 구분 불가** (PRD §8.3 "7 캡처 동일, 프로그램 변경 무관" 명시)
-  - **해결 경로**: Z/0x82 또는 0x8B 인스트럭션 바이트코드에서 LE16 주소 스캔 → MW×2 역산으로 실사용 주소 집합 추출 → GZIP 심볼 셋과 교집합 → stale 제거 (PRD §7.2 기반, 🟢 확정)
-  - **사용자 합의**: "예, XG5000에서 원하는 프로그램 만들고 캡처 가능" — Level 4(접점 타입)까지 추가 캡처 수집 가능
-  - **수정 파일 예상**: `plc_upload_decode.py` (0x8B 파서 신규), `plc_value_backup.py` (scatter-gather 결과와 교집합 로직 추가)
+### Phase B 근본 재설계 (2026-04-23)
+"단순 regex 확장"이 아니라 **함수블록 OPCODE 자동 매핑 프레임워크**로 전환. 사용자 기여(XML+pcapng) → 도구가 자동으로 `function_opcodes.json` DB 성장. 지금 모르는 함수도 미래 자동 수용.
 
-## 다음 마일스톤 (확정된 로드맵, 우선순위 순)
+- [x] **B.0** 정답지 인프라 (2026-04-23 커밋 대기):
+  - `plc_xml_parser.py --full` — XG5000 XML → 함수 INDEX + Rung + 시스템플래그 + ElementType 완전 추출
+  - `plc_value_backup.py --debug-dump` — 실기 때 fragment/GZIP/priming 응답 전체 저장
+  - `validate_extraction.py` — 프로토콜 추출 vs XML 정답지 대조
+  - `function_opcodes.json` — 매핑 DB 씨앗 (ADD·MOVE·TON·CTU_INT 4종)
+- [ ] **B.0 사용자 액션 대기** — 최신 EXE + `--debug-dump --auto` 실기 1회 → `snapshots/dump_*` 디렉토리 공유
+- [ ] **B.1** `plc_bytecode_scanner.py` — Z/0x82 응답에서 OPCODE 후보 자동 추출 (다음 세션)
+- [ ] **B.2** `correlate_xml_bytecode.py` — XML 함수 리스트 ↔ 바이트코드 후보 상관관계 매퍼
+- [ ] **B.3** 사용자 기여 파이프라인 — `contribute_function.py <project>.xml <capture>.pcapng`
+- [ ] **B.4+** 함수 DB 순차 확장: SUB/MUL/DIV/OR/AND/NOT/RS/SR/TOF/TP/CTD/CTUD ...
+- [ ] **B.5** Rung 경계 + 접점 타입 변화 감지 (Level 3-4)
 
-- [ ] **Phase B** — Stale symbol 근본 해결 (Level 1 로직 파싱) ← **다음 세션 우선 타깃**
+### XGT Port 2004 실기 검증 (우선순위 낮음, 보조 경로)
+- [ ] `PLC_XGTReader.exe --read 192.168.250.110 --mw 152 1000` 실기 1회
+  - 성공 시 M4 쓰기를 XGT로 단순화 가능 (PDF §5.2 공개 스펙)
+  - 실패 시 LGIS-GLOFA 유지 (영향 없음, 현 기능 그대로)
+
+## 다음 마일스톤 (Phase B 이후, 로드맵 순)
+
 - [ ] **M3.x Phase C** — 시계열 축적 (`--interval` 주기, CSV/SQLite 포맷, Phase D의 "데이터 축적 → AI 학습" 기반)
-- [ ] **M2.5 Phase D** — Semantic Diff 업그레이드 (Level 3 rung 경계 diff, Level 4 접점 타입 변화)
-- [ ] **M4** — 변수 값 쓰기 (W/0xE1, 안전 가드 + 화이트리스트)
+- [ ] **M2.5 Phase D** — Semantic Diff 업그레이드 (Phase B.2 결과 위에 구축: rung 단위 diff, 접점 타입 변화)
+- [ ] **M4** — 변수 값 쓰기 (W/0xE1 또는 XGT h5800, 안전 가드 + 화이트리스트)
 - [ ] **M5** — Invoke ID 자동 재작성
 - [ ] **M6** — **상주 서비스** (단순 CLI 통합 아님, Claude 메모리 `feedback_m6_redefined.md` 참조)
   - `plc_state_manager serve --port 8080`, HTTP/WebSocket API 노출

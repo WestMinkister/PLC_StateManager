@@ -1,0 +1,28 @@
+C:\PLC_Test>PLC_XGTReader.exe --help
+usage: PLC_XGTReader.exe [-h] [--read IP] [--scan IP] [--mw MW [MW ...]] [--iw IW [IW ...]] [--config CONFIG]
+                         [--port PORT] [--timeout TIMEOUT] [--range RANGE RANGE] [--export EXPORT] [--out OUT]
+                         [--samples SAMPLES] [--interval INTERVAL]
+
+PLC XGT Protocol Reader (Port 2004)
+
+options:
+  -h, --help           show this help message and exit
+  --read IP            Read mode: PLC IP address
+  --scan IP            Scan mode: PLC IP address
+  --mw MW [MW ...]     MW word addresses to read
+  --iw IW [IW ...]     IW word addresses to read
+  --config CONFIG      JSON config with variable list
+  --port PORT          XGT port (default 2004)
+  --timeout TIMEOUT    Socket timeout (seconds)
+  --range RANGE RANGE  Scan range: start end
+  --export EXPORT      Export found variables to JSON
+  --out OUT            Output file for snapshot
+  --samples SAMPLES    Number of repeated reads
+  --interval INTERVAL  Interval between samples (s)
+
+Examples: # Read specific MW addresses python plc_xgt_reader.py --read 192.168.1.100 --mw 0 152 3000 1002 # Read IW
+addresses python plc_xgt_reader.py --read 192.168.1.100 --iw 5000 # Read from config file python plc_xgt_reader.py
+--read 192.168.1.100 --config variables.json # Scan memory range for non-zero values python plc_xgt_reader.py --scan
+192.168.1.100 --range 0 10000 # Scan and export found variables python plc_xgt_reader.py --scan 192.168.1.100 --range
+0 10000 --export found.json # Multiple samples with interval python plc_xgt_reader.py --read 192.168.1.100 --mw 152
+--samples 5 # Custom output path python plc_xgt_reader.py --read 192.168.1.100 --mw 1002 --out snapshot.json

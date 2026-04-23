@@ -123,7 +123,7 @@ def build_z_c0_request(offset):
     return bytes(header) + sub_header + cmd_data
 
 
-def dynamic_scatter_gather(client):
+def dynamic_scatter_gather(client, dump_dir=None):
     """Dynamically read symbol table from PLC using sequential Z/0xC0 requests.
 
     Sends Z/0xC0 at offsets 0, 680, 1360, ... until response < 680 bytes.
@@ -131,6 +131,8 @@ def dynamic_scatter_gather(client):
 
     Args:
         client: Connected PLCUploadClient (session already primed with upload replay)
+        dump_dir: (optional) pathlib.Path — if set, Phase B.0 debug dump:
+                  saves each raw fragment + reassembled buffer + decoded XML.
     Returns:
         tuple: (set of symbol addresses like {'%MW152', '%MW6000'}, fragment_count: int)
     """
@@ -207,6 +209,19 @@ def dynamic_scatter_gather(client):
     for f in sorted(fragments, key=lambda x: x['offset']):
         buffer[f['offset']:f['offset'] + len(f['data'])] = f['data']
 
+    # Phase B.0 Debug dump — 오프라인 분석 + XML 정답지 대조용
+    if dump_dir is not None:
+        try:
+            dump_dir.mkdir(parents=True, exist_ok=True)
+            # 각 fragment raw bytes
+            for i, f in enumerate(fragments):
+                (dump_dir / f'fragment_{i:02d}_offset{f["offset"]:05d}.bin').write_bytes(f['data'])
+            # 재조립 버퍼
+            (dump_dir / 'reassembled_buffer.bin').write_bytes(bytes(buffer))
+            print(f"    [DUMP] Fragments and buffer saved to {dump_dir}")
+        except Exception as e:
+            print(f"    [DUMP] Fragment dump failed: {e}")
+
     # Extract symbols: try both bzip2 (BZh) and gzip (\x1f\x8b) compressed blocks.
     # 실측: 이 PLC 펌웨어는 symbol table을 GZIP으로 압축 (PRD §8.3 "GZIP 내포 → UTF-16LE XML"와 정합).
     symbols = set()
@@ -218,6 +233,17 @@ def dynamic_scatter_gather(client):
                 break
             try:
                 d = decompressor(buffer[idx:])
+                # Phase B.0 Debug dump — 해제된 바이트 원본 + 각 인코딩 디코딩 결과 저장
+                if dump_dir is not None:
+                    try:
+                        (dump_dir / f'decompressed_{magic.hex()}_off{idx}.bin').write_bytes(d)
+                        # UTF-16LE 디코딩 결과 (XML이면 가독성 확보)
+                        text_utf16 = d.decode('utf-16-le', errors='replace')
+                        (dump_dir / f'decompressed_{magic.hex()}_off{idx}.utf16le.xml').write_text(
+                            text_utf16, encoding='utf-8'
+                        )
+                    except Exception as e:
+                        print(f"    [DUMP] Decompressed dump failed: {e}")
                 # 해제된 텍스트는 UTF-16LE XML 또는 ASCII — 둘 다 시도
                 for enc in ('utf-16-le', 'ascii'):
                     try:
@@ -527,6 +553,9 @@ def main():
     parser.add_argument('--range', nargs=2, type=int, metavar=('START', 'END'),
                         default=[0, 10000],
                         help='MW address range for --scan (default: 0 10000)')
+    parser.add_argument('--debug-dump', action='store_true',
+                        help='Phase B.0: snapshots/dump_<ts>/에 fragment/GZIP/Z응답/메타 전부 저장 '
+                             '(offline 분석 + XML 정답지 대조용)')
 
     args = parser.parse_args()
 
@@ -867,6 +896,14 @@ def main():
             # Then dynamically reads symbol table via Z/0xC0 at sequential offsets
             print(f"\n=== AUTO MODE: Universal Priming + Dynamic Scatter-Gather ===")
 
+            # Phase B.0: --debug-dump 시 덤프 디렉토리 준비
+            dump_dir = None
+            if getattr(args, 'debug_dump', False):
+                ts = datetime.now().strftime('%Y%m%d_%H%M%S')
+                dump_dir = Path('snapshots') / f'dump_{ts}'
+                dump_dir.mkdir(parents=True, exist_ok=True)
+                print(f"  [DUMP] Debug dump directory: {dump_dir}")
+
             # Load generic priming frames (program-independent, verified identical across 1/2/4-prog captures)
             priming_path = resource_path('generic_priming.json')
             try:
@@ -917,6 +954,16 @@ def main():
                         else:
                             entry[k] = v
                     snap_responses.append(entry)
+
+                # Phase B.0 Debug dump — priming 단계 Z/*/R/*/... 모든 응답 저장
+                # (B.1 바이트코드 스캐너가 Z/0x82, Z/0x8B 를 여기서 꺼내 분석함)
+                if dump_dir is not None:
+                    try:
+                        with open(dump_dir / 'priming_responses.json', 'w', encoding='utf-8') as f:
+                            json.dump(snap_responses, f, indent=2, ensure_ascii=False)
+                        print(f"  [DUMP] Priming responses saved ({len(snap_responses)} frames)")
+                    except Exception as e:
+                        print(f"  [DUMP] Priming dump failed: {e}")
             except Exception as e:
                 print(f"  ✗ Priming failed: {e}")
                 client1.disconnect()
@@ -936,7 +983,7 @@ def main():
             if not args.snapshot:
                 try:
                     print(f"  [AUTO] Dynamic scatter-gather (sequential Z/0xC0)...")
-                    sg_symbols, n_frags = dynamic_scatter_gather(client1)
+                    sg_symbols, n_frags = dynamic_scatter_gather(client1, dump_dir=dump_dir)
                     sg_addresses = extract_addresses_from_symbols(sg_symbols)
 
                     # 다중 영역 지원 (PDF 부록 A.1 15종) — 심볼 테이블에 있는 모든 영역 포함
@@ -947,6 +994,25 @@ def main():
                     print(f"  [AUTO] Scatter-gather: {n_frags} fragments → {len(sg_symbols)} symbols")
                     if sg_symbols:
                         print(f"  [AUTO] Symbols: {sorted(sg_symbols)}")
+
+                    # Phase B.0 메타 JSON
+                    if dump_dir is not None:
+                        try:
+                            meta = {
+                                'timestamp': datetime.now().isoformat(),
+                                'plc_ip': args.read,
+                                'port': args.port,
+                                'priming_frame_count': len(priming_frames),
+                                'scatter_gather_fragments': n_frags,
+                                'scatter_gather_symbols': sorted(sg_symbols),
+                                'schema_version': 1,
+                                'notes': 'Phase B.0 debug dump for XML ground truth comparison',
+                            }
+                            with open(dump_dir / 'meta.json', 'w', encoding='utf-8') as f:
+                                json.dump(meta, f, indent=2, ensure_ascii=False)
+                            print(f"  [DUMP] meta.json saved at {dump_dir}")
+                        except Exception as e:
+                            print(f"  [DUMP] meta write failed: {e}")
                 except Exception as e:
                     print(f"  [AUTO] Scatter-gather failed: {e} (using parser results only)")
                 finally:
