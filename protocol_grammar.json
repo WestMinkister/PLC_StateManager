@@ -228,6 +228,33 @@
       "102": "FB_definition_slot"
     }
   },
+  "x_command_structure": {
+    "note": "Phase B.2.1 2026-04-23 밤 분석 결과",
+    "request_structure": {
+      "note": "X 요청은 Z 명령과 달리 ASCII-hex 2자 sub 포맷이 아닌 바이너리 직접 시작으로 추정",
+      "size_range_bytes": "6-30 (avg 15)",
+      "common_prefixes": ["00 01 80 40 60 0f", "00 11 80 40 60 0f", "00 00 00 00 00 60 00 00"]
+    },
+    "response_variants": {
+      "sub_0x00": {
+        "count_in_0423_pcapng": 48,
+        "size_range_bytes": "21-501 (variable)",
+        "bzip2_blocks_found": 2,
+        "meaning": "BULK_DATA — 메모리 영역 덤프. 대부분 BZh 없음 (원시 데이터 또는 별도 encoding)"
+      },
+      "sub_0xaa": {
+        "count_in_0423_pcapng": 44,
+        "size_bytes": 2,
+        "content_fixed": "55 44 (ASCII 'UD')",
+        "meaning_hypothesis": "STATUS_PING (Upload Done or poll ack)"
+      },
+      "sub_0x58": {
+        "count_in_0423_pcapng": 42,
+        "size_bytes": 0,
+        "meaning_hypothesis": "ACK / TRANSMIT_COMPLETE"
+      }
+    }
+  },
   "unresolved_grammar": {
     "description": "파서 구현 전 반드시 해결해야 할 문법 공백",
     "items": [
