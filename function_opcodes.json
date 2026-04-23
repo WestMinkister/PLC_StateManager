@@ -1,5 +1,7 @@
 {
-  "version": 1,
+  "version": 2,
+  "DEPRECATED_see": "protocol_grammar.json",
+  "deprecation_note": "2026-04-23 관점 전환: '이름 매핑 DB' → 'Grammar 문법 DB'. 이 파일은 호환성 유지를 위해 남지만 주 자산은 protocol_grammar.json의 name_labels_optional 섹션.",
   "schema": "XML INDEX <-> binary OPCODE mapping DB for LGIS-GLOFA XG5000 function blocks",
   "last_updated": "2026-04-23",
   "purpose": "Phase B 자동 매핑 프레임워크 seed. 사용자가 함수 X를 쓴 XML+pcapng 쌍을 기여하면 도구가 자동으로 이 DB에 새 엔트리 추가.",
@@ -9,34 +11,24 @@
     "low": "XML INDEX만 확정, 바이트코드 OPCODE 미확인"
   },
   "functions": [
-    {
-      "name": "ADD",
-      "xml_index": 71,
-      "bytecode_opcode_hex": "5c 16 00 0d a6",
-      "confidence": "high",
-      "evidence": "PRD §7.3 + 0409 capture 4,5,6,7"
-    },
-    {
-      "name": "MOVE",
-      "xml_index": 118,
-      "bytecode_opcode_hex": null,
-      "confidence": "low",
-      "evidence": "XML only (0410_try_again, 0422_try_again, 0423_try_again)"
-    },
-    {
-      "name": "TON",
-      "xml_index": 81,
-      "bytecode_opcode_hex": null,
-      "confidence": "low",
-      "evidence": "XML only (0423_try_again_0422)"
-    },
-    {
-      "name": "CTU_INT",
-      "xml_index": 243,
-      "bytecode_opcode_hex": null,
-      "confidence": "low",
-      "evidence": "XML only (0423_try_again_0422)"
-    }
+    {"name": "TOF",       "xml_index": 10,  "fb_def_match_count": 0, "confidence": "low",  "evidence": "XML only (0423 manyfunction). FB_DEFINITION 패턴 미발견 — Timer 특수 encoding 추정"},
+    {"name": "RS",        "xml_index": 19,  "fb_def_match_count": 1, "confidence": "medium", "evidence": "0423 PLC로부터열기 pcapng FB_DEFINITION 패턴 1회"},
+    {"name": "AND",       "xml_index": 20,  "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "OR",        "xml_index": 21,  "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "SR",        "xml_index": 28,  "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "TP",        "xml_index": 34,  "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "ADD",       "xml_index": 71,  "fb_def_match_count": 1, "bytecode_opcode_hex": "5c 16 00 0d a6", "confidence": "high", "evidence": "PRD §7.3 + 0409 capture 4,5,6,7 + 0423 pcapng 1회 FB_DEFINITION"},
+    {"name": "MUL",       "xml_index": 72,  "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "TON",       "xml_index": 81,  "fb_def_match_count": 0, "confidence": "low",  "evidence": "XML only. FB_DEFINITION 미발견 — Timer 특수 encoding 추정"},
+    {"name": "DIV",       "xml_index": 99,  "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "NOT",       "xml_index": 110, "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "MOVE",      "xml_index": 118, "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "SUB",       "xml_index": 127, "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "CTUD_DINT", "xml_index": 207, "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "CTD_UDINT", "xml_index": 210, "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "CTD_LINT",  "xml_index": 212, "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "CTD_DINT",  "xml_index": 213, "fb_def_match_count": 1, "confidence": "medium"},
+    {"name": "CTU_INT",   "xml_index": 243, "fb_def_match_count": 0, "confidence": "low",  "evidence": "XML only. FB_DEFINITION 미발견 — Counter 특수 encoding 추정"}
   ],
   "bytecode_markers_known": {
     "LOAD":        "14 XX",

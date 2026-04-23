@@ -1,0 +1,1395 @@
+{
+  "source": "docs/0423_try_again_manyfunction.xml",
+  "programs": [],
+  "addresses": {
+    "word_unique": [
+      "%IW1400",
+      "%IW5000",
+      "%MB2000",
+      "%MB2002",
+      "%MB2004",
+      "%MB2006",
+      "%MB3000",
+      "%MB3044",
+      "%MW1000",
+      "%MW1002",
+      "%MW1400",
+      "%MW1500",
+      "%MW152",
+      "%MW30",
+      "%MW3000",
+      "%MW6000",
+      "%QW1400"
+    ],
+    "bit_unique": [
+      "%IW1400.0",
+      "%IW5000.12",
+      "%IW5000.13",
+      "%IW5000.14",
+      "%IW5000.15",
+      "%MW1000.0",
+      "%MW1002.0",
+      "%MW1002.1",
+      "%MW1002.2",
+      "%MW1002.3",
+      "%MW1002.4",
+      "%MW1400.0",
+      "%MW152.0",
+      "%MW3000.0",
+      "%MW3000.1",
+      "%MW6000.0",
+      "%MW6000.1",
+      "%QW1400.0",
+      "%QW1400.1"
+    ],
+    "by_area": {
+      "MW": [
+        30,
+        152,
+        1000,
+        1002,
+        1400,
+        1500,
+        3000,
+        6000
+      ],
+      "IW": [
+        1400,
+        5000
+      ],
+      "QW": [
+        1400
+      ],
+      "MB": [
+        2000,
+        2002,
+        2004,
+        2006,
+        3000,
+        3044
+      ]
+    }
+  },
+  "functions": [
+    {
+      "name": "ADD",
+      "xml_index": 71,
+      "var_in": [
+        {
+          "name": "EN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "IN1",
+          "flags_hex": "0x00207fe0"
+        },
+        {
+          "name": "IN2",
+          "flags_hex": "0x00207fe0"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "ENO",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "OUT",
+          "flags_hex": "0x00007fe0"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "MOVE",
+      "xml_index": 118,
+      "var_in": [
+        {
+          "name": "EN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "IN",
+          "flags_hex": "0x022fffff"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "ENO",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "OUT",
+          "flags_hex": "0x020fffff"
+        }
+      ],
+      "instance_count": 3
+    },
+    {
+      "name": "TON",
+      "xml_index": 81,
+      "var_in": [
+        {
+          "name": "IN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "PT",
+          "flags_hex": "0x00208000"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "Q",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "ET",
+          "flags_hex": "0x00008000"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "CTU_INT",
+      "xml_index": 243,
+      "var_in": [
+        {
+          "name": "CU",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "R",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "PV",
+          "flags_hex": "0x00200040"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "Q",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "CV",
+          "flags_hex": "0x00000040"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "SUB",
+      "xml_index": 127,
+      "var_in": [
+        {
+          "name": "EN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "IN1",
+          "flags_hex": "0x00207fe0"
+        },
+        {
+          "name": "IN2",
+          "flags_hex": "0x00207fe0"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "ENO",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "OUT",
+          "flags_hex": "0x00007fe0"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "MUL",
+      "xml_index": 72,
+      "var_in": [
+        {
+          "name": "EN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "IN1",
+          "flags_hex": "0x00207fe0"
+        },
+        {
+          "name": "IN2",
+          "flags_hex": "0x00207fe0"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "ENO",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "OUT",
+          "flags_hex": "0x00007fe0"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "DIV",
+      "xml_index": 99,
+      "var_in": [
+        {
+          "name": "EN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "IN1",
+          "flags_hex": "0x00207fe0"
+        },
+        {
+          "name": "IN2",
+          "flags_hex": "0x00207fe0"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "ENO",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "OUT",
+          "flags_hex": "0x00007fe0"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "AND",
+      "xml_index": 20,
+      "var_in": [
+        {
+          "name": "EN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "IN1",
+          "flags_hex": "0x0020001f"
+        },
+        {
+          "name": "IN2",
+          "flags_hex": "0x0020001f"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "ENO",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "OUT",
+          "flags_hex": "0x0000001f"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "OR",
+      "xml_index": 21,
+      "var_in": [
+        {
+          "name": "EN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "IN1",
+          "flags_hex": "0x0020001f"
+        },
+        {
+          "name": "IN2",
+          "flags_hex": "0x0020001f"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "ENO",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "OUT",
+          "flags_hex": "0x0000001f"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "NOT",
+      "xml_index": 110,
+      "var_in": [
+        {
+          "name": "EN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "IN",
+          "flags_hex": "0x0020001f"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "ENO",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "OUT",
+          "flags_hex": "0x0000001f"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "TOF",
+      "xml_index": 10,
+      "var_in": [
+        {
+          "name": "IN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "PT",
+          "flags_hex": "0x00208000"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "Q",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "ET",
+          "flags_hex": "0x00008000"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "TP",
+      "xml_index": 34,
+      "var_in": [
+        {
+          "name": "IN",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "PT",
+          "flags_hex": "0x00208000"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "Q",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "ET",
+          "flags_hex": "0x00008000"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "CTD_DINT",
+      "xml_index": 213,
+      "var_in": [
+        {
+          "name": "CD",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "LD",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "PV",
+          "flags_hex": "0x00200080"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "Q",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "CV",
+          "flags_hex": "0x00000080"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "CTD_LINT",
+      "xml_index": 212,
+      "var_in": [
+        {
+          "name": "CD",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "LD",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "PV",
+          "flags_hex": "0x00200100"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "Q",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "CV",
+          "flags_hex": "0x00000100"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "CTD_UDINT",
+      "xml_index": 210,
+      "var_in": [
+        {
+          "name": "CD",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "LD",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "PV",
+          "flags_hex": "0x00200800"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "Q",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "CV",
+          "flags_hex": "0x00000800"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "CTUD_DINT",
+      "xml_index": 207,
+      "var_in": [
+        {
+          "name": "CU",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "CD",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "R",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "LD",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "PV",
+          "flags_hex": "0x00200080"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "QU",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "QD",
+          "flags_hex": "0x00000001"
+        },
+        {
+          "name": "CV",
+          "flags_hex": "0x00000080"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "RS",
+      "xml_index": 19,
+      "var_in": [
+        {
+          "name": "S",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "R_1",
+          "flags_hex": "0x00200001"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "Q",
+          "flags_hex": "0x00000001"
+        }
+      ],
+      "instance_count": 1
+    },
+    {
+      "name": "SR",
+      "xml_index": 28,
+      "var_in": [
+        {
+          "name": "S_1",
+          "flags_hex": "0x00200001"
+        },
+        {
+          "name": "R",
+          "flags_hex": "0x00200001"
+        }
+      ],
+      "var_out": [
+        {
+          "name": "Q",
+          "flags_hex": "0x00000001"
+        }
+      ],
+      "instance_count": 1
+    }
+  ],
+  "rungs": [
+    {
+      "index": 0,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 1,
+          "addr_or_name": "%MW3000.0"
+        },
+        {
+          "type": 2,
+          "coord": 4,
+          "addr_or_name": null
+        },
+        {
+          "type": 0,
+          "coord": 9,
+          "addr_or_name": null
+        },
+        {
+          "type": 2,
+          "coord": 10,
+          "addr_or_name": null
+        },
+        {
+          "type": 14,
+          "coord": 94,
+          "addr_or_name": "%MW3000.1"
+        },
+        {
+          "type": 2,
+          "coord": 1025,
+          "addr_or_name": null
+        },
+        {
+          "type": 6,
+          "coord": 1031,
+          "addr_or_name": "_ON"
+        },
+        {
+          "type": 1,
+          "coord": 1034,
+          "addr_or_name": null
+        },
+        {
+          "type": 8,
+          "coord": 1037,
+          "addr_or_name": "%MW152.0"
+        },
+        {
+          "type": 102,
+          "coord": 1040,
+          "addr_or_name": null
+        },
+        {
+          "type": 70,
+          "coord": 2061,
+          "addr_or_name": "%MW1000"
+        },
+        {
+          "type": 70,
+          "coord": 2067,
+          "addr_or_name": "%MW1002"
+        },
+        {
+          "type": 70,
+          "coord": 3085,
+          "addr_or_name": "%MW1002"
+        }
+      ],
+      "element_count": 13
+    },
+    {
+      "index": 1,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 1,
+          "addr_or_name": "%IW5000.12"
+        },
+        {
+          "type": 0,
+          "coord": 3,
+          "addr_or_name": null
+        },
+        {
+          "type": 2,
+          "coord": 4,
+          "addr_or_name": null
+        },
+        {
+          "type": 17,
+          "coord": 94,
+          "addr_or_name": "%MW6000.0"
+        },
+        {
+          "type": 6,
+          "coord": 1025,
+          "addr_or_name": "%IW5000.13"
+        }
+      ],
+      "element_count": 5
+    },
+    {
+      "index": 2,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 2049,
+          "addr_or_name": "%IW5000.15"
+        },
+        {
+          "type": 0,
+          "coord": 2051,
+          "addr_or_name": null
+        },
+        {
+          "type": 2,
+          "coord": 2052,
+          "addr_or_name": null
+        },
+        {
+          "type": 16,
+          "coord": 2142,
+          "addr_or_name": "%MW6000.0"
+        },
+        {
+          "type": 6,
+          "coord": 3073,
+          "addr_or_name": "%IW5000.14"
+        }
+      ],
+      "element_count": 5
+    },
+    {
+      "index": 3,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 4097,
+          "addr_or_name": "%MW6000.0"
+        },
+        {
+          "type": 2,
+          "coord": 4100,
+          "addr_or_name": null
+        },
+        {
+          "type": 102,
+          "coord": 4106,
+          "addr_or_name": null
+        },
+        {
+          "type": 70,
+          "coord": 5127,
+          "addr_or_name": "1"
+        },
+        {
+          "type": 70,
+          "coord": 5133,
+          "addr_or_name": "%MW30"
+        }
+      ],
+      "element_count": 5
+    },
+    {
+      "index": 4,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 7,
+          "coord": 7169,
+          "addr_or_name": "_ON"
+        },
+        {
+          "type": 0,
+          "coord": 7171,
+          "addr_or_name": null
+        },
+        {
+          "type": 2,
+          "coord": 7172,
+          "addr_or_name": null
+        },
+        {
+          "type": 102,
+          "coord": 7178,
+          "addr_or_name": null
+        },
+        {
+          "type": 6,
+          "coord": 8193,
+          "addr_or_name": "%MW6000.1"
+        },
+        {
+          "type": 70,
+          "coord": 8199,
+          "addr_or_name": "0"
+        },
+        {
+          "type": 70,
+          "coord": 8205,
+          "addr_or_name": "%MW30"
+        }
+      ],
+      "element_count": 7
+    },
+    {
+      "index": 5,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 1,
+          "addr_or_name": "%IW1400.0"
+        },
+        {
+          "type": 2,
+          "coord": 4,
+          "addr_or_name": null
+        },
+        {
+          "type": 16,
+          "coord": 94,
+          "addr_or_name": "%MW1400.0"
+        }
+      ],
+      "element_count": 3
+    },
+    {
+      "index": 6,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 7,
+          "coord": 1025,
+          "addr_or_name": "%IW1400.0"
+        },
+        {
+          "type": 2,
+          "coord": 1028,
+          "addr_or_name": null
+        },
+        {
+          "type": 102,
+          "coord": 1034,
+          "addr_or_name": "INST"
+        },
+        {
+          "type": 2,
+          "coord": 1037,
+          "addr_or_name": null
+        },
+        {
+          "type": 17,
+          "coord": 1118,
+          "addr_or_name": "%MW1400.0"
+        },
+        {
+          "type": 70,
+          "coord": 2055,
+          "addr_or_name": "T#3s"
+        }
+      ],
+      "element_count": 6
+    },
+    {
+      "index": 7,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 5121,
+          "addr_or_name": "%MW1400.0"
+        },
+        {
+          "type": 2,
+          "coord": 5124,
+          "addr_or_name": null
+        },
+        {
+          "type": 14,
+          "coord": 5214,
+          "addr_or_name": "%QW1400.0"
+        }
+      ],
+      "element_count": 3
+    },
+    {
+      "index": 8,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 7,
+          "coord": 6145,
+          "addr_or_name": "%MW1400.0"
+        },
+        {
+          "type": 2,
+          "coord": 6148,
+          "addr_or_name": null
+        },
+        {
+          "type": 102,
+          "coord": 6154,
+          "addr_or_name": "INST1"
+        },
+        {
+          "type": 2,
+          "coord": 6157,
+          "addr_or_name": null
+        },
+        {
+          "type": 14,
+          "coord": 6238,
+          "addr_or_name": "%QW1400.1"
+        },
+        {
+          "type": 70,
+          "coord": 7175,
+          "addr_or_name": "1"
+        },
+        {
+          "type": 70,
+          "coord": 7181,
+          "addr_or_name": "%MW1000"
+        },
+        {
+          "type": 70,
+          "coord": 8199,
+          "addr_or_name": "%MW1002"
+        }
+      ],
+      "element_count": 8
+    },
+    {
+      "index": 9,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 1025,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 1028,
+          "addr_or_name": null
+        },
+        {
+          "type": 70,
+          "coord": 2049,
+          "addr_or_name": "%MW1002"
+        },
+        {
+          "type": 70,
+          "coord": 2055,
+          "addr_or_name": "%MW1000"
+        }
+      ],
+      "element_count": 4
+    },
+    {
+      "index": 10,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 4097,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 4100,
+          "addr_or_name": null
+        },
+        {
+          "type": 70,
+          "coord": 5121,
+          "addr_or_name": "%MW1002"
+        },
+        {
+          "type": 70,
+          "coord": 6145,
+          "addr_or_name": "%MW1000"
+        }
+      ],
+      "element_count": 4
+    },
+    {
+      "index": 11,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 8193,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 8196,
+          "addr_or_name": null
+        },
+        {
+          "type": 70,
+          "coord": 9217,
+          "addr_or_name": "%MW1002"
+        },
+        {
+          "type": 70,
+          "coord": 10241,
+          "addr_or_name": "%MW1000"
+        }
+      ],
+      "element_count": 4
+    },
+    {
+      "index": 12,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 13313,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 13316,
+          "addr_or_name": null
+        },
+        {
+          "type": 70,
+          "coord": 14337,
+          "addr_or_name": "%MW1000"
+        },
+        {
+          "type": 70,
+          "coord": 15361,
+          "addr_or_name": "%MW1002"
+        }
+      ],
+      "element_count": 4
+    },
+    {
+      "index": 13,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 17409,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 17412,
+          "addr_or_name": null
+        },
+        {
+          "type": 70,
+          "coord": 18433,
+          "addr_or_name": "%MW1000"
+        },
+        {
+          "type": 70,
+          "coord": 19457,
+          "addr_or_name": "%MW1002"
+        }
+      ],
+      "element_count": 4
+    },
+    {
+      "index": 14,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 21505,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 21508,
+          "addr_or_name": null
+        },
+        {
+          "type": 70,
+          "coord": 22529,
+          "addr_or_name": "%MW1000"
+        },
+        {
+          "type": 70,
+          "coord": 23553,
+          "addr_or_name": "%MW1002"
+        }
+      ],
+      "element_count": 4
+    },
+    {
+      "index": 15,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 25601,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 25604,
+          "addr_or_name": null
+        },
+        {
+          "type": 70,
+          "coord": 26625,
+          "addr_or_name": "%MW1000"
+        }
+      ],
+      "element_count": 3
+    },
+    {
+      "index": 16,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 28673,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 28676,
+          "addr_or_name": "INST"
+        },
+        {
+          "type": 70,
+          "coord": 29697,
+          "addr_or_name": "T#3s"
+        }
+      ],
+      "element_count": 3
+    },
+    {
+      "index": 17,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 31745,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 31748,
+          "addr_or_name": "INST1"
+        },
+        {
+          "type": 70,
+          "coord": 32769,
+          "addr_or_name": "T#5s"
+        }
+      ],
+      "element_count": 3
+    },
+    {
+      "index": 18,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 34817,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 34820,
+          "addr_or_name": "INST2"
+        },
+        {
+          "type": 2,
+          "coord": 34823,
+          "addr_or_name": null
+        },
+        {
+          "type": 102,
+          "coord": 34829,
+          "addr_or_name": "INST3"
+        },
+        {
+          "type": 2,
+          "coord": 34832,
+          "addr_or_name": null
+        },
+        {
+          "type": 102,
+          "coord": 34838,
+          "addr_or_name": "INST4"
+        },
+        {
+          "type": 70,
+          "coord": 35841,
+          "addr_or_name": "1"
+        },
+        {
+          "type": 70,
+          "coord": 35850,
+          "addr_or_name": "0"
+        },
+        {
+          "type": 70,
+          "coord": 35859,
+          "addr_or_name": "1"
+        },
+        {
+          "type": 70,
+          "coord": 36865,
+          "addr_or_name": "1"
+        },
+        {
+          "type": 70,
+          "coord": 36874,
+          "addr_or_name": "1"
+        },
+        {
+          "type": 70,
+          "coord": 36883,
+          "addr_or_name": "0"
+        }
+      ],
+      "element_count": 12
+    },
+    {
+      "index": 19,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 38913,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 38916,
+          "addr_or_name": "INST5"
+        },
+        {
+          "type": 70,
+          "coord": 39937,
+          "addr_or_name": "1"
+        },
+        {
+          "type": 70,
+          "coord": 40961,
+          "addr_or_name": "1"
+        },
+        {
+          "type": 70,
+          "coord": 41985,
+          "addr_or_name": "1"
+        },
+        {
+          "type": 70,
+          "coord": 43009,
+          "addr_or_name": "1"
+        }
+      ],
+      "element_count": 6
+    },
+    {
+      "index": 20,
+      "block_mask": 0,
+      "elements": [
+        {
+          "type": 6,
+          "coord": 45057,
+          "addr_or_name": "_OFF"
+        },
+        {
+          "type": 102,
+          "coord": 45060,
+          "addr_or_name": "INST6"
+        },
+        {
+          "type": 1,
+          "coord": 45063,
+          "addr_or_name": null
+        },
+        {
+          "type": 1,
+          "coord": 45066,
+          "addr_or_name": null
+        },
+        {
+          "type": 102,
+          "coord": 45069,
+          "addr_or_name": "INST7"
+        },
+        {
+          "type": 70,
+          "coord": 46081,
+          "addr_or_name": "0"
+        },
+        {
+          "type": 70,
+          "coord": 46090,
+          "addr_or_name": "1"
+        }
+      ],
+      "element_count": 7
+    }
+  ],
+  "element_type_counts": {
+    "70": 38,
+    "6": 22,
+    "102": 20,
+    "2": 15,
+    "0": 4,
+    "14": 3,
+    "1": 3,
+    "7": 3,
+    "17": 2,
+    "16": 2,
+    "8": 1
+  },
+  "element_type_legend": {
+    "0": "blank",
+    "1": "vertical",
+    "2": "horizontal",
+    "6": "NO(A접점)",
+    "7": "NC(B접점)",
+    "8": "PULSE",
+    "14": "OUT coil",
+    "16": "unknown(SET?)",
+    "17": "unknown(RESET?)",
+    "70": "FB I/O var",
+    "102": "FB definition"
+  },
+  "system_flags": [
+    "_OFF",
+    "_ON",
+    "_RI00",
+    "_RI00P00",
+    "_RI00P01",
+    "_RI00P02",
+    "_RI00P03",
+    "_RI00P04",
+    "_RI00P05",
+    "_RI00P06",
+    "_RI00P07",
+    "_RI00P08",
+    "_RI00P09",
+    "_RI00P10",
+    "_RI00P11",
+    "_RI00P12",
+    "_RI00P13",
+    "_RI00P14",
+    "_RI00P15",
+    "_RI01",
+    "_RI01P00",
+    "_RI01P01",
+    "_RI01P02",
+    "_RI01P03",
+    "_RI01P04",
+    "_RI01P05",
+    "_RI01P06",
+    "_RI01P07",
+    "_RI01P08",
+    "_RI01P09",
+    "_RI01P10",
+    "_RI01P11",
+    "_RI01P12",
+    "_RI01P13",
+    "_RI01P14",
+    "_RI01P15",
+    "_RQ02",
+    "_RQ02P00",
+    "_RQ02P01",
+    "_RQ02P02",
+    "_RQ02P03",
+    "_RQ02P04",
+    "_RQ02P05",
+    "_RQ02P06",
+    "_RQ02P07",
+    "_RQ02P08",
+    "_RQ02P09",
+    "_RQ02P10",
+    "_RQ02P11",
+    "_RQ02P12",
+    "_RQ02P13",
+    "_RQ02P14",
+    "_RQ02P15",
+    "_RQ03",
+    "_RQ03P00",
+    "_RQ03P01",
+    "_RQ03P02",
+    "_RQ03P03",
+    "_RQ03P04",
+    "_RQ03P05",
+    "_RQ03P06",
+    "_RQ03P07",
+    "_RQ03P08",
+    "_RQ03P09",
+    "_RQ03P10",
+    "_RQ03P11",
+    "_RQ03P12",
+    "_RQ03P13",
+    "_RQ03P14",
+    "_RQ03P15"
+  ],
+  "stats": {
+    "xml_size_chars": 181821,
+    "total_addr_refs": 55,
+    "unique_addr_count": 17,
+    "bit_addr_count": 19,
+    "function_instance_count": 20,
+    "unique_function_count": 18,
+    "rung_count": 21,
+    "system_flag_count": 70
+  }
+}

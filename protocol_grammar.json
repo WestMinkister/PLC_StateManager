@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "purpose": "LGIS-GLOFA 프로토콜 Grammar DB — 프로그램 구조를 이름 없이 파싱하기 위한 토큰 규칙",
+  "philosophy": [
+    "파서는 이름(ADD/MOVE 등) 없이도 '여기는 함수' '여기는 접점' '여기는 rung 경계'를 구조로 인식한다.",
+    "XML/IL 같은 외부 정답지는 검증용. 파서 자체는 프로토콜 바이트만으로 AST를 빌드.",
+    "새 함수·UDF가 나타나도 구조 토큰만으로 '함수다'를 확정 — 이름은 사후 레이블."
+  ],
+  "last_updated": "2026-04-23",
+  "overall_protocol_decode_coverage": {
+    "note": "솔직 자가평가. 숫자가 정확한 진척 지표.",
+    "frame_transport": 0.95,
+    "ascii_hex_double_encoding": 1.0,
+    "scatter_gather_reassembly": 1.0,
+    "bzip2_compression": 1.0,
+    "function_block_token_grammar": 0.80,
+    "address_encoding": 0.60,
+    "fx_system_flags": 0.40,
+    "three_tuple_contact": 0.30,
+    "rung_grammar": 0.10,
+    "instruction_bytecode_0x8B_or_X": 0.05,
+    "function_param_mapping_46_0d_13": 0.0,
+    "udf_index_assignment": 0.0,
+    "timer_counter_special_encoding": 0.0,
+    "total_estimate": 0.35
+  },
+  "grammar_tokens": {
+    "FB_DEFINITION": {
+      "pattern_hex": "67 [sub] 00 00 00 00 [func_id] 00 00 00 [param_count]",
+      "meaning": "함수블록 정의 시작. func_id 바이트는 XML의 INDEX 값과 일치",
+      "evidence": "완전 업로드 캡처 0423에서 15/18 함수 매칭",
+      "confidence": "high",
+      "ast_node": "FunctionDefinition"
+    },
+    "FB_BINDING": {
+      "pattern_hex": "68 [sub] 00 [offset] 00 00",
+      "meaning": "함수블록 파라미터 바인딩 (IN 연결)",
+      "evidence": "PRD §6.5 부분 관찰",
+      "confidence": "medium",
+      "ast_node": "ParameterBinding"
+    },
+    "FB_END": {
+      "pattern_hex": "69 [sub] 00 [offset] 00 00",
+      "meaning": "함수블록 종료",
+      "evidence": "PRD §6.5",
+      "confidence": "medium",
+      "ast_node": "FunctionBlockEnd"
+    },
+    "VAR_IN_ANCHOR": {
+      "pattern_hex": "46 0d 00 00 [len] [ascii_addr]",
+      "meaning": "함수 입력 파라미터 앵커. 뒤따르는 ASCII 주소가 IN 값",
+      "evidence": "PRD §6.5, 아직 실데이터 검증 전",
+      "confidence": "low",
+      "ast_node": "VarInput"
+    },
+    "VAR_OUT_ANCHOR": {
+      "pattern_hex": "46 13 00 00 [len] [ascii_addr]",
+      "meaning": "함수 출력 파라미터 앵커",
+      "evidence": "PRD §6.5",
+      "confidence": "low",
+      "ast_node": "VarOutput"
+    },
+    "FX_FLAG_TOKEN": {
+      "pattern_hex": "58 [fx_index_le32] (5B)",
+      "meaning": "시스템 플래그 (_ON=FX153, _OFF=FX154 등)",
+      "evidence": "완전 업로드 캡처 0423에서 2개(_ON, _OFF) 검증",
+      "confidence": "high",
+      "ast_node": "SystemFlag"
+    },
+    "CONTACT_POS_C": {
+      "pattern_hex": "04 [element_type] 07",
+      "meaning": "3-tuple 접점 (열 C 위치)",
+      "evidence": "PRD §6.3 + 0423 덤프 off2358에서 관찰",
+      "confidence": "medium",
+      "ast_node": "Contact"
+    },
+    "CONTACT_POS_A": {
+      "pattern_hex": "0a [element_type] 0d",
+      "meaning": "3-tuple 접점 (열 A 위치)",
+      "evidence": "PRD §6.3 + 0423 덤프",
+      "confidence": "medium",
+      "ast_node": "Contact"
+    },
+    "CONTACT_POS_B": {
+      "pattern_hex": "10 [element_type] 13",
+      "meaning": "3-tuple 접점 (열 B 위치)",
+      "evidence": "PRD §6.3",
+      "confidence": "low",
+      "ast_node": "Contact"
+    },
+    "RUNG_END_MARKER_A": {
+      "pattern_hex": "54 98",
+      "meaning": "rung 경계 종료 (변종 A)",
+      "evidence": "PRD §7.3",
+      "confidence": "medium",
+      "ast_node": "RungBoundary"
+    },
+    "RUNG_END_MARKER_B": {
+      "pattern_hex": "54 b0",
+      "meaning": "rung 경계 종료 (변종 B)",
+      "evidence": "PRD §7.3",
+      "confidence": "medium",
+      "ast_node": "RungBoundary"
+    },
+    "PROGRAM_END": {
+      "pattern_hex": "fd ff 07 4a",
+      "meaning": "프로그램 종료 마커",
+      "evidence": "PRD §7.3",
+      "confidence": "high",
+      "ast_node": "ProgramEnd"
+    },
+    "INSTR_LOAD": {
+      "pattern_hex": "14 [operand]",
+      "meaning": "LD (Load, 접점 읽기)",
+      "evidence": "PRD §7.3, IL의 `LD`에 대응 예상",
+      "confidence": "medium",
+      "ast_node": "Instruction",
+      "il_equivalent": "LD"
+    },
+    "INSTR_NC_MOD": {
+      "pattern_hex": "8d",
+      "meaning": "B접점(NC) 수정자",
+      "evidence": "PRD §7.3",
+      "confidence": "medium",
+      "ast_node": "InstructionModifier",
+      "il_equivalent": "LDN"
+    },
+    "INSTR_PULSE": {
+      "pattern_hex": "90 00 c0 0f",
+      "meaning": "PULSE 수정자",
+      "evidence": "PRD §7.3",
+      "confidence": "medium",
+      "ast_node": "InstructionModifier"
+    },
+    "ADDRESS_INLINE_ASCII": {
+      "pattern_hex": "[len] [ascii bytes like '%MW152.0']",
+      "meaning": "ASCII 주소가 길이 prefix 뒤에 인라인 (UTF-16 아님)",
+      "evidence": "0423 덤프의 작은 bzip2 블록에서 직접 관찰",
+      "confidence": "high",
+      "ast_node": "AddressReference"
+    }
+  },
+  "name_labels_optional": {
+    "description": "Grammar 파싱에는 불필요. 디버그·표시용 인간 가독 레이블. IL 파일 확보 후 자동 확장 예정.",
+    "function_ids_observed": {
+      "10": "TOF",
+      "19": "RS",
+      "20": "AND",
+      "21": "OR",
+      "28": "SR",
+      "34": "TP",
+      "71": "ADD",
+      "72": "MUL",
+      "81": "TON",
+      "99": "DIV",
+      "110": "NOT",
+      "118": "MOVE",
+      "127": "SUB",
+      "207": "CTUD_DINT",
+      "210": "CTD_UDINT",
+      "212": "CTD_LINT",
+      "213": "CTD_DINT",
+      "243": "CTU_INT"
+    },
+    "fx_index_observed": {
+      "153": "_ON",
+      "154": "_OFF"
+    },
+    "element_types_observed": {
+      "0": "blank",
+      "1": "vertical_line",
+      "2": "horizontal_line",
+      "6": "NO_contact",
+      "7": "NC_contact",
+      "8": "PULSE_contact",
+      "14": "OUT_coil",
+      "16": "unknown_possibly_SET",
+      "17": "unknown_possibly_RESET",
+      "70": "FB_IO_variable",
+      "102": "FB_definition_slot"
+    }
+  },
+  "unresolved_grammar": {
+    "description": "파서 구현 전 반드시 해결해야 할 문법 공백",
+    "items": [
+      "X 명령 134 페어의 내부 구조 (완전 업로드의 대부분) — Phase B.1 핵심",
+      "Timer·Counter 특수 encoding (TON=81, CTU_INT=243, TOF=10 FB_DEFINITION 패턴 외부에 존재)",
+      "MB 영역 주소 표현 방식 (word→byte 변환?)",
+      "비트 주소 '.N' suffix의 binary encoding",
+      "접점 Coordinate 속성의 binary 대응",
+      "UDF(사용자 정의 함수) INDEX 배정 범위·방식"
+    ]
+  },
+  "reference_materials_priority": {
+    "note": "파서 개발·검증 참고 자료의 가치 순위",
+    "1_il_instruction_list": {
+      "reason": "바이트코드와 사실상 1:1. OPCODE 의미 기계적 역추론 가능",
+      "status": "사용자 제공 가능 — 다음 세션 요청 예정"
+    },
+    "2_complete_upload_pcapng": {
+      "reason": "프로토콜 바이트 원본. 우리 1차 분석 자료",
+      "status": "확보됨 (docs/0423_PLC로부터열기.pcapng)"
+    },
+    "3_xml_export": {
+      "reason": "고수준 구조 정답지. Recall 측정용",
+      "status": "확보됨 (docs/0423_try_again_manyfunction.xml)"
+    },
+    "4_prd_protocol_analysis": {
+      "reason": "기존 역공학 축적",
+      "status": "확보됨 (docs/PRD_PROTOCOL_ANALYSIS.md)"
+    }
+  }
+}

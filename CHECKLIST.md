@@ -17,27 +17,34 @@
 - [x] **M3 자동발견 완성** (2026-04-22) — Universal Priming(30 frames) + 동적 Z/0xC0 scatter-gather + GZIP/UTF-16LE 디컴프레션. 실측 증거: `docs/0422_cmd2.txt` 6 fragments → 12 symbols → R/0xE0 12개 읽기 성공, 값 변화 포착 확인 (MW1400 0→1 등). 커밋 `132bfa9`까지
 - [x] **M3 영역 확장** (2026-04-22) — AREA_MARKERS 7종 → 15종 (PDF 부록 A.1 전체: P/M/K/F/T/C/L/N/D/U/Z/R/W/I/Q). ALL_AREAS/AREA_ORDER 도입
 
-## 현재 블로커 — Phase B.0 (정답지 인프라) 완료 대기, B.1 사용자 기여 필요
+## 현재 블로커 — Phase B 세 번째 재정의 완료 (2026-04-23 저녁)
 
-### Phase B 근본 재설계 (2026-04-23)
-"단순 regex 확장"이 아니라 **함수블록 OPCODE 자동 매핑 프레임워크**로 전환. 사용자 기여(XML+pcapng) → 도구가 자동으로 `function_opcodes.json` DB 성장. 지금 모르는 함수도 미래 자동 수용.
+### Phase B 최종 관점 — "Grammar Parser"
+**이름 매핑**이 아닌 **프로토콜 문법(Grammar)** 파서가 목표. XML·IL 없이도 `67 XX 00 00 00 00 YY` 패턴을 보면 "여기는 함수다"를 즉시 인식. 사용자 지적 (2026-04-23): *"이게 어떤 함수인지는 몰라도, opcode 위치라는 걸 확실히 알기 때문에, 지금 받은 데이터도 함수인 걸 확실히 안다"*.
 
-- [x] **B.0** 정답지 인프라 (2026-04-23 커밋 대기):
-  - `plc_xml_parser.py --full` — XG5000 XML → 함수 INDEX + Rung + 시스템플래그 + ElementType 완전 추출
-  - `plc_value_backup.py --debug-dump` — 실기 때 fragment/GZIP/priming 응답 전체 저장
-  - `validate_extraction.py` — 프로토콜 추출 vs XML 정답지 대조
-  - `function_opcodes.json` — 매핑 DB 씨앗 (ADD·MOVE·TON·CTU_INT 4종)
-- [ ] **B.0 사용자 액션 대기** — 최신 EXE + `--debug-dump --auto` 실기 1회 → `snapshots/dump_*` 디렉토리 공유
-- [ ] **B.1** `plc_bytecode_scanner.py` — Z/0x82 응답에서 OPCODE 후보 자동 추출 (다음 세션)
-- [ ] **B.2** `correlate_xml_bytecode.py` — XML 함수 리스트 ↔ 바이트코드 후보 상관관계 매퍼
-- [ ] **B.3** 사용자 기여 파이프라인 — `contribute_function.py <project>.xml <capture>.pcapng`
-- [ ] **B.4+** 함수 DB 순차 확장: SUB/MUL/DIV/OR/AND/NOT/RS/SR/TOF/TP/CTD/CTUD ...
-- [ ] **B.5** Rung 경계 + 접점 타입 변화 감지 (Level 3-4)
+### 실증된 진척 (오늘 2026-04-23)
+- ✅ **완전 업로드 pcapng 확보**: `docs/0423_PLC로부터열기.pcapng` (500 패킷, 248 요청·응답 페어)
+- ✅ **함수 정의 토큰 `FB_DEFINITION` 15/18 매칭**: RS/AND/OR/SR/TP/ADD/MUL/DIV/NOT/MOVE/SUB/CTUD_DINT/CTD_UDINT/CTD_LINT/CTD_DINT
+- ✅ **Precision 100%** (추출 주소 12개 모두 XML 정답지에 존재, stale 0개)
+- ✅ **FX_FLAG_TOKEN** (_ON, _OFF) 확인
+- ✅ `protocol_grammar.json` 작성 — Grammar 중심 DB
+
+### 솔직 자가평가 (해독률)
+**전체 프로토콜 문법 약 35%**. "대돌파" 아님. 자세히는 `protocol_grammar.json` `overall_protocol_decode_coverage` 참조.
+
+### 다음 세션 최우선 — Phase B.1 (Grammar Parser 구현)
+
+- [ ] **사용자 IL 파일 수령** — XG5000에서 manyfunction 프로젝트를 IL로 export. IL은 바이트코드와 사실상 1:1이라 **OPCODE 의미 기계적 역추론의 로제타 스톤**
+- [ ] **B.1** X 명령 134 페어 파싱 — 프로토콜 대부분이 이 안. Rung 문법·MB 영역·비트 주소 확장 가능성
+- [ ] **B.2** `plc_program_parser.py` 신규 — Grammar 기반 AST 빌더 (이름 없이 구조 트리)
+- [ ] **B.3** 함수 파라미터 매핑 (`46 0d` VAR_IN / `46 13` VAR_OUT) — 사용자 요청 *"펑션별로 어떤 인풋값이 어떻게 들어가는지"*
+- [ ] **B.4** Timer/Counter 특수 구조 규명 (TON=81, CTU_INT=243, TOF=10 FB_DEFINITION 패턴 외)
+- [ ] **B.5** UDF 배정 방식 탐구
+- [ ] **B.6** `validate_extraction.py` 업그레이드 — AST vs XML·IL 대조 (정확한 Recall)
+- [ ] **B.7** MB 영역 + 비트 주소 `.N` encoding
 
 ### XGT Port 2004 실기 검증 (우선순위 낮음, 보조 경로)
 - [ ] `PLC_XGTReader.exe --read 192.168.250.110 --mw 152 1000` 실기 1회
-  - 성공 시 M4 쓰기를 XGT로 단순화 가능 (PDF §5.2 공개 스펙)
-  - 실패 시 LGIS-GLOFA 유지 (영향 없음, 현 기능 그대로)
 
 ## 다음 마일스톤 (Phase B 이후, 로드맵 순)
 
