@@ -68,6 +68,9 @@ def make_parser() -> argparse.ArgumentParser:
                            help='출력 AST JSON 경로 (기본: program_ast.json)')
     p_extract.add_argument('-v', '--verbose', action='store_true',
                            help='요약 통계 출력')
+    p_extract.add_argument('--no-il', action='store_true',
+                           help='IL ground truth 없이 pcapng 자체에서만 파싱. '
+                                'PLC 구조가 docs/il_parsed_0423.json 과 다를 때 권장.')
     p_extract.set_defaults(func=cmd_extract)
 
     # ②③ compare
@@ -142,7 +145,8 @@ def cmd_extract(args: argparse.Namespace) -> int:
         return 1
 
     try:
-        builder = ProgramASTBuilder()
+        use_il = not getattr(args, 'no_il', False)
+        builder = ProgramASTBuilder(use_il=use_il)
         builder.load_bytecode(str(input_path))
         ast = builder.build()
     except Exception as e:
@@ -155,11 +159,14 @@ def cmd_extract(args: argparse.Namespace) -> int:
         json.dump(ast, f, indent=2, ensure_ascii=False)
 
     print(f"✓ AST 추출: {output_path}")
+    print(f"  모드: {ast.get('mode', '?')}")
     if args.verbose:
         stats = ast.get('stats', {})
         print(f"  Programs: {stats.get('total_programs', '?')}")
         print(f"  Rungs:    {stats.get('total_rungs', '?')}")
         print(f"  Recall:   {stats.get('function_call_recall', 'N/A')}")
+    for w in ast.get('warnings', []):
+        print(f"  [주의] {w}")
     return 0
 
 

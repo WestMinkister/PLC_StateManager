@@ -28,14 +28,21 @@ class ProgramASTBuilder:
         self,
         grammar_path: str = 'protocol_grammar.json',
         rosetta_path: str = 'docs/rosetta_0423.json',
-        il_path: str = 'docs/il_parsed_0423.json'
+        il_path: Optional[str] = 'docs/il_parsed_0423.json',
+        use_il: bool = True,
     ):
-        """Grammar, Rosetta, IL ground truth 로드."""
+        """Grammar, Rosetta, IL ground truth 로드.
+
+        use_il=False: IL ground truth 를 로드하지 않음. locate_program_regions
+        가 IL 구조 (4 program × 21 rung) 를 따르지 않고 pcapng 자체에서
+        프로그램/rung 경계를 탐지 시도. 결과에 경고 메시지 포함.
+        """
         self.source_path: Optional[str] = None
         self.responses: List[Dict[str, Any]] = []
         self.grammar: Dict[str, Any] = {}
         self.rosetta: Dict[str, Any] = {}
         self.il_ground_truth: Dict[str, Any] = {}  # S5: IL fallback용
+        self.use_il: bool = use_il
 
         # Grammar 로드
         if Path(grammar_path).exists():
@@ -47,8 +54,8 @@ class ProgramASTBuilder:
             with open(rosetta_path, encoding='utf-8') as f:
                 self.rosetta = json.load(f)
 
-        # S5: IL ground truth 로드
-        if Path(il_path).exists():
+        # S5: IL ground truth 로드 (use_il=True 일 때만)
+        if use_il and il_path and Path(il_path).exists():
             with open(il_path, encoding='utf-8') as f:
                 self.il_ground_truth = json.load(f)
 
@@ -137,11 +144,23 @@ class ProgramASTBuilder:
         반환: [{'name': str, 'byte_range': [int, int], 'boundary_marker': str,
                 'response_idx': int|None, 'fb_indices': List[int], 'fb_count': int, ...}]
         """
-        # IL 프로그램 개수 (기본 4, il_ground_truth 에서 추출)
+        # IL 프로그램 개수 결정
         il_programs = []
         if self.il_ground_truth:
             il_programs = self.il_ground_truth.get('programs', [])
-        num_programs = max(len(il_programs), 4)
+
+        if il_programs:
+            # IL 모드: IL 이 정의한 프로그램 수 (보수적으로 최소 4 보장)
+            num_programs = max(len(il_programs), 4)
+        else:
+            # IL-free 모드: pcapng 의 response 개수 (프로그램 업로드 response) 사용
+            # 각 response 중 FB_DEFINITION 또는 RUNG_END 토큰이 있는 것만 카운트
+            program_responses = sum(
+                1 for r in (self.responses or [])
+                if any(t.get('type') in ('FB_DEFINITION', 'RUNG_END_A', 'RUNG_END_B', 'PROGRAM_END')
+                       for t in r.get('tokens', []))
+            )
+            num_programs = max(program_responses, 1)
 
         if not self.responses:
             return [
@@ -1135,9 +1154,26 @@ class ProgramASTBuilder:
         il_matched_count = il_function_count - il_unmatched_count
         recall_rate = f"{il_matched_count}/{il_function_count}"
 
+        # 투명성 경고: 어떤 필드가 IL-의존인지 명시
+        warnings_list = []
+        if self.il_ground_truth:
+            warnings_list.append(
+                "total_programs/total_rungs/function_call_recall 은 IL ground truth "
+                "(docs/il_parsed_0423.json) 기반 골격. pcapng 이 이 IL 과 다른 프로젝트면 "
+                "이 수치는 고정값으로 나타나고 by_source='il_fallback' instruction 이 많아짐. "
+                "--no-il 옵션으로 IL 의존 없이 pcapng 자체에서만 파싱 가능."
+            )
+        else:
+            warnings_list.append(
+                "IL-free 모드: 프로그램 경계를 pcapng 자체의 response 단위로 추정. "
+                "함수 라벨 (TOF/TON/ADD 등) 은 rosetta.json 에 의존. "
+                "Recall 은 IL 비교 없으므로 'N/A' 로 표시."
+            )
+
         ast = {
             'source': self.source_path,
             'grammar_version': '2026-04-23',
+            'mode': 'il_ground_truth' if self.il_ground_truth else 'il_free',
             'programs': programs_list,
             'stats': {
                 'total_programs': len(programs_list),
@@ -1147,15 +1183,16 @@ class ProgramASTBuilder:
                 'by_source': by_source,  # B.5.2 보강: source 분포
                 'parse_quality_distribution': parse_quality_distribution,  # B.5.2 보강: rung parse_quality 분포
                 'function_calls_labeled': labeled_instructions,
-                'function_call_recall': recall_rate,
+                'function_call_recall': recall_rate if self.il_ground_truth else 'N/A (il-free)',
                 'unresolved_moves': 2,  # IL MOVE 3 vs BC MOVE 1
-                'phase_b5_pending': ['TON', 'CTU_INT'],
+                'phase_b5_pending': ['TON', 'CTU_INT'] if self.il_ground_truth else [],
                 'unknown_count': by_kind.get('unknown', 0),
                 'response_count': len(self.responses),
                 'total_token_count': total_tokens,
                 'rung_boundary_markers': ['RUNG_END_A', 'RUNG_END_B'],
                 'program_boundary_marker': 'PROGRAM_END',
-            }
+            },
+            'warnings': warnings_list,
         }
 
         return ast
@@ -1173,6 +1210,10 @@ Example:
     parser.add_argument('input', help='pcapng 또는 JSON 파일 경로')
     parser.add_argument('-o', '--output', default='program_ast.json', help='출력 JSON 경로')
     parser.add_argument('-v', '--verbose', action='store_true', help='자세한 출력')
+    parser.add_argument('--no-il', action='store_true',
+                        help='IL ground truth (docs/il_parsed_0423.json) 를 사용하지 않고 '
+                             'pcapng 자체에서만 프로그램/rung 경계 탐지. 현재 PLC 구조가 '
+                             'IL 과 다를 때 사용.')
     args = parser.parse_args()
 
     if not Path(args.input).exists():
@@ -1180,7 +1221,9 @@ Example:
         sys.exit(1)
 
     print(f'입력: {args.input}')
-    builder = ProgramASTBuilder()
+    if args.no_il:
+        print('모드: IL-free (pcapng 자체 파싱)')
+    builder = ProgramASTBuilder(use_il=not args.no_il)
     builder.load_bytecode(args.input)
 
     if args.verbose:
