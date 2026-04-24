@@ -154,80 +154,118 @@
       "xg5000_extension": {
         "description": "XG5000 엔지니어링 툴 ↔ PLC 확장 명령. 공식 매뉴얼에 문서화되지 않음. 이 프로젝트의 주 역공학 대상.",
         "commands": {
-          "note": "frame bundle (upload_replay_frames.json, write_replay_frames.json) 관찰 기반. session reset 에도 보존되도록 여기에 영구 기록.",
-          "upload_session": {
+          "note": "13 pcapng 전체 실측 (1906 PC→PLC frames, docs/ 디렉토리). Command 는 LGIS sig + 24 offset 에서 2 bytes. offset 20-23 은 inner header length prefix.",
+          "frame_layout": {
+            "offset_0_9": "Company ID (LGIS-GLOFA / LSIS-XGT)",
+            "offset_10_19": "Rest of Company Header (PLC Info, CPU Info, Source, Invoke ID, Length, FEnet, BCC)",
+            "offset_20_21": "Inner header prefix (0e 00 관찰됨, 의미 미확정)",
+            "offset_22_23": "Inner length LE16 (command payload byte count)",
+            "offset_24_25": "ACTUAL COMMAND (2 bytes)",
+            "offset_26_plus": "Command payload (ASCII hex or binary)"
+          },
+          "full_inventory": {
+            "note": "sub variant 중 ASCII printable 은 ASCII pair 표기. non-printable 은 hex 유지.",
             "X_0x58": {
-              "first_byte_ascii": "X",
-              "role": "burst 진입점 — upload 시작 시 가장 먼저 연속 전송",
+              "total": 804,
+              "role": "upload burst 진입 + 주요 upload 명령",
               "sub_variants": {
-                "0x4C": {"ascii_pair": "XL", "count": 44},
-                "0x4D": {"ascii_pair": "XM", "count": 48, "note": "burst 키워드 후보 (사용자 관찰)"},
-                "0x57": {"ascii_pair": "XW", "count": 42}
-              },
-              "response_subs_observed": {
-                "0x00": "벌크 데이터 응답 (48개)",
-                "0xAA": "UD 상태 응답 (44개)",
-                "0x58": "ACK (42개)"
-              },
-              "evidence": "upload_replay_frames.json, Phase B.2.1"
+                "0x4C": {"pair": "XL", "count": 264},
+                "0x4D": {"pair": "XM", "count": 288, "note": "burst 키워드 후보"},
+                "0x57": {"pair": "XW", "count": 252}
+              }
             },
             "Z_0x5A": {
-              "first_byte_ascii": "Z",
+              "total": 535,
               "role": "Command flow — upload 진행 제어",
-              "sub_variants_observed": ["0x5A", "0x6A", "0x82", "0x83", "0x86", "0x88", "0x89", "0x8D", "0x8E", "0x96", "0xC0", "0xC6", "0x6E"],
-              "sub_count": 65,
-              "printable_sub_samples": {"0x5A": "ZZ (첫 burst 키워드 후보)", "0x6A": "Zj"},
-              "evidence": "upload_replay_frames.json 집계"
-            },
-            "J_0x4A": {
-              "first_byte_ascii": "J",
-              "role": "upload 중간 요청 (확인 또는 fragment 요청 추정)",
-              "sub_variants": {
-                "0x34": {"ascii_pair": "J4", "count": 19}
-              },
-              "evidence": "upload_replay_frames.json 에서 19회 관찰 — 기존 문서 미기록"
+              "sub_variants_count": 23,
+              "top_subs": {
+                "0x88": 72, "0x83": 60, "0x89": 48, "0xC0": 46, "0x96": 34,
+                "0x8E": 28, "0x8D": 26, "0x86": 24,
+                "0x58": {"pair": "ZX", "count": 22},
+                "0x59": {"pair": "ZY", "count": 22},
+                "0x6E": {"pair": "Zn", "count": 22},
+                "0xC6": 22
+              }
             },
             "R_0x52": {
-              "first_byte_ascii": "R",
-              "role": "read/response 유도 (R/0xE0 값 읽기와는 별도)",
+              "total": 276,
+              "role": "read 요청 (R/0xE0 값 읽기 + 기타 variants)",
               "sub_variants": {
-                "0xAC": {"count": 4},
-                "0x6E": {"count": 3}
-              },
-              "evidence": "upload_replay_frames.json 에서 7회 관찰 — 기존 문서 미기록"
+                "0xE0": {"count": 206, "note": "R/0xE0 bulk read — M3 의 핵심. value backup 에서 사용"},
+                "0xAC": {"count": 32},
+                "0x6E": {"pair": "Rn", "count": 22},
+                "0x56": {"pair": "RV", "count": 8},
+                "0xC6": {"count": 8}
+              }
             },
-            "U_0x55": {
-              "first_byte_ascii": "U",
-              "role": "업로드 시작 시퀀스 (초기 기록, frame bundle 재검증 필요)",
-              "note": "upload_replay_frames.json 집계에서 직접 관찰 안 됨. 다른 세션에 있을 수 있음."
-            }
-          },
-          "write_session": {
-            "note": "쓰기 세션은 트랜잭션 기반: CONN → T_START → E_WRITE×N → T_END → DISC. write_replay_frames.json (28 frames) 기반.",
-            "T_0x54": {
-              "first_byte_ascii": "T",
-              "role": "transaction 경계",
-              "sub_variants": {
-                "0x53": {"ascii_pair": "TS", "role": "T_START"},
-                "0x45": {"ascii_pair": "TE", "role": "T_END"}
-              },
-              "evidence": "write_replay_frames.json write_role=T_START/T_END"
+            "J_0x4A": {
+              "total": 215,
+              "role": "upload 중간 요청 (단일 sub)",
+              "sub_variants": {"0x34": {"pair": "J4", "count": 215}}
             },
             "E_0x45": {
-              "first_byte_ascii": "E",
-              "role": "E_WRITE — 쓰기 본체 (런중수정 Online Edit 추정)",
-              "sub_variants_observed": ["0x5E", "0x6E", "0x8B", "0x8D", "0x8E", "0x96", "0x97", "0x98", "0x9E", "0xAA", "0xAD", "0xC0", "0xC9", "0xCE"],
-              "most_frequent": "0xC0 (9회, 기본 쓰기 추정)",
-              "sub_count": 20,
-              "evidence": "write_replay_frames.json write_role=E_WRITE"
+              "total": 27,
+              "role": "E_WRITE — 쓰기 본체 (write session 전용)",
+              "sub_variants_count": 16,
+              "most_frequent": {"0xC0": 9, "0x4E": {"pair": "EN", "count": 2}, "0x8B": 2, "0xC9": 2}
+            },
+            "O_0x4F": {
+              "total": 16,
+              "role": "신규 발견 — 역할 미규명",
+              "sub_variants": {
+                "0x69": {"pair": "Oi", "count": 9},
+                "0x7C": {"pair": "O|", "count": 7}
+              }
+            },
+            "N_0x4E": {
+              "total": 13,
+              "role": "신규 발견 — 역할 미규명",
+              "sub_variants": {
+                "0x7C": {"pair": "N|", "count": 7},
+                "0x69": {"pair": "Ni", "count": 6}
+              }
+            },
+            "W_0x57": {
+              "total": 8,
+              "role": "세션 단위 이벤트 — 각 pcapng 마다 정확히 1회 (연결 단계 포함)",
+              "sub_variants": {"0x4E": {"pair": "WN", "count": 8}},
+              "note": "0420_접속만.pcapng 에도 등장 — 연결 handshake 요소 추정"
+            },
+            "Y_0x59": {
+              "total": 8,
+              "role": "세션 단위 이벤트 — WN 과 같은 세션 lifecycle 이벤트",
+              "sub_variants": {"0x52": {"pair": "YR", "count": 8}},
+              "note": "WN 과 동일하게 세션당 1회 출현"
+            },
+            "T_0x54": {
+              "total": 2,
+              "role": "Transaction 경계 (write session)",
+              "sub_variants": {
+                "0x53": {"pair": "TS", "role": "T_START"},
+                "0x45": {"pair": "TE", "role": "T_END"}
+              }
+            },
+            "P_0x50": {
+              "total": 2,
+              "role": "신규 발견 — 역할 미규명",
+              "sub_variants": {"0x54": {"pair": "PT", "count": 2}}
             }
           },
-          "awaiting_verification": {
-            "note": "사용자 2026-04-24 세션 관찰. upload/write bundle 에는 없음 — 다른 pcapng 세션에서 관찰된 것으로 추정. 추가 캡처로 컨텍스트 규명 필요.",
-            "Y_families": ["YR", "Y (second byte unknown)"],
-            "W_families": ["WN", "WX"],
-            "Z_printable_extra": ["Z₩ (binary 0x5A 0x??)", "Z]", "ZX", "ZY"]
-          }
+          "evidence_files": [
+            "docs/0420_접속만.pcapng",
+            "docs/0420_모니터시작_누른후_모니터종료_누름.pcapng",
+            "docs/0420_모니터시작_누른후_접점껐다켜보기.pcapng",
+            "docs/0421_접점켜둔상태에서_모니터ON_잠시후모니터OFF.pcapng",
+            "docs/0421_4개프로그램이있는프로젝트를_PLC로부터읽기.pcapng",
+            "docs/0421_exe_auto_read.pcapng",
+            "docs/0421_upgrade5파일로모니터링후_xg5000에서접속하고_모니터ON하여_접점값변경한패킷.pcapng",
+            "docs/0421_스캔프로그램1개만있음_PLC로부터열기패킷.pcapng",
+            "docs/0421_스캔프로그램2개만있음_PLC로부터열기패킷.pcapng",
+            "docs/0421_진단을위한_PLC로부터열기패킷.pcapng",
+            "docs/0423_PLC로부터열기.pcapng",
+            "docs/pkt_monitor_0410_런중수정시작_두프로그램접점을F5로바꿔서런중수정쓰기_런중수정종료.pcapng",
+            "docs/pkt_monitor_0416_접점하나씩_값바꾸기.pcapng"
+          ]
         },
         "note": "공식 h5400~h5900 과 공존. 역공학으로만 구조 규명."
       }

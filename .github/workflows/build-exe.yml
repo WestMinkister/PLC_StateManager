@@ -70,6 +70,28 @@ jobs:
           pyinstaller --onefile --console --name PLC_XGTReader --noconfirm
           plc_xgt_reader.py
 
+      - name: Build PLC_AstDiff (콘솔)
+        run: >
+          pyinstaller --onefile --console --name PLC_AstDiff --noconfirm
+          --add-data "protocol_grammar.json;."
+          plc_ast_diff.py
+
+      - name: Build PLC_StateManager (콘솔, 통합 CLI)
+        run: >
+          pyinstaller --onefile --console --name PLC_StateManager --noconfirm
+          --add-data "protocol_grammar.json;."
+          --add-data "value_read_frames.json;."
+          --add-data "upload_replay_frames.json;."
+          --add-data "generic_priming.json;."
+          --hidden-import plc_program_parser
+          --hidden-import plc_ast_diff
+          --hidden-import plc_value_backup
+          --hidden-import plc_upload_test
+          --hidden-import plc_upload_decode
+          --hidden-import plc_upload_analyze
+          --hidden-import plc_bytecode_scanner
+          plc_state_manager.py
+
       - name: Upload PLC_WriteReplay
         uses: actions/upload-artifact@v4
         with:
@@ -111,3 +133,15 @@ jobs:
         with:
           name: PLC_XGTReader-Windows
           path: dist/PLC_XGTReader.exe
+
+      - name: Upload PLC_AstDiff
+        uses: actions/upload-artifact@v4
+        with:
+          name: PLC_AstDiff-Windows
+          path: dist/PLC_AstDiff.exe
+
+      - name: Upload PLC_StateManager
+        uses: actions/upload-artifact@v4
+        with:
+          name: PLC_StateManager-Windows
+          path: dist/PLC_StateManager.exe
