@@ -104,10 +104,13 @@ def make_parser() -> argparse.ArgumentParser:
                           help='자동 발견 모드')
     p_backup.add_argument('--out', type=str, default='snapshots/values.json',
                           help='출력 파일 (기본: snapshots/values.json)')
-    p_backup.add_argument('--port', type=int, default=2004,
-                          help='PLC 포트 (기본: 2004)')
-    p_backup.add_argument('--samples', type=int, default=1,
-                          help='샘플 개수 (기본: 1)')
+    # --port / --samples: default=None 으로 두어 사용자 명시 시에만 plc_value_backup 에
+    # 전달. 미전달 시 plc_value_backup 자체 기본값 (port=2002 확장, samples=1) 사용.
+    # 이전 버그: default=2004 를 명시 전달해 확장 frame 이 공식 port 2004 로 가 timeout.
+    p_backup.add_argument('--port', type=int, default=None,
+                          help='PLC 포트 (미지정 시 plc_value_backup 기본값 2002 사용)')
+    p_backup.add_argument('--samples', type=int, default=None,
+                          help='샘플 개수 (미지정 시 1)')
     p_backup.add_argument('--dry-run', action='store_true',
                           help='실제 연결 없이 frame 검증만')
     p_backup.set_defaults(func=cmd_backup)
@@ -217,6 +220,8 @@ def _invoke_backup(argv: list) -> int:
         backup_exe = exe_dir / 'PLC_ValueBackup.exe'
         if backup_exe.exists():
             # 방식 1: 인접 EXE subprocess — 단독 실행과 100% 동일 환경
+            print(f"[진단] PLC_ValueBackup.exe 호출: {backup_exe}")
+            print(f"[진단] 전달 인자: {argv}")
             result = subprocess.run([str(backup_exe)] + argv)
             return result.returncode
 
