@@ -188,30 +188,54 @@ def cmd_compare(args: argparse.Namespace) -> int:
     return 0
 
 
-def cmd_backup(args: argparse.Namespace) -> int:
-    """④ plc_value_backup.py 를 subprocess 로 실행 (CLI surface 승계).
+def _build_backup_argv(args: argparse.Namespace) -> list:
+    """args → plc_value_backup.main() 이 기대하는 sys.argv 형태로 변환."""
+    argv = []
+    if args.read:     argv.extend(['--read', args.read])
+    if args.config:   argv.extend(['--config', args.config])
+    if args.mw:       argv.extend(['--mw'] + [str(x) for x in args.mw])
+    if args.auto:     argv.append('--auto')
+    if args.out:      argv.extend(['--out', args.out])
+    if args.port:     argv.extend(['--port', str(args.port)])
+    if args.samples:  argv.extend(['--samples', str(args.samples)])
+    if args.dry_run:  argv.append('--dry-run')
+    return argv
 
-    이유: plc_value_backup 의 로직이 main() 안에 위치하고 인자 surface 가
-    풍부하므로 subprocess wrap 이 BC 가장 안전.
+
+def _invoke_backup(argv: list) -> int:
+    """plc_value_backup 실행. Frozen EXE 면 import, 개발환경이면 subprocess.
+
+    Frozen 환경: PyInstaller 가 plc_value_backup 모듈을 번들에 포함 (--hidden-import).
+                 .py 소스 파일은 번들에 없음. subprocess 가 py 파일을 찾지 못하므로
+                 import 해서 sys.argv 조작 후 main() 직접 호출.
+    개발 환경:  plc_value_backup.py 소스 존재. subprocess 가 깨끗한 경계 제공.
     """
+    if getattr(sys, 'frozen', False):
+        # Frozen EXE: import fallback
+        import plc_value_backup
+        orig_argv = sys.argv
+        sys.argv = [orig_argv[0]] + argv
+        try:
+            rc = plc_value_backup.main()
+            return rc if isinstance(rc, int) else 0
+        except SystemExit as e:
+            return e.code if isinstance(e.code, int) else 0
+        finally:
+            sys.argv = orig_argv
+
+    # 개발 환경: subprocess
     script_path = Path(__file__).parent / 'plc_value_backup.py'
     if not script_path.exists():
         print(f"오류: plc_value_backup.py 없음: {script_path}", file=sys.stderr)
         return 1
-
-    cmd = [sys.executable, str(script_path)]
-    if args.read:     cmd.extend(['--read', args.read])
-    if args.config:   cmd.extend(['--config', args.config])
-    if args.mw:       cmd.extend(['--mw'] + [str(x) for x in args.mw])
-    if args.auto:     cmd.append('--auto')
-    if args.out:      cmd.extend(['--out', args.out])
-    if args.port:     cmd.extend(['--port', str(args.port)])
-    if args.samples:  cmd.extend(['--samples', str(args.samples)])
-    if args.dry_run:  cmd.append('--dry-run')
-
-    # subprocess 실행. capture_output=False → 실시간 출력 투과
+    cmd = [sys.executable, str(script_path)] + argv
     result = subprocess.run(cmd)
     return result.returncode
+
+
+def cmd_backup(args: argparse.Namespace) -> int:
+    """④ plc_value_backup 호출 (frozen: import, dev: subprocess)."""
+    return _invoke_backup(_build_backup_argv(args))
 
 
 def cmd_flow(args: argparse.Namespace) -> int:
@@ -270,15 +294,11 @@ def cmd_flow(args: argparse.Namespace) -> int:
     if args.read:
         print("\n=== ④ 값 백업 ===")
         backup_out = out_dir / 'values.json'
-        script_path = Path(__file__).parent / 'plc_value_backup.py'
-        cmd = [sys.executable, str(script_path),
-               '--read', args.read, '--auto',
-               '--out', str(backup_out)]
-        result = subprocess.run(cmd)
-        if result.returncode == 0:
+        rc = _invoke_backup(['--read', args.read, '--auto', '--out', str(backup_out)])
+        if rc == 0:
             print(f"✓ {backup_out}")
         else:
-            print(f"⚠ 백업 실패 (exit={result.returncode})")
+            print(f"⚠ 백업 실패 (exit={rc})")
     else:
         print("\n=== ④ Skipped (--read 없음) ===")
 
