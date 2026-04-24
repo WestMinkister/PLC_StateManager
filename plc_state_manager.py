@@ -203,15 +203,26 @@ def _build_backup_argv(args: argparse.Namespace) -> list:
 
 
 def _invoke_backup(argv: list) -> int:
-    """plc_value_backup 실행. Frozen EXE 면 import, 개발환경이면 subprocess.
+    """plc_value_backup 실행. 3단계 전략:
 
-    Frozen 환경: PyInstaller 가 plc_value_backup 모듈을 번들에 포함 (--hidden-import).
-                 .py 소스 파일은 번들에 없음. subprocess 가 py 파일을 찾지 못하므로
-                 import 해서 sys.argv 조작 후 main() 직접 호출.
-    개발 환경:  plc_value_backup.py 소스 존재. subprocess 가 깨끗한 경계 제공.
+    1) Frozen EXE + 인접 PLC_ValueBackup.exe 존재 → exe subprocess (단독 실행과 동일)
+    2) Frozen EXE + 인접 exe 없음 → import fallback (timing/context 주의)
+    3) 개발 환경 → plc_value_backup.py subprocess
+
+    방식 1 이 가장 안정적. 사용자는 artifact 다운로드 시 두 EXE 를 같은 폴더에 두면 됨.
     """
     if getattr(sys, 'frozen', False):
-        # Frozen EXE: import fallback
+        # Frozen 환경 — 우선 인접 EXE 찾기
+        exe_dir = Path(sys.executable).parent
+        backup_exe = exe_dir / 'PLC_ValueBackup.exe'
+        if backup_exe.exists():
+            # 방식 1: 인접 EXE subprocess — 단독 실행과 100% 동일 환경
+            result = subprocess.run([str(backup_exe)] + argv)
+            return result.returncode
+
+        # 방식 2: import fallback (PLC_ValueBackup.exe 가 없을 때)
+        print("⚠ PLC_ValueBackup.exe 가 같은 폴더에 없음. import fallback 사용.", file=sys.stderr)
+        print("  (권장: PLC_ValueBackup.exe 를 PLC_StateManager.exe 와 같은 폴더에 두세요)", file=sys.stderr)
         import plc_value_backup
         orig_argv = sys.argv
         sys.argv = [orig_argv[0]] + argv
@@ -223,7 +234,7 @@ def _invoke_backup(argv: list) -> int:
         finally:
             sys.argv = orig_argv
 
-    # 개발 환경: subprocess
+    # 방식 3: 개발 환경 — plc_value_backup.py subprocess
     script_path = Path(__file__).parent / 'plc_value_backup.py'
     if not script_path.exists():
         print(f"오류: plc_value_backup.py 없음: {script_path}", file=sys.stderr)
