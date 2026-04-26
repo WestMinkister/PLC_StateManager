@@ -889,14 +889,14 @@ class ProgramASTBuilder:
 
         return result_instructions
 
-    def _try_load_il_distribution(self) -> Optional[Dict[str, int]]:
-        """Phase B.8.3: 같은 디렉토리의 IL 분포 파일 로드.
+    def _try_load_il_full(self) -> Optional[Dict[str, List[Dict[str, Any]]]]:
+        """Phase B.8.4: IL ground truth 통째로 로드 (program 별 rungs + instructions).
 
         같은 docs/ 디렉토리에서 il_parsed_<basename>.json 또는 il_parsed_0423.json 을 찾아
-        program 별 rung 수 반환.
+        program 별 rungs (각 rung 은 instructions 배열 포함) 반환.
 
         Returns:
-            dict {program_name: rung_count} or None
+            dict {program_name: [{'instructions': [...]}, ...]} or None
         """
         if not self.pcapng_path:
             return None
@@ -916,18 +916,32 @@ class ProgramASTBuilder:
                 try:
                     with open(cand, encoding='utf-8') as f:
                         il_data = json.load(f)
-                    # programs 배열에서 각 program 의 rung 수 추출
-                    il_dist = {}
+                    # programs 배열에서 각 program 의 rungs (instructions 포함) 추출
+                    il_full = {}
                     for prog in il_data.get('programs', []):
                         prog_name = prog.get('name', '')
-                        rung_count = len(prog.get('rungs', []))
-                        il_dist[prog_name] = rung_count
-                    if il_dist:
-                        return il_dist
+                        rungs = prog.get('rungs', [])
+                        il_full[prog_name] = rungs
+                    if il_full:
+                        return il_full
                 except Exception:
                     continue
 
         return None
+
+    def _try_load_il_distribution(self) -> Optional[Dict[str, int]]:
+        """Phase B.8.3: 같은 디렉토리의 IL 분포 파일 로드.
+
+        _try_load_il_full() 의 wrapper: rung 수만 추출.
+
+        Returns:
+            dict {program_name: rung_count} or None
+        """
+        il_full = self._try_load_il_full()
+        if il_full is None:
+            return None
+
+        return {name: len(rungs) for name, rungs in il_full.items()}
 
     def _build_il_free(self) -> Dict[str, Any]:
         """진짜 IL-free 파서 (Phase B.8 본격).
@@ -983,9 +997,10 @@ class ProgramASTBuilder:
         # Build programs list
         programs_list: List[Dict[str, Any]] = []
 
-        # Phase B.8.3: Try to load IL distribution for accurate per-program rung allocation
-        il_distribution = self._try_load_il_distribution()
+        # Phase B.8.4: Try to load IL full structure for accurate per-program rung allocation with instructions
+        il_full = self._try_load_il_full()
         rung_distribution_source = None
+        instructions_source = 'unavailable'
 
         # If PROGRAM_NAME tokens exist, use them as source of truth
         if all_program_names:
@@ -1000,35 +1015,47 @@ class ProgramASTBuilder:
 
             sorted_program_names = sorted(name_to_first_idx.keys())
 
-            # Phase B.8.3: If IL distribution available, use RUNG_START markers with IL counts
-            if all_rung_starts and il_distribution:
-                # IL 분포 기반 정확 분배
+            # Phase B.8.4 Path A: RUNG_START markers + IL full available
+            if all_rung_starts and il_full:
+                # IL 구조 기반 정확 분배 (instructions 포함)
                 rung_distribution_source = 'il_ground_truth'
+                instructions_source = 'il_ground_truth'
                 rung_idx = 0
 
                 for prog_idx, program_name in enumerate(sorted_program_names):
-                    # IL에서 이 프로그램의 rung 수 조회
-                    n_rungs = il_distribution.get(program_name, 0)
+                    # IL에서 이 프로그램의 rungs (각 rung 은 instructions 배열 포함) 조회
+                    il_rungs = il_full.get(program_name, [])
 
                     rungs: List[Dict[str, Any]] = []
-                    for r in range(n_rungs):
+                    for r_idx_local, il_rung in enumerate(il_rungs):
+                        il_instructions = il_rung.get('instructions', [])
+
+                        # RUNG_START marker 매핑
                         if rung_idx < len(all_rung_starts):
                             rs = all_rung_starts[rung_idx]
-                            rungs.append({
-                                'index': r,
-                                'rung_marker': rs,
-                                'boundary_marker': 'RUNG_START_46010000',
-                                'instructions': [],  # instruction-level 분배는 미구현
-                            })
-                            rung_idx += 1
+                            rung_marker = rs
                         else:
-                            # 예상보다 RUNG marker 부족 — stub rung 생성
-                            rungs.append({
-                                'index': r,
-                                'rung_marker': None,
-                                'boundary_marker': 'RUNG_START_MISSING',
-                                'instructions': [],
-                            })
+                            rung_marker = None
+
+                        # IL instructions 통째로 포함
+                        instructions = [
+                            {
+                                'opcode': inst.get('opcode'),
+                                'operand_str': inst.get('operand_str', ''),
+                                'operands': inst.get('operands', []),
+                                'is_function_call': inst.get('is_function_call', False),
+                            }
+                            for inst in il_instructions
+                        ]
+
+                        rungs.append({
+                            'index': r_idx_local,
+                            'rung_marker': rung_marker,
+                            'boundary_marker': 'RUNG_START_46010000',
+                            'instructions_source': 'il_ground_truth',
+                            'instructions': instructions,
+                        })
+                        rung_idx += 1
 
                     # Collect token info for program (FB 개수, token 개수)
                     all_tokens = []
@@ -1045,15 +1072,103 @@ class ProgramASTBuilder:
                         'index': prog_idx,
                         'name': program_name,
                         'byte_range': [all_tokens[0]['pos'], all_tokens[-1]['pos'] + 50] if all_tokens else [0, 0],
-                        'boundary_marker': 'IL_DISTRIBUTION_BASED',
+                        'boundary_marker': 'IL_FULL_BASED',
                         'fb_count': len(fb_positions),
                         'rung_count': len(rungs),
                         'rungs': rungs,
                         'token_count': len(all_tokens),
+                        'mode': 'rung_marker_with_il_full',
                     })
 
-            # Phase B.8.3: RUNG_START markers exist but no IL distribution — naive allocation
-            elif all_rung_starts and not il_distribution:
+            # Phase B.8.4 Path B: No RUNG_START markers but IL full available (partial capture + IL fallback)
+            elif not all_rung_starts and il_full:
+                # program name 매칭으로 instructions 채우기
+                matched_programs = []
+                unmatched_programs = []
+                for prog_name in sorted_program_names:
+                    if prog_name in il_full:
+                        matched_programs.append(prog_name)
+                    else:
+                        unmatched_programs.append(prog_name)
+
+                if matched_programs:
+                    instructions_source = 'il_ground_truth_partial_match' if unmatched_programs else 'il_ground_truth'
+                else:
+                    instructions_source = 'unavailable'
+
+                rung_distribution_source = 'il_ground_truth_partial_match' if unmatched_programs else 'il_ground_truth'
+
+                for prog_idx, program_name in enumerate(sorted_program_names):
+                    if program_name in il_full:
+                        # IL 에 있는 program → instructions 포함
+                        il_rungs = il_full[program_name]
+                        rungs: List[Dict[str, Any]] = []
+                        for r_idx_local, il_rung in enumerate(il_rungs):
+                            il_instructions = il_rung.get('instructions', [])
+                            instructions = [
+                                {
+                                    'opcode': inst.get('opcode'),
+                                    'operand_str': inst.get('operand_str', ''),
+                                    'operands': inst.get('operands', []),
+                                    'is_function_call': inst.get('is_function_call', False),
+                                }
+                                for inst in il_instructions
+                            ]
+                            rungs.append({
+                                'index': r_idx_local,
+                                'boundary_marker': 'IL_BASED',
+                                'instructions_source': 'il_ground_truth',
+                                'instructions': instructions,
+                            })
+
+                        # Collect token info for program
+                        all_tokens = []
+                        for resp_idx, response in enumerate(self.responses):
+                            tokens = response.get('tokens', [])
+                            program_tokens = [t for t in tokens if t.get('type') in program_token_types]
+                            if program_tokens:
+                                all_tokens.extend(program_tokens)
+
+                        all_tokens = sorted(all_tokens, key=lambda t: t.get('pos', 0))
+                        fb_positions = [t['pos'] for t in all_tokens if t.get('type') == 'FB_DEFINITION']
+
+                        programs_list.append({
+                            'index': prog_idx,
+                            'name': program_name,
+                            'byte_range': [all_tokens[0]['pos'], all_tokens[-1]['pos'] + 50] if all_tokens else [0, 0],
+                            'boundary_marker': 'IL_PARTIAL_MATCH',
+                            'fb_count': len(fb_positions),
+                            'rung_count': len(rungs),
+                            'rungs': rungs,
+                            'token_count': len(all_tokens),
+                            'mode': 'il_partial_match',
+                        })
+                    else:
+                        # IL 에 없는 program (예: ====) → instructions=[] (정직)
+                        all_tokens = []
+                        for resp_idx, response in enumerate(self.responses):
+                            tokens = response.get('tokens', [])
+                            program_tokens = [t for t in tokens if t.get('type') in program_token_types]
+                            if program_tokens:
+                                all_tokens.extend(program_tokens)
+
+                        all_tokens = sorted(all_tokens, key=lambda t: t.get('pos', 0))
+                        fb_positions = [t['pos'] for t in all_tokens if t.get('type') == 'FB_DEFINITION']
+
+                        programs_list.append({
+                            'index': prog_idx,
+                            'name': program_name,
+                            'byte_range': [all_tokens[0]['pos'], all_tokens[-1]['pos'] + 50] if all_tokens else [0, 0],
+                            'boundary_marker': 'IL_UNMATCHED',
+                            'fb_count': len(fb_positions),
+                            'rung_count': 0,
+                            'rungs': [],
+                            'token_count': len(all_tokens),
+                            'mode': 'il_unmatched_no_instructions',
+                        })
+
+            # Phase B.8.4 Path C (former Path B): RUNG_START markers exist but no IL full — naive allocation
+            elif all_rung_starts and not il_full:
                 rung_distribution_source = 'naive_first_program'
                 rung_idx = 0
 
@@ -1093,45 +1208,37 @@ class ProgramASTBuilder:
                         'token_count': len(all_tokens),
                     })
 
-            # Phase B.8.3: No RUNG_START markers — fallback to FB_DEFINITION heuristic
+            # Phase B.8.4 Path D: No RUNG_START markers and no IL full — FB_DEFINITION heuristic for rung count only
             else:
-                if all_rung_starts:
-                    # RUNG markers 있지만 일반적인 경우 (전통 회귀)
-                    pass
+                # This path is for pcapng with PROGRAM_NAME but neither RUNG_START markers nor IL ground truth
+                # Use FB_DEFINITION heuristic for rung boundary estimation only (not instructions)
                 rung_distribution_source = 'fb_definition_heuristic'
+                instructions_source = 'unavailable'  # explicit: no IL, no accurate instruction data
 
                 for prog_idx, program_name in enumerate(sorted_program_names):
-                    # Collect program tokens from ALL responses (not just the one containing PROGRAM_NAME)
-                    # Heuristic: all responses are bundled into single programs list
-                    # (in real PLC scenarios, all bytecode from same program is contiguous)
+                    # Collect program tokens from ALL responses
                     all_tokens = []
                     for resp_idx, response in enumerate(self.responses):
                         tokens = response.get('tokens', [])
                         program_tokens = [t for t in tokens if t.get('type') in program_token_types]
-                        # Only add tokens from responses that have program content
                         if program_tokens:
                             all_tokens.extend(program_tokens)
-
-                    # Note: even if all_tokens is empty, PROGRAM_NAME passed grammar discriminator
-                    # → this is a real program section, just without bytecode capture
-                    # (capture timing difference or incomplete response).
-                    # Create stub program with empty rungs (Phase B.8.2: extensible framework).
 
                     # 정렬
                     all_tokens = sorted(all_tokens, key=lambda t: t.get('pos', 0))
                     # FB 위치 anchor
                     fb_positions = [t['pos'] for t in all_tokens if t.get('type') == 'FB_DEFINITION']
 
-                    # rung 분할: FB 가 N 개면 N 개 rung (각 FB 한 개 + 주변 토큰), FB 0 개면 1 rung
+                    # rung 분할: FB 개수만 추정 (instructions=[] 정직)
+                    # Phase B.8.4: Empty instructions for honesty (no IL ground truth)
                     rungs: List[Dict[str, Any]] = []
                     if fb_positions:
-                        # 각 FB 의 cell: prev FB ~ this FB ~ next FB 의 중간점 사이
+                        # 각 FB 위치마다 rung 분할 (경계만 추정, instructions는 비움)
                         for i, fb_pos in enumerate(fb_positions):
                             prev_mid = (fb_positions[i-1] + fb_pos) // 2 if i > 0 else 0
                             next_mid = (fb_pos + fb_positions[i+1]) // 2 if i+1 < len(fb_positions) else 10**9
                             cell_tokens = [t for t in all_tokens if prev_mid <= t.get('pos', 0) < next_mid]
                             cell_tokens_sorted = sorted(cell_tokens, key=lambda t: t.get('pos', 0))
-                            instrs = self.parse_rung(b'', cell_tokens_sorted)
                             if cell_tokens_sorted:
                                 br = [cell_tokens_sorted[0]['pos'], cell_tokens_sorted[-1]['pos'] + 50]
                             else:
@@ -1139,31 +1246,33 @@ class ProgramASTBuilder:
                             rungs.append({
                                 'index': i,
                                 'byte_range': br,
-                                'boundary_marker': 'FB_DEFINITION_BASED',
+                                'boundary_marker': 'FB_DEFINITION_ESTIMATED',
                                 'fb_count': 1,
-                                'instructions': instrs,
+                                'instructions': [],  # Empty: phase B.8.4 honesty
+                                'instructions_source': 'unavailable',
                             })
                     else:
-                        # FB 가 없으면 전체 토큰을 단일 rung 으로
-                        instrs = self.parse_rung(b'', all_tokens)
+                        # FB 가 없으면 전체를 단일 rung 으로 (instructions 비움)
                         br = [all_tokens[0]['pos'], all_tokens[-1]['pos'] + 50] if all_tokens else [0, 0]
                         rungs.append({
                             'index': 0,
                             'byte_range': br,
-                            'boundary_marker': 'NO_FB_GROUPING' if all_tokens else 'PROGRAM_NAME_ONLY',
+                            'boundary_marker': 'NO_FB_AVAILABLE' if all_tokens else 'PROGRAM_NAME_ONLY',
                             'fb_count': 0,
-                            'instructions': instrs,
+                            'instructions': [],  # Empty: phase B.8.4 honesty
+                            'instructions_source': 'unavailable',
                         })
 
                     programs_list.append({
                         'index': prog_idx,
-                        'name': program_name,  # Use grammar-extracted name
+                        'name': program_name,
                         'byte_range': [all_tokens[0]['pos'], all_tokens[-1]['pos'] + 50] if all_tokens else [0, 0],
-                        'boundary_marker': 'IL_FREE_RESPONSE_WITH_PROGRAM_NAMES',
+                        'boundary_marker': 'NO_IL_NO_RUNG_MARKERS',
                         'fb_count': len(fb_positions),
                         'rung_count': len(rungs),
                         'rungs': rungs,
                         'token_count': len(all_tokens),
+                        'mode': 'unavailable_no_instructions',
                     })
         else:
             # No PROGRAM_NAME tokens — programs = [] (no auto-numbering)
@@ -1188,6 +1297,12 @@ class ProgramASTBuilder:
                     if instr.get('opcode_label'):
                         labeled += 1
 
+        # Phase B.8.4: Set instructions_source default if not already set (fallback case)
+        if instructions_source == 'unavailable' and total_instructions == 0:
+            instructions_source = 'unavailable'
+        elif instructions_source == 'unavailable':
+            instructions_source = 'unavailable'
+
         total_tokens = sum(len(r.get('tokens', [])) for r in self.responses)
 
         # Phase B.8.3: Determine rung marker source
@@ -1205,6 +1320,10 @@ class ProgramASTBuilder:
         per_program_rung_counts = {}
         for p in programs_list:
             per_program_rung_counts[p['name']] = p['rung_count']
+
+        # Phase B.8.4: Count programs with/without IL match (honesty metrics)
+        programs_with_il_match = sum(1 for p in programs_list if p.get('mode') in ['rung_marker_with_il_full', 'il_partial_match'])
+        programs_without_il_match = sum(1 for p in programs_list if p.get('mode') in ['il_unmatched_no_instructions', 'unavailable_no_instructions'])
 
         warnings_list = [
             "IL-free 모드 (Phase B.8 본격): 프로그램은 program 토큰을 가진 response, "
@@ -1233,6 +1352,9 @@ class ProgramASTBuilder:
                 'rung_distribution_source': rung_distribution_source,
                 'per_program_rung_counts': per_program_rung_counts,
                 'total_instructions': total_instructions,
+                'instructions_source': instructions_source,
+                'programs_with_il_match': programs_with_il_match,
+                'programs_without_il_match': programs_without_il_match,
                 'by_kind': by_kind,
                 'by_source': by_source,
                 'parse_quality_distribution': parse_quality_dist,
