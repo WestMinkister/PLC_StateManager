@@ -387,23 +387,24 @@ def scan_tokens(binary):
     return sorted(tokens, key=lambda x: x['pos'])
 
 
-def scan_pcapng(pcap_path, include_binary=False):
-    """pcapng 파일 → PLC→PC 응답별 바이너리 + 토큰 맵.
+def scan_responses_bytes(response_bytes_list, include_binary=False):
+    """Raw response bytes list → 각 응답의 token 추출 (Live PLC 통합용).
+
+    PLCUploadClient.send_frame() 이 받은 raw response_data (bytes) list 받음.
+    scan_pcapng() 이 pcapng 파일에서 하는 것과 동일한 token 추출
+    (FB_DEFINITION, PROGRAM_NAME, RUNG_START 등) 을 메모리에서 수행.
 
     Args:
-        pcap_path: pcapng 파일 경로
+        response_bytes_list: raw response bytes list (예: PLCUploadClient.responses_raw)
         include_binary: True면 각 response에 binary_hex (hex string) 포함
 
-    Enhancements (Phase B.8):
-    - Extracts command_char, command_byte, sub_cmd, sub_cmd_hex from payload
-    - Decodes payload_hex from response
-    - Generates PROGRAM_NAME tokens from decoded binary using grammar
+    Returns:
+        scan_pcapng() 와 동일 형식의 list of dicts
+        각 dict: {binary_len, token_count, tokens, command_char, ...}
     """
-    packets = parse_pcapng_packets(pcap_path)
-
     responses = []
-    for direction, payload in packets:
-        if direction != 'PLC→PC':
+    for payload in response_bytes_list:
+        if not payload:
             continue
 
         # Parse command_char, command_byte, sub_cmd from payload header
@@ -487,6 +488,28 @@ def scan_pcapng(pcap_path, include_binary=False):
             resp['binary_hex'] = binary.hex()
 
         responses.append(resp)
+    return responses
+
+
+def scan_pcapng(pcap_path, include_binary=False):
+    """pcapng 파일 → PLC→PC 응답별 바이너리 + 토큰 맵.
+
+    Args:
+        pcap_path: pcapng 파일 경로
+        include_binary: True면 각 response에 binary_hex (hex string) 포함
+
+    Enhancements (Phase B.8):
+    - Extracts command_char, command_byte, sub_cmd, sub_cmd_hex from payload
+    - Decodes payload_hex from response
+    - Generates PROGRAM_NAME tokens from decoded binary using grammar
+    """
+    packets = parse_pcapng_packets(pcap_path)
+
+    # Extract PLC→PC responses (raw bytes)
+    response_bytes_list = [payload for direction, payload in packets if direction == 'PLC→PC']
+
+    # Use scan_responses_bytes for token extraction (DRY)
+    responses = scan_responses_bytes(response_bytes_list, include_binary=include_binary)
     return responses
 
 

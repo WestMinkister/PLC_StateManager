@@ -89,6 +89,19 @@ class ProgramASTBuilder:
         else:
             raise ValueError(f"지원 안 함: {path.suffix}")
 
+    def load_responses(self, responses: List[Dict[str, Any]], source_label: str = '<live>') -> None:
+        """이미 token 추출된 responses list를 직접 로드 (Live PLC 통신용).
+
+        Args:
+            responses: scan_responses_bytes() 또는 scan_pcapng() 결과 list.
+                      각 항목: {binary_len, token_count, tokens, ...}
+            source_label: AST의 source 필드에 기록할 라벨
+                         (예: 'live:192.168.1.100:2002')
+        """
+        self.source_path = source_label
+        self.pcapng_path = source_label  # IL fallback path 검색 None (live mode에서 IL 없음)
+        self.responses = responses
+
     def _collect_program_address_fingerprint(self, program_idx: int) -> set:
         """IL 의 특정 프로그램이 참조하는 주소 집합 추출.
 

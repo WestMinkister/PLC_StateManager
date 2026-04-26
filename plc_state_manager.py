@@ -61,9 +61,10 @@ def make_parser() -> argparse.ArgumentParser:
     # ① extract
     p_extract = subparsers.add_parser(
         'extract',
-        help='① pcapng 에서 프로그램 AST 추출',
+        help='① pcapng 또는 Live PLC 에서 프로그램 AST 추출',
     )
-    p_extract.add_argument('input', help='입력 pcapng 또는 사전 처리된 JSON')
+    p_extract.add_argument('input', nargs='?', default=None,
+                           help='입력 pcapng 또는 사전 처리된 JSON (--live 미사용 시 필수)')
     p_extract.add_argument('-o', '--output', default='program_ast.json',
                            help='출력 AST JSON 경로 (기본: program_ast.json)')
     p_extract.add_argument('-v', '--verbose', action='store_true',
@@ -71,6 +72,14 @@ def make_parser() -> argparse.ArgumentParser:
     p_extract.add_argument('--no-il', action='store_true',
                            help='IL ground truth 없이 pcapng 자체에서만 파싱. '
                                 'PLC 구조가 docs/il_parsed_0423.json 과 다를 때 권장.')
+    p_extract.add_argument('--live', action='store_true',
+                           help='Live PLC 직접 통신 (frames JSON 재전송)')
+    p_extract.add_argument('--host', type=str, metavar='IP',
+                           help='Live mode: PLC IP 주소')
+    p_extract.add_argument('--port', type=int, default=2002,
+                           help='Live mode: PLC port (기본값 2002)')
+    p_extract.add_argument('--frames', type=str, metavar='FILE',
+                           help='Live mode: frame sequence JSON 경로 (PLC로부터 열기 캡처)')
     p_extract.set_defaults(func=cmd_extract)
 
     # ②③ compare
@@ -138,7 +147,51 @@ def make_parser() -> argparse.ArgumentParser:
 
 
 def cmd_extract(args: argparse.Namespace) -> int:
-    """① pcapng 또는 JSON 에서 AST 추출."""
+    """① pcapng, JSON 또는 Live PLC 에서 AST 추출."""
+    # Live PLC 모드
+    if getattr(args, 'live', False):
+        if not args.host:
+            print("오류: --live 모드는 --host 필수", file=sys.stderr)
+            return 1
+        if not args.frames:
+            print("오류: --live 모드는 --frames JSON 필수", file=sys.stderr)
+            return 1
+
+        frames_path = Path(args.frames)
+        if not frames_path.exists():
+            print(f"오류: frames JSON 파일 없음: {frames_path}", file=sys.stderr)
+            return 1
+
+        try:
+            from plc_upload_test import PLCUploadClient
+            client = PLCUploadClient(args.host, args.port)
+            ast = client.extract_ast_live(str(frames_path), args.output)
+            if not ast:
+                print("오류: Live PLC 통신 실패", file=sys.stderr)
+                return 1
+        except Exception as e:
+            print(f"Live AST 추출 실패: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc()
+            return 1
+
+        print(f"✓ Live AST 추출: {args.output}")
+        print(f"  PLC: {args.host}:{args.port}")
+        print(f"  모드: {ast.get('mode', '?')}")
+        if args.verbose:
+            stats = ast.get('stats', {})
+            print(f"  Programs: {stats.get('total_programs', '?')}")
+            print(f"  Rungs:    {stats.get('total_rungs', '?')}")
+            print(f"  Recall:   {stats.get('function_call_recall', 'N/A')}")
+        for w in ast.get('warnings', []):
+            print(f"  [주의] {w}")
+        return 0
+
+    # 기존 pcapng/JSON 모드
+    if not args.input:
+        print("오류: input 필수 (--live 미사용 시)", file=sys.stderr)
+        return 1
+
     input_path = Path(args.input)
     if not input_path.exists():
         print(f"오류: 입력 파일 없음: {input_path}", file=sys.stderr)

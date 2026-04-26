@@ -137,7 +137,8 @@ class PLCUploadClient:
         self.timeout = timeout
         self._sock = None
         self._recv_buffer = b''
-        self.responses = []
+        self.responses = []        # parsed response dicts
+        self.responses_raw = []    # raw response bytes (for scan_responses_bytes)
 
     def connect(self):
         """Establish TCP connection to PLC."""
@@ -199,6 +200,8 @@ class PLCUploadClient:
                         break
 
             if response_data:
+                # Store raw response bytes for scan_responses_bytes (Live AST extraction)
+                self.responses_raw.append(response_data)
                 parsed = parse_response(response_data)
                 if parsed:
                     self.responses.append(parsed)
@@ -291,6 +294,61 @@ class PLCUploadClient:
 
         print(f"\nResults: {success} successful, {errors} errors out of {total} frames")
         return success, errors
+
+    def extract_ast_live(self, frames_json_path, ast_output_path='program_ast.json'):
+        """Live PLC 통신 → AST 추출 통합.
+
+        1. frames_json으로 표준 "PLC로부터 열기" sequence 재전송
+        2. raw response bytes 모음 (responses_raw)
+        3. scan_responses_bytes()로 token 추출
+        4. ProgramASTBuilder.load_responses()로 AST build
+        5. ast_output_path에 dump
+
+        Args:
+            frames_json_path: 캡처된 frame sequence JSON 경로
+            ast_output_path: 출력 AST JSON 경로
+
+        Returns:
+            AST dict
+        """
+        from plc_bytecode_scanner import scan_responses_bytes
+        from plc_program_parser import ProgramASTBuilder
+
+        # Load frames
+        with open(frames_json_path, encoding='utf-8') as f:
+            frames = json.load(f)
+
+        # Replay frames and collect raw responses
+        print(f"Replaying frames from {frames_json_path}...")
+        self.connect()
+        try:
+            self.replay_frames(frames, delay=0.1)
+        finally:
+            self.disconnect()
+
+        if not self.responses_raw:
+            print("⚠ No responses received from PLC")
+            return None
+
+        print(f"\n✓ Collected {len(self.responses_raw)} raw response bytes")
+
+        # Extract tokens from raw responses
+        print("Extracting tokens from responses...")
+        scanned = scan_responses_bytes(self.responses_raw)
+        print(f"✓ Scanned {len(scanned)} responses, {sum(r.get('token_count', 0) for r in scanned)} total tokens")
+
+        # Build AST
+        print("Building AST from tokens...")
+        builder = ProgramASTBuilder(use_il=False)  # No IL in live mode
+        builder.load_responses(scanned, source_label=f'live:{self.plc_ip}:{self.plc_port}')
+        ast = builder.build()
+
+        # Dump to JSON
+        with open(ast_output_path, 'w', encoding='utf-8') as f:
+            json.dump(ast, f, ensure_ascii=False, indent=2)
+        print(f"✓ AST written to {ast_output_path}")
+
+        return ast
 
 
 def dry_run(replay_path):
