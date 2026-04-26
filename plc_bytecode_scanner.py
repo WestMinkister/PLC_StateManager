@@ -248,15 +248,10 @@ def extract_rung_markers_from_decoded(decoded_binary: bytes) -> list:
     return results
 
 
-def decode_response_binary(payload):
-    """PLC→PC 응답의 ASCII-hex 데이터를 바이너리로 복원.
-
-    응답 레이아웃: LGIS-GLOFA(10B) + 헤더(14B) + 0x06(status) + ASCII hex data
-    """
+def _extract_payload_hex(payload):
+    """LGIS-GLOFA 응답에서 ASCII-hex payload string 추출 (sig+26 이후, hex chars only)."""
     sig = payload.find(b'LGIS-GLOFA')
-    if sig < 0:
-        return None
-    if len(payload) < sig + 27:
+    if sig < 0 or len(payload) < sig + 27:
         return None
     tail = payload[sig + 26:]
     try:
@@ -266,8 +261,19 @@ def decode_response_binary(payload):
     clean = ''.join(c for c in s if c in '0123456789abcdefABCDEF')
     if len(clean) % 2:
         clean = clean[:-1]
+    return clean if clean else None
+
+
+def decode_response_binary(payload):
+    """PLC→PC 응답의 ASCII-hex 데이터를 바이너리로 복원.
+
+    응답 레이아웃: LGIS-GLOFA(10B) + 헤더(14B) + 0x06(status) + ASCII hex data
+    """
+    clean = _extract_payload_hex(payload)
+    if clean is None:
+        return None
     try:
-        return bytes.fromhex(clean) if clean else b''
+        return bytes.fromhex(clean)
     except ValueError:
         return None
 
@@ -426,16 +432,7 @@ def scan_responses_bytes(response_bytes_list, include_binary=False):
                 except (IndexError, ValueError):
                     pass
 
-            # Extract payload hex (starting from sig+26)
-            tail = payload[sig + 26:]
-            try:
-                s = tail.decode('ascii', errors='ignore')
-                clean = ''.join(c for c in s if c in '0123456789abcdefABCDEF')
-                if len(clean) % 2:
-                    clean = clean[:-1]
-                payload_hex = clean if clean else None
-            except (UnicodeDecodeError, Exception):
-                pass
+            payload_hex = _extract_payload_hex(payload)
 
         binary = decode_response_binary(payload)
         if binary is None:

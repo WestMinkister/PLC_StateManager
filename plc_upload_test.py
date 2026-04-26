@@ -314,11 +314,12 @@ class PLCUploadClient:
         from plc_bytecode_scanner import scan_responses_bytes
         from plc_program_parser import ProgramASTBuilder
 
-        # Load frames
         with open(frames_json_path, encoding='utf-8') as f:
             frames = json.load(f)
 
-        # Replay frames and collect raw responses
+        self.responses.clear()
+        self.responses_raw.clear()
+
         print(f"Replaying frames from {frames_json_path}...")
         self.connect()
         try:

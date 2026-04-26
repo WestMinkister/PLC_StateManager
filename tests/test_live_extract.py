@@ -17,24 +17,20 @@ from plc_bytecode_scanner import scan_pcapng, scan_responses_bytes
 from plc_upload_analyze import parse_pcapng_packets
 
 
+def _find_test_pcapng():
+    for p in [Path("docs/0423_PLC로부터열기.pcapng"), Path("docs") / "0423_PLC로부터열기.pcapng"]:
+        if p.exists():
+            return p
+    return None
+
+
 def test_scan_responses_bytes_vs_scan_pcapng():
     """scan_responses_bytes 가 scan_pcapng 과 같은 token 을 추출하는지 검증."""
     print("\n" + "=" * 70)
     print("TEST: scan_responses_bytes vs scan_pcapng")
     print("=" * 70)
 
-    # 테스트용 pcapng 파일 찾기
-    pcapng_paths = [
-        Path("docs/0423_PLC로부터열기.pcapng"),
-        Path("docs") / "0423_PLC로부터열기.pcapng",
-    ]
-
-    pcapng_path = None
-    for p in pcapng_paths:
-        if p.exists():
-            pcapng_path = p
-            break
-
+    pcapng_path = _find_test_pcapng()
     if not pcapng_path:
         print("⚠ pcapng 파일 없음 — 테스트 스킵")
         return True
@@ -104,18 +100,7 @@ def test_program_ast_builder_load_responses():
 
     from plc_program_parser import ProgramASTBuilder
 
-    # pcapng 파일 찾기
-    pcapng_paths = [
-        Path("docs/0423_PLC로부터열기.pcapng"),
-        Path("docs") / "0423_PLC로부터열기.pcapng",
-    ]
-
-    pcapng_path = None
-    for p in pcapng_paths:
-        if p.exists():
-            pcapng_path = p
-            break
-
+    pcapng_path = _find_test_pcapng()
     if not pcapng_path:
         print("⚠ pcapng 파일 없음 — 테스트 스킵")
         return True

@@ -24,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from plc_program_parser import ProgramASTBuilder
+from plc_upload_test import PLCUploadClient
 from plc_ast_diff import (
     load_ast,
     diff_ast,
@@ -148,8 +149,7 @@ def make_parser() -> argparse.ArgumentParser:
 
 def cmd_extract(args: argparse.Namespace) -> int:
     """① pcapng, JSON 또는 Live PLC 에서 AST 추출."""
-    # Live PLC 모드
-    if getattr(args, 'live', False):
+    if args.live:
         if not args.host:
             print("오류: --live 모드는 --host 필수", file=sys.stderr)
             return 1
@@ -157,18 +157,15 @@ def cmd_extract(args: argparse.Namespace) -> int:
             print("오류: --live 모드는 --frames JSON 필수", file=sys.stderr)
             return 1
 
-        frames_path = Path(args.frames)
-        if not frames_path.exists():
-            print(f"오류: frames JSON 파일 없음: {frames_path}", file=sys.stderr)
-            return 1
-
         try:
-            from plc_upload_test import PLCUploadClient
             client = PLCUploadClient(args.host, args.port)
-            ast = client.extract_ast_live(str(frames_path), args.output)
+            ast = client.extract_ast_live(args.frames, args.output)
             if not ast:
                 print("오류: Live PLC 통신 실패", file=sys.stderr)
                 return 1
+        except FileNotFoundError as e:
+            print(f"오류: {e}", file=sys.stderr)
+            return 1
         except Exception as e:
             print(f"Live AST 추출 실패: {e}", file=sys.stderr)
             import traceback

@@ -99,7 +99,7 @@ class ProgramASTBuilder:
                          (예: 'live:192.168.1.100:2002')
         """
         self.source_path = source_label
-        self.pcapng_path = source_label  # IL fallback path 검색 None (live mode에서 IL 없음)
+        self.pcapng_path = None
         self.responses = responses
 
     def _collect_program_address_fingerprint(self, program_idx: int) -> set:
