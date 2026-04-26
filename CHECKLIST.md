@@ -1,10 +1,19 @@
 # PLC_StateManager — 진행 체크리스트
 
-> **최종 업데이트**: 2026-04-24 KST (Phase B.7 완료 + frame bundle 기반 command inventory 영구화)
+> **최종 업데이트**: 2026-04-26 KST (회귀 발견 + Phase B.8 핸드오프 정리)
+>
+> 🚨 **다음 세션 첫 작업 — Phase B.8 본격**:
+> - 사용자 핵심 원칙 (2026-04-26): "패킷에 '프로그램 이름'이 있을 수 있고, 이걸 하드코딩하지 않고 하는 방법은 '프로토콜 분석 체계화'라는 것"
+> - 회귀 원인: `scan_pcapng()` 가 raw payload 안 저장 → `build_program_state()` 가 program name 추출 불가
+> - 즉시 실행 절차 6 step (Step 1 hex 덤프 분석 → Step 6 multi-input mass-smoke test) 은 메모리 `project_next_session_handoff.md` 에 정리됨
+> - **자기 검증 의무**: pytest 100/100 + 13 pcapng mass-smoke + expected dict 검증 + grammar JSON 정의 (하드코딩 0줄) + console output 확인. 5 단계 통과 안 되면 commit 금지
+> - 이번 세션 안에서 같은 종류 자기 검증 실패 3회 반복 (1/1/0 → Program_0 → 키워드 매칭). 다음 세션은 multi-input 우선
+> - 사용자 확인: "테스트해볼 패킷은 많다" → 13 pcapng + 추가 캡처로 검증 풍부히 가능
+>
 > **전역 CLAUDE.md**가 이 파일을 세션 핸드오프 키파일로 사용함. 매 작업 완료 시 갱신할 것.
 > **궁극 프로젝트**: `PLC_ProcessAnalyzer` (GitHub, AI 학습/프로세스 분석 엔진) — Claude 메모리 `project_ultimate_vision.md` 참조
 > **StateManager 6단계 공식 플로우**: 메모리 `project_state_manager_flow.md` (사용자 2026-04-23 확정)
-> **설계 철학**: Grammar 인식 우선 + 확장 가능 프레임워크 — `feedback_grammar_over_naming.md` + `feedback_extensible_framework.md`
+> **설계 철학**: Grammar 인식 우선 + 확장 가능 프레임워크 — `feedback_grammar_over_naming.md` + `feedback_extensible_framework.md` + `feedback_multi_input_validation.md`
 
 ## 완료된 마일스톤
 
