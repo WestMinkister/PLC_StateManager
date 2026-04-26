@@ -894,6 +894,7 @@ class ProgramASTBuilder:
 
         같은 docs/ 디렉토리에서 il_parsed_<basename>.json 또는 il_parsed_0423.json 을 찾아
         program 별 rungs (각 rung 은 instructions 배열 포함) 반환.
+        3순위: 같은 SmartFactory 내 sibling project (PLC_StateManager, PLC_ProgramTraker) 의 IL 참조.
 
         Returns:
             dict {program_name: [{'instructions': [...]}, ...]} or None
@@ -902,6 +903,7 @@ class ProgramASTBuilder:
             return None
 
         import os
+        import pathlib
         docs_dir = os.path.dirname(self.pcapng_path) or '.'
         base = os.path.splitext(os.path.basename(self.pcapng_path))[0]
 
@@ -910,6 +912,16 @@ class ProgramASTBuilder:
             os.path.join(docs_dir, f'il_parsed_{base}.json'),
             os.path.join(docs_dir, 'il_parsed_0423.json'),  # 기본 ref (현 dataset)
         ]
+
+        # Phase B.8.4: cross-project IL fallback
+        # PLC_StateManager 의 __file__ 기반 경로 추가 (sibling project 에서도 접근 가능)
+        try:
+            this_project_il = pathlib.Path(__file__).parent / 'docs' / 'il_parsed_0423.json'
+            this_project_il_str = str(this_project_il)
+            if this_project_il_str not in candidates:
+                candidates.append(this_project_il_str)
+        except Exception:
+            pass
 
         for cand in candidates:
             if os.path.exists(cand):
