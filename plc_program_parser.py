@@ -904,6 +904,11 @@ class ProgramASTBuilder:
         - Names same program tokens appearing in multiple responses under same name
         - If PROGRAM_NAME tokens exist, uses them as program names instead of auto-numbering
         - If no PROGRAM_NAME tokens, programs=[] (no auto-numbering fallback)
+
+        Phase B.8.3 enhancement:
+        - Collects RUNG_START markers (46 01 00 00) from BZ2-decompressed bytecode
+        - Counts total rungs via RUNG_START markers for IL ground truth accuracy
+        - Adds rung_marker_source to stats: "bz2_decompressed_46010000" or "fb_definition_heuristic"
         """
         program_token_types = {'FB_DEFINITION', 'CONTACT_POS_A', 'CONTACT_POS_B', 'CONTACT_POS_C',
                                 'FX_FLAG', 'INSTR_LOAD', 'INSTR_NC_MOD', 'INSTR_PULSE'}
@@ -918,6 +923,19 @@ class ProgramASTBuilder:
                         'name': t.get('value'),
                         'response_idx': resp_idx,
                         'is_first': t.get('is_first'),
+                    })
+
+        # Phase B.8.3: Collect RUNG_START markers from all responses
+        all_rung_starts = []  # list of {offset_in_decompressed, bz2_chunk_idx, resp_idx}
+        for resp_idx, response in enumerate(self.responses):
+            tokens = response.get('tokens', [])
+            for t in tokens:
+                if t.get('type') == 'RUNG_START':
+                    all_rung_starts.append({
+                        'offset_in_decompressed': t.get('offset_in_decompressed'),
+                        'bz2_chunk_idx': t.get('bz2_chunk_idx'),
+                        'rung_index': t.get('rung_index'),
+                        'response_idx': resp_idx,
                     })
 
         # Build programs list
@@ -1025,14 +1043,25 @@ class ProgramASTBuilder:
 
         total_tokens = sum(len(r.get('tokens', [])) for r in self.responses)
 
+        # Phase B.8.3: Determine rung marker source
+        total_rungs_via_rung_marker = len(all_rung_starts)
+        if total_rungs_via_rung_marker > 0:
+            rung_marker_source = 'bz2_decompressed_46010000'
+        else:
+            rung_marker_source = 'fb_definition_heuristic'
+
         warnings_list = [
             "IL-free 모드 (Phase B.8 본격): 프로그램은 program 토큰을 가진 response, "
-            "rung 은 FB_DEFINITION 위치 기준 휴리스틱 분할. "
+            "rung 은 FB_DEFINITION 위치 기준 휴리스틱 분할 (또는 B.8.3: RUNG_START marker 기반). "
             "RUNG_END/PROGRAM_END 마커는 모든 pcapng 에 0회 — bytecode 자체에 rung 경계 정보 없음.",
             "이 모드는 IL ground truth 없이 bytecode 만 본 결과. monitor/value-only "
             "pcapng (FB 없음) 은 program 0 개로 보고됨. 정상.",
             "프로그램 이름은 protocol_grammar.json program_section 과 extract_program_names_from_payload() "
             "로 추출됨 (하드코딩 키워드 검색 없음). PROGRAM_NAME 토큰이 없으면 programs=[] (자동번호 없음).",
+            f"Phase B.8.3: rung 개수 = {total_rungs_via_rung_marker} (RUNG marker via 46010000 signature) "
+            f"or {total_rungs} (FB_DEFINITION 휴리스틱). "
+            f"rung_marker_source = {rung_marker_source}. "
+            f"RUNG marker 검출 = 완전 program upload 캡처 증거.",
         ]
 
         return {
@@ -1043,6 +1072,8 @@ class ProgramASTBuilder:
             'stats': {
                 'total_programs': len(programs_list),
                 'total_rungs': total_rungs,
+                'total_rungs_via_rung_marker': total_rungs_via_rung_marker,
+                'rung_marker_source': rung_marker_source,
                 'total_instructions': total_instructions,
                 'by_kind': by_kind,
                 'by_source': by_source,

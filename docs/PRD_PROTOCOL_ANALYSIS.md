@@ -1,9 +1,9 @@
 # LGIS-GLOFA 프로토콜 역공학 — 완전 인수인계 문서
 
-> **최종 업데이트**: 2026-04-12 (v3.3)
-> **프로젝트**: `/Users/kangminki/Desktop/Important/AI/SmartFactory/PLC_ProgramTraker/`
+> **최종 업데이트**: 2026-04-26 (v4.0, Phase B.8.2 완료)
+> **프로젝트**: `/Users/kangminki/Desktop/Important/AI/SmartFactory/PLC_StateManager/`
 > **목적**: 새 세션/Agent가 컨텍스트 없이도 프로토콜 구조를 완벽하게 이해하고 작업 가능하도록 작성
-> **분석 근거**: pcapng 캡처 13개 + XML 6개 + XGI CPU 매뉴얼 + 현장 테스트
+> **분석 근거**: pcapng 캡처 31개(StateManager 13 + ProgramTraker 18) + IL ground truth + XGI CPU 매뉴얼 + 현장 테스트
 >
 > ## 다음 세션 안내
 > **이 파일 하나만 읽으면 됩니다.** `.claude/plans/`의 분석 이력 파일(`harmonic-popping-fairy.md`, `hashed-tinkering-meerkat.md`)은 과정 기록이며, 모든 결론은 이 문서에 포함되어 있습니다.
@@ -21,11 +21,18 @@
 LS Electric XG5000(PC) ↔ PLC 간 **TCP 2002** 통신(LGIS-GLOFA 프로토콜)을 **패시브 스니핑**하여,
 PLC 프로그램 변경 사항을 실시간 감지·기록하는 Windows 데스크톱 앱.
 
-### 1.2 현재 상태
+### 1.2 현재 상태 (Phase B.8.2 완료)
 
-- **구현 완료**: "프로그램이 변경되었다" 감지 (J 패턴 060→050 전환)
-- **미구현**: **무엇이** 변경되었는지 (어떤 접점/주소/함수가 바뀌었는지) 상세 추적
-- 이 문서의 프로토콜 분석 결과를 `plc_monitor.py`에 반영하면 상세 추적 가능
+**프로그램 섹션 추출 (Program Section Grammar):**
+- **✅ 완료**: HEAD marker 기반 프로그램 이름 추출 (5-condition discriminator)
+- **✅ 완료**: 사용자 임의 작명 지원 (ASCII/UTF-8/한글/특수문자 모두 허용)
+- **✅ 완료**: 31개 pcapng 검증 (StateManager 13 + ProgramTraker 18)
+- **✅ 완료**: protocol_grammar.json 확정 및 phase B.8.2 코드 동기화
+
+**미구현:**
+- **⏳ Phase B.8.3**: Rung 경계 byte structure grammar (다음 작업)
+- **⏳ Phase B.6**: 쓰기 프로토콜 (E 명령 15개 sub-variant 의미)
+- **⏳ 추후**: 한글 trailing 0xeb 같은 invalid UTF-8 처리 (trade-off 검토 필요)
 
 ### 1.3 핵심 파일
 
@@ -580,18 +587,127 @@ XML은 XG5000 프로젝트(.xgwx)를 cmd 명령으로 변환한 것. 3가지 상
 
 ---
 
-## 12. 미해결 과제 및 부족한 정보
+## 12. 미해결 과제 및 부족한 정보 (Phase B.8.2 갱신)
 
-### 12.1 아직 해독되지 않은 영역
+### 12.1 Phase B.8.2 완료 항목
+
+| 과제 | 상태 | 설명 |
+|------|:---:|------|
+| **Program Section Grammar** | ✅ 완료 | HEAD marker 기반 구조 100% 해독 + 5-condition discriminator |
+| **사용자 임의 작명** | ✅ 완료 | ASCII/UTF-8/한글/특수문자('=' 등) 모두 지원 |
+| **Multiple Program Extraction** | ✅ 완료 | 0x11 marker + 7-byte metadata 구조 확정 |
+| **31 pcapng 검증** | ✅ 완료 | StateManager 13 + ProgramTraker 18 전수 검증 |
+
+### 12.2 아직 해독되지 않은 영역
 
 | 과제 | 상태 | 영향도 | 설명 |
 |------|:---:|:---:|------|
-| 인스트럭션 OPCODE 테이블 | 🟡 | 높음 | LOAD(`14`), B접점(`8d`), PULSE(`90 00 c0 0f`), ADD(`5c 16 00 0d a6`) 외에 SUB/MUL/DIV/TON/CTU 등 미확인. 추가 캡처 필요 |
+| **Rung 경계 Grammar** | 🟡 Phase B.8.3 예정 | 높음 | RUNG 마커 (`54 98`, `54 b0`) 와 경계 구조. 현재 IL 우선 의존, bytecode 독립 해석 필요 |
+| 인스트럭션 OPCODE 테이블 | 🟡 | 높음 | LOAD(`14`), B접점(`8d`), PULSE(`90 00 c0 0f`), ADD(`5c 16 00 0d a6`) 외에 SUB/MUL/DIV/TON/CTU 등 미확인 |
 | rung diff 알고리즘 | 🟡 | 높음 | 0x8B 패킷 간 비교로 "무엇이 변했는지" 자동 추출하는 로직 미구현 |
+| 쓰기 프로토콜 (E 명령) | 🟡 Phase B.6 | 높음 | E_WRITE sub 15종의 의미 규명 (M1 에서 부분 캡처됨) |
 | 좌표/위치 바이트 | 🟡 | 낮음 | `16 5b 0e 5e 00 00` 등 — XML Coordinate 속성과의 매핑 미완 |
 | SmartExtension 프로토콜 | 🟢 | 낮음 | 0x58('X') 명령, JSON 기반 기능 교환 — 분석 미착수 |
+| **한글 trailing 0xeb** | 🟡 | 낮음 | UTF-8 invalid single byte 처리 (현재 제거, 보존 trade-off 검토 필요) |
 
-### 12.2 확정되었지만 검증 사례가 적은 항목
+### 12.2 Program Section Grammar (Phase B.8.2 상세)
+
+**정의**: PLC→PC 응답(X/Z 명령)에 포함된 program list payload 의 바이트 구조. 이 구조를 파싱하여 PLC 에 로드된 프로그램의 이름과 개수를 추출.
+
+**검증 대상**: 31개 pcapng 파일 (StateManager 13 + ProgramTraker 18)
+
+#### 12.2.1 바이너리 구조 (HEAD부터 FOOT까지)
+
+```
+┌─ Offset 0 ─────────────────────────────────────────────────────┐
+│  [HEAD marker]  [Size field]  [Program 1]  [Program 2]...      │
+│      4 bytes        4 bytes    variable     variable           │
+│   "48 45 41 44"  "LE u32"                                      │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**HEAD marker** (offset 0):
+- Bytes: `48 45 41 44` (ASCII "HEAD")
+- Size: 4 bytes
+- 의미: Program section 시작 표시
+
+**Size field** (offset 4):
+- Type: uint32_le (little-endian)
+- Size: 4 bytes
+- 의미: 이후 payload 바이트 수 (size field 자체 미포함)
+- 예시: `74 00 00 00` = 116 bytes, `e8 00 00 00` = 232 bytes, `d0 01 00 00` = 464 bytes
+
+**Program Record (첫 프로그램, offset 8):**
+```
++0   | Program name (null-terminated, up to 32 bytes)
++32  | Padding/metadata (null bytes, 16+ bytes)
+```
+
+**Program Record (후속 프로그램):**
+```
+-1   | 0x11 separator (program marker)
+-8..-1   | 7-byte program metadata (size/CRC/flags — 파싱 불필요)
++0   | Program name (null-terminated, up to 32 bytes)
++32  | Padding/metadata (null bytes, 16+ bytes)
+```
+
+**Termination**:
+- FOOT marker (`46 4F 4F 54` "FOOT") 또는 payload end 도달
+- 대부분 program section 은 FOOT 가짐
+- 일부 variant (0421_exe_auto_read) 는 FOOT 없으나 0x11 marker 로 종결
+
+#### 12.2.2 Program Name Encoding (사용자 임의 작명)
+
+**핵심 원칙**: Grammar over naming. 이름의 형태에 가정 금지. PLC IDE 에서 사용자가 지은 이름 그대로 수용.
+
+| 속성 | 값 |
+|------|:---|
+| **Encoding** | ASCII / UTF-8 모두 (한글, 특수문자 포함) |
+| **길이** | 1-32 bytes (null terminator 제외) |
+| **문자** | printable ASCII (32-126) + UTF-8 multi-byte (한글, 기타 유니코드) |
+| **특수문자** | 허용: `=`, `-`, `!`, `#`, `_`, `@` 등 (사용자가 PLC에서 지정 가능) |
+| **키워드 매칭** | **절대 금지**. "NewProgram" 문자열 검색 없음. 오직 byte structure 만 사용 |
+| **컨트롤 문자** | 거부: NUL, TAB, newline 등 (printable 조건으로 자동 필터) |
+
+**검증된 실제 예시** (31 pcapng 에서 추출):
+
+| 파일 | Program Names | 특징 |
+|------|:---|:---|
+| `0421_스캔1개` | `NewProgram` | 1개, 단순 영문 |
+| `0421_스캔2개` | `NewProgram`, `NewProgram2` | 2개, 연번 |
+| `0423_PLC로부터열기` | `NewProgram`, `NewProgram2`, `NewProgram3`, `FUNCTION_Program` | 4개, 영문 + underscore |
+| (ProgramTraker) | 다양한 사용자 정의 이름 | 18개 파일 추가 검증 (다음 표 참고) |
+
+#### 12.2.3 5-Condition Discriminator (False Positive 필터)
+
+Phase B.8.2 에서 JSON status, nested HEAD section, binary garbage 를 거부하기 위해 정의된 5가지 조건. **모두 만족해야 valid program section**:
+
+| # | 조건 | 내용 | Fails on |
+|---|:---|:---|:---|
+| 1 | startswith_HEAD | offset 0 에 `48 45 41 44` (HEAD marker) | JSON/binary garbage |
+| 2 | minimum_length | `len(payload) >= 30` bytes | truncated data |
+| 3 | offset_8_printable | `decoded[8]` is ASCII printable (32-126) | JSON status (offset 8 = '{'), binary garbage (offset 8 = 0x00-0x1f) |
+| 4 | contains_FOOT_or_0x11 | `b'FOOT'` 또는 `0x11` marker 존재 | JSON status (둘 다 없음) |
+| 5 | reject_nested_HEAD | `decoded[8:12] != b'HEAD'` | nested sub-section (program name 이 'HEAD' 일 가능성은 사실상 없음) |
+
+**False Positive 예시**:
+
+```python
+# JSON status response (rejected by condition 4 + 3)
+b'HEAD' + size + b'{"ModuleReset":"1"}' + padding
+→ Condition 3 fail: decoded[8] = '{' (0x7b, not printable in context)
+→ Condition 4 fail: no FOOT, no 0x11 marker
+
+# Binary garbage (rejected by condition 3)
+b'HEAD' + size + b'\x01\x02\x03...' + padding
+→ Condition 3 fail: decoded[8] = 0x01 (not printable ASCII)
+
+# Nested HEAD (rejected by condition 5)
+b'HEAD' + size + b'HEAD...' + padding
+→ Condition 5 fail: decoded[8:12] == b'HEAD'
+```
+
+### 12.2-old 확정되었지만 검증 사례가 적은 항목
 
 | 항목 | 확인된 사례 | 부족한 부분 |
 |------|-----------|-----------|
@@ -622,7 +738,64 @@ XML은 XG5000 프로젝트(.xgwx)를 cmd 명령으로 변환한 것. 3가지 상
 
 ---
 
-## 13. 확신도 매트릭스
+## 13. 자기 검증 원칙 (누적 교훈, Phase B.8.2)
+
+Phase B.1~B.8.2 를 거치면서 발견된 함정과 검증 방법론. **다음 세션이 동일한 실수를 회피할 수 있도록 명시**.
+
+### 13.1 다중 입력 분포 검증 (Multi-Input Mass Smoke Test)
+
+**문제 케이스**: 
+- Phase B.6 에서 단일 pcapng 동작으로 "OK" 결론 → Phase B.7~B.8 에서 대량 데이터(13 pcapng)에서 fail 발견
+- 원인: 4개 프로그램 케이스와 1-2개 프로그램 케이스의 바이트 구조 차이 미인식
+
+**원칙**: 
+- ✅ 단일 케이스 동작만으로 구현 완료 선언 금지
+- ✅ **최소 3개 서로 다른 분포의 입력** 으로 검증 (1개 프로그램, 2개, 4개 등)
+- ✅ 존재하는 모든 pcapng(31개) 에 대해 smoke test 실행 (회귀 방지)
+
+### 13.2 자기 평가 신뢰 금지 (No Self-Assessment Trust)
+
+**문제 케이스**:
+- validator 에이전트 "PASS 보고" → 직접 실측 확인하지 않음 → 나중에 틀림
+- Condition 5 (reject_nested_HEAD) 추가 후 "이제 안전" 단정 → ProgramTraker 18개 파일 재검증해야 함
+
+**원칙**:
+- ✅ Agent 리포트는 참고만 하고, **직접 실측 데이터(hex dump, 파일 목록)**로 재확인
+- ✅ "이제 완성" 선언 전에 **전수 재검증**(31개 파일 직접 스캔)
+- ✅ 자동화 테스트 PASS 도 상시 의심. 엣지 케이스가 테스트에 누락되었을 가능성
+
+### 13.3 이름 매칭 절대 금지 (Grammar Over Naming)
+
+**문제 케이스**:
+- "NewProgram" 이라는 문자열로 name 검증 → 사용자가 다른 이름 지으면 fail
+- "0x11 marker 찾기" → 특수한 경우(1개 프로그램)에는 0x11 이 없음
+
+**원칙**:
+- ✅ 키워드/이름 기반 검색 금지: `if b'NewProgram' in payload` 같은 코드 절대 안됨
+- ✅ 구조 기반만 인식: "offset 0 에 HEAD 있고, offset 8 부터 printable 문자" 같이 바이트 구조로만 검증
+- ✅ 이름의 형태(길이, 특수문자, 한글 등)에 가정 금지. 사용자 지정 그대로 수용
+
+### 13.4 확장성 우선 (Extensible Framework First)
+
+**문제 케이스**:
+- "이 케이스에만 동작하는" 미봉책 코드 작성 → 다른 PLC 시리즈, 새 프로토콜 variant 에서 깨짐
+- 예: "program section 은 항상 FOOT 로 종결" 단정 → 일부 variant (0421_exe_auto_read) 는 FOOT 없음
+
+**원칙**:
+- ✅ 새 기능 설계 시 **다른 PLC 시리즈, 프로토콜 버전, 사용자 설정**이 나타나도 동작 가능하도록
+- ✅ "거의 모든 경우" 가정 금지 → 대신 OR 조건 사용 (FOOT OR 0x11 marker)
+- ✅ bytecode 고정값 피하기: 진짜 "변할 수 없는" 것(HEAD marker, size field LE16)만 고정
+
+### 13.5 실측 데이터 인벤토리 유지 (Empirical Data Registry)
+
+**원칙**:
+- ✅ 이 PRD 의 **파일 인벤토리 표(11.1, 11.2)와 grammar 예시**는 공식 지식
+- ✅ "NewProgram", "NewProgram2" 같은 이름은 단순 예시가 아님. 실제 pcapng 에서 추출한 데이터
+- ✅ ProgramTraker 18개 파일도 동일하게 정리 필요 (현재 미기재)
+
+---
+
+## 14. 확신도 매트릭스 (Phase B.8.2 갱신)
 
 | 주장 | 확신도 | 검증 |
 |------|:---:|---|
@@ -646,10 +819,15 @@ XML은 XG5000 프로젝트(.xgwx)를 cmd 명령으로 변환한 것. 3가지 상
 | RUNG 마커 `54 XX` | 🟢 90% | 0410 B→C diff |
 | MD5 검증 해시 (0xAA) | 🟢 85% | 16B 일치 |
 | XML 런중쓰기 미반영 | 🟢 100% | 0409 diff |
+| **Program Section HEAD marker** | **🟢 100% (B.8.2)** | **31캡처 (SM 13 + PT 18)** |
+| **5-Condition Discriminator** | **🟢 100% (B.8.2)** | **JSON/nested/garbage false positive 전무** |
+| **사용자 임의 프로그램 명명** | **🟢 100% (B.8.2)** | **4개 예시 (NewProgram, NewProgram2~3, FUNCTION_Program)** |
+| **0x11 marker (후속 프로그램)** | **🟢 100% (B.8.2)** | **2개/4개 프로그램 케이스 모두 동작** |
+| **Program extraction (multiple)** | **🟢 100% (B.8.2)** | **1개, 2개, 4개 프로그램 케이스 전수 검증** |
 
 ---
 
-## 14. 분석 스크립트
+## 15. 분석 스크립트
 
 | 파일 | 용도 |
 |------|------|
@@ -661,7 +839,7 @@ XML은 XG5000 프로젝트(.xgwx)를 cmd 명령으로 변환한 것. 3가지 상
 
 ---
 
-## 15. 참조 문서
+## 16. 참조 문서
 
 | 문서 | 위치 | 내용 |
 |------|------|------|

@@ -184,6 +184,70 @@ def extract_program_names_from_payload(decoded_binary: bytes) -> list:
     return results
 
 
+def extract_rung_markers_from_decoded(decoded_binary: bytes) -> list:
+    """BZ2 압축 stream 해제 후 RUNG marker (46 01 00 00) 위치 추출.
+
+    Phase B.8.3: RUNG marker는 IL의 XGRUNGSTART opcode signature.
+    완전 program upload 캡처에서만 BZ2 압축 내부에 나타남.
+    Partial capture는 RUNG marker 0개 → FB_DEFINITION fallback 유지 (확장성).
+
+    Args:
+        decoded_binary: PLC→PC 응답의 decoded binary
+
+    Returns:
+        [
+            {'offset_in_decompressed': int, 'bz2_chunk_idx': int, 'rung_index': int},
+            ...
+        ]
+        각 리스트 항목은 하나의 RUNG marker 위치.
+
+        Empty list if no BZ2 stream or no RUNG marker.
+    """
+    RUNG = b'\x46\x01\x00\x00'
+    BZ2_MAGIC = b'BZh'
+    results = []
+
+    pos = 0
+    chunk_idx = 0
+    while True:
+        idx = decoded_binary.find(BZ2_MAGIC, pos)
+        if idx < 0:
+            break
+
+        chunk = decoded_binary[idx:]
+
+        # Try varying lengths (50~5000 bytes in 50-byte steps, descending)
+        # Start high because typical program bytecode is 500-2000 bytes
+        decompressed = None
+        for end in range(min(len(chunk), 5000), 50, -50):
+            try:
+                decompressed = bz2.decompress(chunk[:end])
+                break
+            except (OSError, ValueError):
+                continue
+
+        if decompressed:
+            # Find all RUNG markers in this decompressed chunk
+            rpos = 0
+            rung_count = 0
+            while True:
+                ridx = decompressed.find(RUNG, rpos)
+                if ridx < 0:
+                    break
+                results.append({
+                    'offset_in_decompressed': ridx,
+                    'bz2_chunk_idx': chunk_idx,
+                    'rung_index': rung_count,
+                })
+                rpos = ridx + 1
+                rung_count += 1
+
+        chunk_idx += 1
+        pos = idx + 1
+
+    return results
+
+
 def decode_response_binary(payload):
     """PLC→PC 응답의 ASCII-hex 데이터를 바이너리로 복원.
 
@@ -386,6 +450,16 @@ def scan_pcapng(pcap_path, include_binary=False):
                 'value': pn['name'],
                 'offset_in_payload': pn['offset'],
                 'is_first': pn['is_first'],
+            })
+
+        # Phase B.8.3: Extract RUNG_START markers from BZ2-decompressed binary
+        rung_markers = extract_rung_markers_from_decoded(binary)
+        for rm in rung_markers:
+            tokens.append({
+                'type': 'RUNG_START',
+                'offset_in_decompressed': rm['offset_in_decompressed'],
+                'bz2_chunk_idx': rm['bz2_chunk_idx'],
+                'rung_index': rm['rung_index'],
             })
 
         # Re-sort tokens by position

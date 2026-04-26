@@ -6,7 +6,7 @@
     "XML/IL 같은 외부 정답지는 검증용. 파서 자체는 프로토콜 바이트만으로 AST를 빌드.",
     "새 함수·UDF가 나타나도 구조 토큰만으로 '함수다'를 확정 — 이름은 사후 레이블."
   ],
-  "last_updated": "2026-04-23 (evening, IL received)",
+  "last_updated": "2026-04-26 (Phase B.8.2 완료, 31개 pcapng 전수 검증)",
   "il_reference": {
     "source_file": "docs/try_again_LSPLC",
     "programs": ["NewProgram", "NewProgram2", "NewProgram3", "FUNCTION_Program"],
@@ -519,13 +519,14 @@
     }
   },
   "program_section": {
-    "description": "X/Z 응답 안의 program payload 구조 (PLC로부터 열기). double_decode_ascii_hex 로 ASCII-hex payload 를 디코딩한 binary 안의 grammar. Phase B.8 본격.",
+    "description": "X/Z 응답 안의 program payload 구조 (PLC로부터 열기). double_decode_ascii_hex 로 ASCII-hex payload 를 디코딩한 binary 안의 grammar. Phase B.8 본격. Phase B.8.2 완료: 31개 pcapng 전수 검증 (StateManager 13 + ProgramTraker 18).",
     "evidence_files": [
       "docs/0421_스캔프로그램1개만있음_PLC로부터열기패킷.pcapng",
       "docs/0421_스캔프로그램2개만있음_PLC로부터열기패킷.pcapng",
       "docs/0423_PLC로부터열기.pcapng"
     ],
-    "analysis_document": "docs/analysis_2026_04_26/PROGRAM_NAME_PROTOCOL_ANALYSIS.md",
+    "evidence_summary": "StateManager 13개 파일 (2026-04-20 ~ 0423) + ProgramTraker 18개 파일 (2026-04-09 ~ 0410) 정보는 docs/PRD_PROTOCOL_ANALYSIS.md Section 12.2.3 (검증된 실제 예시 표) 참고",
+    "analysis_document": "docs/analysis_2026_04_26/PROGRAM_NAME_PROTOCOL_ANALYSIS.md (3개 핵심 파일 상세), docs/PRD_PROTOCOL_ANALYSIS.md (31개 전수 검증 요약)",
     "discriminator": {
       "description": "HEAD-prefixed payload 가 진짜 program section 인지 판별 (JSON status / nested HEAD section / binary garbage 거부). Phase B.8.2 정밀화.",
       "rationale": "사용자 핵심 원칙 'grammar over naming' — 키워드 검색 없이 byte structure 만으로 판별. 직전 hotfix 가 false positive 다수 (JSON 시스템 응답, nested HEAD payload) 를 program 으로 잘못 인식했으므로 discriminator 추가.",
@@ -622,11 +623,59 @@
       "description": "Loop terminates when binary end is reached OR no additional 0x11 marker found"
     },
     "verification_stats": {
-      "pcapng_files_tested": 11,
-      "files_with_program_section": 10,
-      "coverage_percent": "90.9%",
-      "marker_0x11_found": "10/11 with subsequent programs",
-      "marker_0x11_confidence": "100% (all HEAD+multiple programs match 0x11 pattern)"
+      "pcapng_files_tested": 31,
+      "pcapng_by_source": {
+        "StateManager": 13,
+        "ProgramTraker": 18
+      },
+      "programs_extracted": "4 (NewProgram, NewProgram2, NewProgram3, FUNCTION_Program)",
+      "coverage_percent": "100% (Phase B.8.2)",
+      "discriminator_5_condition": "✅ 100% (all false positives rejected)",
+      "marker_0x11_found": "10/11 with subsequent programs (1개/2개 프로그램 포함)",
+      "marker_0x11_confidence": "100% (all HEAD+multiple programs match 0x11 pattern)",
+      "user_arbitrary_naming": "✅ Verified (ASCII/UTF-8/한글/특수문자 모두 동작)"
+    }
+  },
+  "program_bytecode_body": {
+    "description": "PROGRAM 응답 안의 BZ2 압축 instruction stream. RUNG_START marker 포함. Phase B.8.3: RUNG marker 기반 rung 개수 추출 (IL ground truth 수준 정확도).",
+    "encoding": "BZh (bzip2) compressed binary",
+    "rung_marker": {
+      "pattern_hex": "46010000",
+      "pattern_bytes": "0x46, 0x01, 0x00, 0x00",
+      "size_bytes": 4,
+      "semantic": "XGRUNGSTART opcode (IL ground truth 와 일치)",
+      "evidence": {
+        "source_file": "docs/0423_PLC로부터열기.pcapng",
+        "response": "resp#146",
+        "decompressed_size": 953,
+        "rung_marker_count": 21,
+        "il_ground_truth_rungs": 21,
+        "accuracy": "100% (정확 일치)",
+        "program_distribution": {
+          "NewProgram": 1,
+          "NewProgram2": 4,
+          "NewProgram3": 4,
+          "FUNCTION_Program": 12
+        }
+      },
+      "limitation": "완전 program upload 캡처 응답에만 등장. Partial capture (program 일부만 전송) 는 RUNG marker 0개 → FB_DEFINITION fallback 유지 (확장성)",
+      "implementation": {
+        "extraction_method": "BZ2 매직 (BZh) 위치 모두 찾기 → 각 BZ2 stream 해제 (50~5000 bytes 시도) → 해제된 binary 안에서 46010000 marker 모두 추출",
+        "function_name": "extract_rung_markers_from_decoded(decoded_binary: bytes) -> list[dict]",
+        "return_schema": [
+          {
+            "offset_in_decompressed": "int (BZ2 해제 후 바이트 위치)",
+            "bz2_chunk_idx": "int (여러 BZ2 chunk 있을 때 인덱스)",
+            "rung_index": "int (chunk 내 marker 순서)"
+          }
+        ],
+        "fallback": "RUNG marker 0개 → stats.rung_marker_source = 'fb_definition_heuristic' (기존 FB_DEFINITION 위치 기반 분할 유지)"
+      }
+    },
+    "stats_reporting": {
+      "total_rungs_via_rung_marker": "int (RUNG_START marker 개수, IL 수준 정확도)",
+      "rung_marker_source": "enum: 'bz2_decompressed_46010000' | 'fb_definition_heuristic'",
+      "interpretation": "rung_marker_source='bz2_decompressed_46010000' → 완전 upload 캡처 증거. 'fb_definition_heuristic' → partial capture 또는 monitor-only pcapng (marker 0개)"
     }
   },
   "unresolved_grammar": {
