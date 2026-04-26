@@ -887,16 +887,136 @@ class ProgramASTBuilder:
 
         return result_instructions
 
-    def build(self) -> Dict[str, Any]:
-        """전체 AST 조립 (Session 2: FB_DEFINITION 구현).
+    def _build_il_free(self) -> Dict[str, Any]:
+        """진짜 IL-free 파서 (Phase B.8 본격).
 
-        반환: {
-            'source': str,
-            'grammar_version': str,
-            'programs': [{...}],
-            'stats': {...}
-        }
+        설계:
+        - response 중 program 토큰 (FB_DEFINITION, CONTACT_POS_*, FX_FLAG, INSTR_*) 이
+          하나라도 있는 것을 program 으로 채택. 토큰 0 인 response 는 monitor/value frame 으로
+          간주하여 제외.
+        - 각 program 안의 모든 program 토큰을 parse_rung() 으로 instruction 추출.
+        - rung 분할: FB_DEFINITION 위치를 anchor 로 그룹핑 (FB 사이 거리 기준).
+          FB 가 0 개면 전체 토큰을 단일 rung 으로.
+        - IL fallback 일체 호출하지 않음 (instruction 0개여도 0개 그대로 보고).
         """
+        program_token_types = {'FB_DEFINITION', 'CONTACT_POS_A', 'CONTACT_POS_B', 'CONTACT_POS_C',
+                                'FX_FLAG', 'INSTR_LOAD', 'INSTR_NC_MOD', 'INSTR_PULSE'}
+
+        programs_list: List[Dict[str, Any]] = []
+        prog_idx = 0
+        for resp_idx, response in enumerate(self.responses):
+            tokens = response.get('tokens', [])
+            program_tokens = [t for t in tokens if t.get('type') in program_token_types]
+            if not program_tokens:
+                continue
+
+            # 정렬
+            program_tokens = sorted(program_tokens, key=lambda t: t.get('pos', 0))
+            # FB 위치 anchor
+            fb_positions = [t['pos'] for t in program_tokens if t.get('type') == 'FB_DEFINITION']
+
+            # rung 분할: FB 가 N 개면 N 개 rung (각 FB 한 개 + 주변 토큰), FB 0 개면 1 rung
+            rungs: List[Dict[str, Any]] = []
+            if fb_positions:
+                # 각 FB 의 cell: prev FB ~ this FB ~ next FB 의 중간점 사이
+                for i, fb_pos in enumerate(fb_positions):
+                    prev_mid = (fb_positions[i-1] + fb_pos) // 2 if i > 0 else 0
+                    next_mid = (fb_pos + fb_positions[i+1]) // 2 if i+1 < len(fb_positions) else 10**9
+                    cell_tokens = [t for t in program_tokens if prev_mid <= t.get('pos', 0) < next_mid]
+                    cell_tokens_sorted = sorted(cell_tokens, key=lambda t: t.get('pos', 0))
+                    instrs = self.parse_rung(b'', cell_tokens_sorted)
+                    if cell_tokens_sorted:
+                        br = [cell_tokens_sorted[0]['pos'], cell_tokens_sorted[-1]['pos'] + 50]
+                    else:
+                        br = [0, 0]
+                    rungs.append({
+                        'index': i,
+                        'byte_range': br,
+                        'boundary_marker': 'FB_DEFINITION_BASED',
+                        'fb_count': 1,
+                        'instructions': instrs,
+                    })
+            else:
+                # FB 가 없으면 전체 토큰을 단일 rung 으로
+                instrs = self.parse_rung(b'', program_tokens)
+                br = [program_tokens[0]['pos'], program_tokens[-1]['pos'] + 50]
+                rungs.append({
+                    'index': 0,
+                    'byte_range': br,
+                    'boundary_marker': 'NO_FB_GROUPING',
+                    'fb_count': 0,
+                    'instructions': instrs,
+                })
+
+            programs_list.append({
+                'index': prog_idx,
+                'name': f'Program_{prog_idx}',
+                'response_idx': resp_idx,
+                'byte_range': [program_tokens[0]['pos'], program_tokens[-1]['pos'] + 50],
+                'boundary_marker': 'IL_FREE_RESPONSE',
+                'fb_count': len(fb_positions),
+                'rung_count': len(rungs),
+                'rungs': rungs,
+                'token_count': len(program_tokens),
+            })
+            prog_idx += 1
+
+        # 통계 집계
+        total_rungs = sum(p['rung_count'] for p in programs_list)
+        total_instructions = 0
+        by_kind: Dict[str, int] = {}
+        by_source: Dict[str, int] = {}
+        parse_quality_dist: Dict[str, int] = {}
+        labeled = 0
+        for p in programs_list:
+            for r in p['rungs']:
+                for instr in r['instructions']:
+                    total_instructions += 1
+                    by_kind[instr.get('kind', 'unknown')] = by_kind.get(instr.get('kind', 'unknown'), 0) + 1
+                    by_source[instr.get('source', 'unknown')] = by_source.get(instr.get('source', 'unknown'), 0) + 1
+                    pq = instr.get('parse_quality', 'unknown')
+                    parse_quality_dist[pq] = parse_quality_dist.get(pq, 0) + 1
+                    if instr.get('opcode_label'):
+                        labeled += 1
+
+        total_tokens = sum(len(r.get('tokens', [])) for r in self.responses)
+
+        warnings_list = [
+            "IL-free 모드 (Phase B.8 본격): 프로그램은 program 토큰을 가진 response, "
+            "rung 은 FB_DEFINITION 위치 기준 휴리스틱 분할. "
+            "RUNG_END/PROGRAM_END 마커는 모든 pcapng 에 0회 — bytecode 자체에 rung 경계 정보 없음.",
+            "이 모드는 IL ground truth 없이 bytecode 만 본 결과. monitor/value-only "
+            "pcapng (FB 없음) 은 program 0 개로 보고됨. 정상.",
+        ]
+
+        return {
+            'source': self.source_path,
+            'grammar_version': '2026-04-26-il-free',
+            'mode': 'il_free',
+            'programs': programs_list,
+            'stats': {
+                'total_programs': len(programs_list),
+                'total_rungs': total_rungs,
+                'total_instructions': total_instructions,
+                'by_kind': by_kind,
+                'by_source': by_source,
+                'parse_quality_distribution': parse_quality_dist,
+                'function_calls_labeled': labeled,
+                'function_call_recall': 'N/A (il-free)',
+                'response_count': len(self.responses),
+                'total_token_count': total_tokens,
+            },
+            'warnings': warnings_list,
+        }
+
+    def build(self) -> Dict[str, Any]:
+        """전체 AST 조립.
+
+        IL ground truth 가 있으면 기존 IL-기반 빌드 사용 (Session 2~B.5.3-c).
+        없으면 _build_il_free() 사용 (Phase B.8 본격).
+        """
+        if not self.use_il or not self.il_ground_truth:
+            return self._build_il_free()
         programs_list = self.locate_program_regions()
 
         # 먼저 모든 FB_DEFINITION을 응답별로 수집
