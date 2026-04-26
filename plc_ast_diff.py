@@ -27,7 +27,11 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Protocol, Tuple
 
 
-SUPPORTED_GRAMMAR_VERSION = "2026-04-23"
+SUPPORTED_GRAMMAR_VERSIONS = {
+    "2026-04-23",
+    "2026-04-26-il-free-with-program-names",
+}
+SUPPORTED_GRAMMAR_VERSION = "2026-04-26-il-free-with-program-names"
 
 _TIME_UNIT_TO_SECONDS = {
     'ms': 1e-3,
@@ -91,8 +95,8 @@ def load_ast(path) -> Dict[str, Any]:
     if 'programs' not in ast:
         raise ValueError(f"유효한 AST 아님 ('programs' 키 없음): {path}")
     gv = ast.get('grammar_version')
-    if gv and gv != SUPPORTED_GRAMMAR_VERSION:
-        print(f"[경고] grammar_version 불일치: ast={gv}, supported={SUPPORTED_GRAMMAR_VERSION}")
+    if gv and gv not in SUPPORTED_GRAMMAR_VERSIONS:
+        print(f"[경고] grammar_version 불일치: ast={gv}, supported={sorted(SUPPORTED_GRAMMAR_VERSIONS)}")
     return ast
 
 
@@ -493,6 +497,13 @@ def diff_ast(
     *, opts: Optional[DiffOptions] = None,
 ) -> Dict[str, Any]:
     """최상위 AST diff 진입점.
+
+    Args:
+        ast_a: baseline/before (예: XG5000 기준 AST)
+        ast_b: target/after (예: pcapng 또는 Live PLC 에서 새로 추출한 AST)
+    Result semantics:
+        programs_added = ast_b - ast_a (after 에만 있음 = 새로 추가됨)
+        programs_removed = ast_a - ast_b (before 에만 있음 = 제거됨)
 
     단계:
       1. align_programs_by_name

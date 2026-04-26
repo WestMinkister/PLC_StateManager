@@ -95,7 +95,7 @@ def make_parser() -> argparse.ArgumentParser:
     p_compare.add_argument('--verbose', action='store_true')
     p_compare.add_argument('--summary-only', action='store_true')
     p_compare.add_argument('--strict-addr', action='store_true',
-                           help='%MW1000.0 vs %MW1000 을 다른 주소로 간주')
+                           help='%%MW1000.0 vs %%MW1000 을 다른 주소로 간주')
     p_compare.add_argument('--strict-opcode', action='store_true',
                            help='opcode_label 정규화 없이 엄격 비교')
     p_compare.add_argument('--ignore-il-fallback', action='store_true',
@@ -353,7 +353,7 @@ def cmd_flow(args: argparse.Namespace) -> int:
         print("\n=== ②③ AST 비교 ===")
         try:
             ast_ref = load_ast(args.xg5000_ast)
-            diff = diff_ast(ast_prot, ast_ref, opts=DiffOptions())
+            diff = diff_ast(ast_ref, ast_prot, opts=DiffOptions())
             print_ast_diff(diff, verbose=args.verbose, summary_only=not args.verbose)
             diff_path = out_dir / 'diff.json'
             write_json_diff(diff, str(diff_path))
