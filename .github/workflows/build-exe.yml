@@ -83,6 +83,7 @@ jobs:
           --add-data "value_read_frames.json;."
           --add-data "upload_replay_frames.json;."
           --add-data "generic_priming.json;."
+          --add-data "docs/il_parsed_0423.json;docs"
           --hidden-import plc_program_parser
           --hidden-import plc_ast_diff
           --hidden-import plc_value_backup
