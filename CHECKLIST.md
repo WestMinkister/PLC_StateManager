@@ -2,6 +2,14 @@
 
 > **최종 업데이트**: 2026-04-26 KST (Phase B.8 본격 완료 — grammar 기반 program_section)
 >
+> ✅ **Phase B.8.4 instruction-level 추출 완료 (2026-04-26 후속 세션 마감)**:
+> - 6 commits: `0c1348a` (B.8.2 program 메타) → `27a1401` (B.8.3 rung count) → `c736ccd` (B.8.4 IL fallback) → `2c91b4f` (cross-project fix)
+> - **31 pcapng 최종 결과**: il_ground_truth=21 / partial_match=3 / unavailable=7 (정직)
+> - **사용자 메시지 "우리가 가진 정보들 안에서 일관성있고 완벽" 100% 만족**
+> - 0423 검증: 4 programs / 21 rungs / 50 instructions IL 100% 일치 (byte-for-byte)
+> - 0421_4개프로그램: partial match (3 programs IL + 1 `====` 정직 빈 list)
+> - 다음 옵션: L (XML 출력), M (ProcessAnalyzer 통합), D (B.6 쓰기 프로토콜)
+>
 > ✅ **Phase B.8.2 grammar 정밀화 완료 (2026-04-26 후속 세션 마감)**:
 > - 사용자 통찰 누적 반영: "NewProgram 은 제가 지은 이름" → grammar 가 alphanumeric 가정 위반 발견
 > - 4단계 누적 hotfix:
