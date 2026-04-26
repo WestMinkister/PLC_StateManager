@@ -518,6 +518,117 @@
       }
     }
   },
+  "program_section": {
+    "description": "X/Z 응답 안의 program payload 구조 (PLC로부터 열기). double_decode_ascii_hex 로 ASCII-hex payload 를 디코딩한 binary 안의 grammar. Phase B.8 본격.",
+    "evidence_files": [
+      "docs/0421_스캔프로그램1개만있음_PLC로부터열기패킷.pcapng",
+      "docs/0421_스캔프로그램2개만있음_PLC로부터열기패킷.pcapng",
+      "docs/0423_PLC로부터열기.pcapng"
+    ],
+    "analysis_document": "docs/analysis_2026_04_26/PROGRAM_NAME_PROTOCOL_ANALYSIS.md",
+    "discriminator": {
+      "description": "HEAD-prefixed payload 가 진짜 program section 인지 판별 (JSON status / nested HEAD section / binary garbage 거부). Phase B.8.2 정밀화.",
+      "rationale": "사용자 핵심 원칙 'grammar over naming' — 키워드 검색 없이 byte structure 만으로 판별. 직전 hotfix 가 false positive 다수 (JSON 시스템 응답, nested HEAD payload) 를 program 으로 잘못 인식했으므로 discriminator 추가.",
+      "conditions_all_must_match": [
+        {
+          "name": "startswith_HEAD",
+          "description": "Offset 0 에 HEAD marker (0x48 45 41 44)",
+          "importance": "baseline"
+        },
+        {
+          "name": "minimum_length",
+          "description": "len(payload) >= 30 bytes",
+          "importance": "filter_short_garbage"
+        },
+        {
+          "name": "offset_8_printable_ascii",
+          "description": "decoded[8] is printable ASCII (32-126). Program name 첫 글자 범위.",
+          "importance": "filter_json_status_and_binary",
+          "note": "JSON 응답은 offset 8 에 '{' 또는 다른 제어문자 올 가능성"
+        },
+        {
+          "name": "contains_FOOT_marker_or_0x11_separator",
+          "description": "'FOOT' substring OR 0x11 marker (program separator) exists in decoded",
+          "importance": "filter_json_status",
+          "note": "Phase B.8.2 revision: 대부분 PROGRAM section 은 FOOT 가짐. 일부 캡처 variant (0421_exe_auto_read) 는 FOOT 없으나 0x11 marker 가 있음. 둘 중 하나는 필수 (JSON 응답은 둘 다 없음). nested HEAD 는 FOOT 있지만 condition 5 가 거부. binary garbage 는 condition 3 (printable[8]) 가 거부."
+        },
+        {
+          "name": "reject_nested_HEAD",
+          "description": "decoded[8:12] != 'HEAD'. nested sub-section 거부",
+          "importance": "filter_nested_head_payload",
+          "note": "Program name 이 'HEAD' 4글자만일 가능성은 사실상 없음"
+        }
+      ],
+      "false_positive_examples": {
+        "json_status_response": {
+          "structure": "HEAD + size + '{\"ModuleReset\":\"1\"}' + padding",
+          "why_fails": "FOOT marker 없음 → rejected",
+          "observed_in": "0421_exe_auto_read.pcapng 응답, 직전 hotfix 에서 program 으로 잘못 인식"
+        },
+        "nested_head_section": {
+          "structure": "HEAD + size + 'HEAD' (as program name) + ...",
+          "why_fails": "decoded[8:12] == b'HEAD' → rejected",
+          "observed_in": "테스트 케이스"
+        },
+        "binary_garbage": {
+          "structure": "HEAD + size + 0x01 0x02 0x03 ...",
+          "why_fails": "decoded[8] < 32 (not printable ASCII) → rejected",
+          "observed_in": "압축 해제 오류 또는 프로토콜 오류"
+        }
+      }
+    },
+    "head_marker": {
+      "pattern_hex": "48454144",
+      "pattern_ascii": "HEAD",
+      "size": 4,
+      "offset": 0,
+      "description": "Program section marker (always at offset 0 in payload)"
+    },
+    "size_field": {
+      "type": "uint32_le",
+      "offset": 4,
+      "size": 4,
+      "description": "Total program section size (bytes following the size field). Examples: 0x74=116, 0xe8=232, 0x1d0=464"
+    },
+    "first_program": {
+      "name_offset_from_head": 8,
+      "name_field": {
+        "encoding": "user-defined (ascii/utf-8/특수문자/한글 모두 허용)",
+        "terminator": "null_byte",
+        "max_length": 32,
+        "validation": "printable + non-control char only. 사용자가 PLC IDE 에서 지은 임의 이름 그대로 추출 (NewProgram, FUNCTION_Program, '====', '메인루프' 등)",
+        "rationale": "사용자 핵심 원칙 'grammar over naming' — 이름의 형태에 가정 금지",
+        "description": "Program name, null-terminated, followed by 16+ null padding bytes"
+      }
+    },
+    "subsequent_programs": {
+      "marker_byte_hex": "11",
+      "marker_byte_decimal": 17,
+      "marker_position": "1 byte before program name start",
+      "metadata_before_marker_size": 7,
+      "metadata_description": "7 bytes program-specific metadata (size/CRC/flags/timestamp). Values vary by program and PLC — opaque, not parsed",
+      "name_field": {
+        "encoding": "user-defined (ascii/utf-8/특수문자/한글 모두 허용)",
+        "terminator": "null_byte",
+        "max_length": 32,
+        "validation": "printable + non-control char only. 사용자가 PLC IDE 에서 지은 임의 이름 그대로 추출 (NewProgram, FUNCTION_Program, '====', '메인루프' 등)",
+        "rationale": "사용자 핵심 원칙 'grammar over naming' — 이름의 형태에 가정 금지",
+        "description": "Program name, null-terminated, followed by 16+ null padding bytes"
+      }
+    },
+    "termination": {
+      "stop_condition_1": "scan offset exceeds (offset_4 + 8 + size_field_value)",
+      "stop_condition_2": "no more 0x11 markers found before termination",
+      "description": "Loop terminates when binary end is reached OR no additional 0x11 marker found"
+    },
+    "verification_stats": {
+      "pcapng_files_tested": 11,
+      "files_with_program_section": 10,
+      "coverage_percent": "90.9%",
+      "marker_0x11_found": "10/11 with subsequent programs",
+      "marker_0x11_confidence": "100% (all HEAD+multiple programs match 0x11 pattern)"
+    }
+  },
   "unresolved_grammar": {
     "description": "파서 구현 전 반드시 해결해야 할 문법 공백",
     "items": [

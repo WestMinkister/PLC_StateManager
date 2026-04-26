@@ -1,0 +1,606 @@
+{
+  "total_files": 13,
+  "analysis_date": "2026-04-26",
+  "il_unique_combos": 1,
+  "il_free_unique_combos": 2,
+  "results": [
+    {
+      "file": "0420_모니터시작_누른후_모니터종료_누름.pcapng",
+      "short": "0420_모니터시작_누른후_모니터종료_누름",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 31,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 3,
+          "pulse_modifier": 1,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0420_모니터시작_누른후_접점껐다켜보기.pcapng",
+      "short": "0420_모니터시작_누른후_접점껐다켜보기",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 31,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 3,
+          "pulse_modifier": 1,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0420_접속만.pcapng",
+      "short": "0420_접속만",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 31,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 3,
+          "pulse_modifier": 1,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0421_4개프로그램이있는프로젝트를_PLC로부터읽기.pcapng",
+      "short": "0421_4개프로그램이있는프로젝트를_PLC로부터읽기",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 36,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 1,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 6,
+          "pulse_modifier": 1,
+          "unknown": 1
+        },
+        "by_source": {
+          "bytecode": 5,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0421_exe_auto_read.pcapng",
+      "short": "0421_exe_auto_read",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 36,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 1,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 6,
+          "pulse_modifier": 1,
+          "unknown": 1
+        },
+        "by_source": {
+          "bytecode": 5,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0421_upgrade5파일로모니터링후_xg5000에서접속하고_모니터ON하여_접점값변경한패킷.pcapng",
+      "short": "0421_upgrade5파일로모니터링후_xg5000에서접속하고_모",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 31,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 3,
+          "pulse_modifier": 1,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0421_스캔프로그램1개만있음_PLC로부터열기패킷.pcapng",
+      "short": "0421_스캔프로그램1개만있음_PLC로부터열기패킷",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 49,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 2,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 16,
+          "pulse_modifier": 1,
+          "unknown": 3
+        },
+        "by_source": {
+          "bytecode": 18,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0421_스캔프로그램2개만있음_PLC로부터열기패킷.pcapng",
+      "short": "0421_스캔프로그램2개만있음_PLC로부터열기패킷",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 41,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 1,
+          "timer": 1,
+          "counter": 1,
+          "contact": 19,
+          "coil": 7,
+          "system_flag": 1,
+          "logic_op": 8,
+          "pulse_modifier": 1,
+          "unknown": 2
+        },
+        "by_source": {
+          "bytecode": 10,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0421_접점켜둔상태에서_모니터ON_잠시후모니터OFF.pcapng",
+      "short": "0421_접점켜둔상태에서_모니터ON_잠시후모니터OFF",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 31,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 3,
+          "pulse_modifier": 1,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0421_진단을위한_PLC로부터열기패킷.pcapng",
+      "short": "0421_진단을위한_PLC로부터열기패킷",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 42,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 1,
+          "timer": 1,
+          "counter": 1,
+          "contact": 19,
+          "coil": 7,
+          "system_flag": 1,
+          "logic_op": 10,
+          "pulse_modifier": 1,
+          "unknown": 1
+        },
+        "by_source": {
+          "bytecode": 11,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "0423_PLC로부터열기.pcapng",
+      "short": "0423_PLC로부터열기",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 156,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 17,
+          "timer": 2,
+          "counter": 1,
+          "contact": 19,
+          "coil": 7,
+          "system_flag": 30,
+          "logic_op": 69,
+          "pulse_modifier": 1,
+          "unknown": 10
+        },
+        "by_source": {
+          "bytecode": 127,
+          "il_fallback": 29
+        }
+      },
+      "nf": {
+        "progs": 3,
+        "rungs": 9,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "pkt_monitor_0410_런중수정시작_두프로그램접점을F5로바꿔서런중수정쓰기_런중수정종료.pcapng",
+      "short": "pkt_monitor_0410_런중수정시작_두프로그램접점을F",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 31,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 3,
+          "pulse_modifier": 1,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    },
+    {
+      "file": "pkt_monitor_0416_접점하나씩_값바꾸기.pcapng",
+      "short": "pkt_monitor_0416_접점하나씩_값바꾸기",
+      "il": {
+        "progs": 4,
+        "rungs": 21,
+        "instr": 31,
+        "recall": "16/18",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 1,
+          "counter": 1,
+          "contact": 18,
+          "coil": 7,
+          "system_flag": 0,
+          "logic_op": 3,
+          "pulse_modifier": 1,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 31
+        }
+      },
+      "nf": {
+        "progs": 1,
+        "rungs": 1,
+        "instr": 0,
+        "recall": "N/A (il-free)",
+        "by_kind": {
+          "function_call": 0,
+          "timer": 0,
+          "counter": 0,
+          "contact": 0,
+          "coil": 0,
+          "system_flag": 0,
+          "logic_op": 0,
+          "pulse_modifier": 0,
+          "unknown": 0
+        },
+        "by_source": {
+          "bytecode": 0,
+          "il_fallback": 0
+        }
+      }
+    }
+  ]
+}

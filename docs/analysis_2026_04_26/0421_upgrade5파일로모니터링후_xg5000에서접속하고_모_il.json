@@ -1,0 +1,776 @@
+{
+  "source": "/Users/kangminki/Desktop/Important/AI/SmartFactory/PLC_StateManager/docs/0421_upgrade5파일로모니터링후_xg5000에서접속하고_모니터ON하여_접점값변경한패킷.pcapng",
+  "grammar_version": "2026-04-23",
+  "mode": "il_ground_truth",
+  "programs": [
+    {
+      "index": 0,
+      "name": "NewProgram",
+      "byte_range": [
+        0,
+        0
+      ],
+      "boundary_marker": "NO_BYTECODE_EVIDENCE",
+      "response_idx": null,
+      "token_count": 0,
+      "rung_count": 1,
+      "fb_count": 0,
+      "fb_indices": [],
+      "rungs": [
+        {
+          "index": 0,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "%MW3000.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "OR",
+              "operand_str": "_ON",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1
+            },
+            {
+              "kind": "coil",
+              "opcode": "OUT",
+              "operand_str": "%MW3000.1",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 2,
+              "coil_type": "OUT",
+              "element_type": 14
+            },
+            {
+              "kind": "pulse_modifier",
+              "opcode": "ANDP",
+              "operand_str": "%MW152.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 3
+            }
+          ],
+          "instruction_count": 4,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "name": "NewProgram2",
+      "byte_range": [
+        0,
+        0
+      ],
+      "boundary_marker": "NO_BYTECODE_EVIDENCE",
+      "response_idx": null,
+      "token_count": 0,
+      "rung_count": 4,
+      "fb_count": 0,
+      "fb_indices": [],
+      "rungs": [
+        {
+          "index": 0,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "%IW5000.12",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "OR",
+              "operand_str": "%IW5000.13",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1
+            },
+            {
+              "kind": "coil",
+              "opcode": "RST",
+              "operand_str": "%MW6000.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 2,
+              "coil_type": "RST",
+              "element_type": 17
+            }
+          ],
+          "instruction_count": 3,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 1,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "%IW5000.15",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            },
+            {
+              "kind": "logic_op",
+              "opcode": "OR",
+              "operand_str": "%IW5000.14",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1
+            },
+            {
+              "kind": "coil",
+              "opcode": "SET",
+              "operand_str": "%MW6000.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 2,
+              "coil_type": "SET",
+              "element_type": 16
+            }
+          ],
+          "instruction_count": 3,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 2,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "%MW6000.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 3,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [],
+          "instruction_count": 0,
+          "raw_bytes_len": 0,
+          "parse_quality": "unknown"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "name": "NewProgram3",
+      "byte_range": [
+        0,
+        0
+      ],
+      "boundary_marker": "NO_BYTECODE_EVIDENCE",
+      "response_idx": null,
+      "token_count": 0,
+      "rung_count": 4,
+      "fb_count": 0,
+      "fb_indices": [],
+      "rungs": [
+        {
+          "index": 0,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "%IW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            },
+            {
+              "kind": "coil",
+              "opcode": "SET",
+              "operand_str": "%MW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1,
+              "coil_type": "SET",
+              "element_type": 16
+            }
+          ],
+          "instruction_count": 2,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 1,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "coil",
+              "opcode": "RST",
+              "operand_str": "%MW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "coil_type": "RST",
+              "element_type": 17
+            },
+            {
+              "kind": "timer",
+              "opcode_label": "TON",
+              "func_id": 81,
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "phase_b5_3_awaiting_capture": true,
+              "timer_opcode": "TON",
+              "counter_opcode": null,
+              "params": {
+                "in": [
+                  "INST\t^LINEIN",
+                  "T#3s",
+                  "^LINEOUT",
+                  "^EMPTY"
+                ],
+                "out": [],
+                "preset_time": "T#3s",
+                "preset_value": null,
+                "instance": null
+              }
+            }
+          ],
+          "instruction_count": 2,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 2,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "%MW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            },
+            {
+              "kind": "coil",
+              "opcode": "OUT",
+              "operand_str": "%QW1400.0",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 1,
+              "coil_type": "OUT",
+              "element_type": 14
+            }
+          ],
+          "instruction_count": 2,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 3,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "coil",
+              "opcode": "OUT",
+              "operand_str": "%QW1400.1",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "coil_type": "OUT",
+              "element_type": 14
+            },
+            {
+              "kind": "counter",
+              "opcode_label": "CTU_INT",
+              "func_id": 243,
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "phase_b5_3_awaiting_capture": true,
+              "timer_opcode": null,
+              "counter_opcode": "CTU_INT",
+              "params": {
+                "in": [
+                  "INST1\t^LINEIN",
+                  "1",
+                  "%MW1002",
+                  "^LINEOUT",
+                  "%MW1000"
+                ],
+                "out": [],
+                "preset_time": null,
+                "preset_value": 1,
+                "instance": null
+              }
+            }
+          ],
+          "instruction_count": 2,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "name": "FUNCTION_Program",
+      "byte_range": [
+        0,
+        0
+      ],
+      "boundary_marker": "NO_BYTECODE_EVIDENCE",
+      "response_idx": null,
+      "token_count": 0,
+      "rung_count": 12,
+      "fb_count": 0,
+      "fb_indices": [],
+      "rungs": [
+        {
+          "index": 0,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 1,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 2,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 3,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 4,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 5,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 6,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 7,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 8,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 9,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 10,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        },
+        {
+          "index": 11,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [
+            {
+              "kind": "contact",
+              "opcode": "LOAD",
+              "operand_str": "_OFF",
+              "byte_offset": -1,
+              "stack_op": null,
+              "source": "il_fallback",
+              "parse_quality": "il_fallback",
+              "fallback_id": 0,
+              "contact_type": "NO",
+              "element_type": 6
+            }
+          ],
+          "instruction_count": 1,
+          "raw_bytes_len": 0,
+          "parse_quality": "il_fallback"
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "total_programs": 4,
+    "total_rungs": 21,
+    "total_instructions": 31,
+    "by_kind": {
+      "function_call": 0,
+      "timer": 1,
+      "counter": 1,
+      "contact": 18,
+      "coil": 7,
+      "system_flag": 0,
+      "logic_op": 3,
+      "pulse_modifier": 1,
+      "unknown": 0
+    },
+    "by_source": {
+      "bytecode": 0,
+      "il_fallback": 31
+    },
+    "parse_quality_distribution": {
+      "full": 0,
+      "il_fallback": 20,
+      "partial": 0,
+      "unknown": 1
+    },
+    "function_calls_labeled": 0,
+    "function_call_recall": "16/18",
+    "unresolved_moves": 2,
+    "phase_b5_pending": [
+      "TON",
+      "CTU_INT"
+    ],
+    "unknown_count": 0,
+    "response_count": 71,
+    "total_token_count": 0,
+    "rung_boundary_markers": [
+      "RUNG_END_A",
+      "RUNG_END_B"
+    ],
+    "program_boundary_marker": "PROGRAM_END"
+  },
+  "warnings": [
+    "total_programs/total_rungs/function_call_recall 은 IL ground truth (docs/il_parsed_0423.json) 기반 골격. pcapng 이 이 IL 과 다른 프로젝트면 이 수치는 고정값으로 나타나고 by_source='il_fallback' instruction 이 많아짐. --no-il 옵션으로 IL 의존 없이 pcapng 자체에서만 파싱 가능."
+  ]
+}

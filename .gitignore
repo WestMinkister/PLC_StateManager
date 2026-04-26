@@ -4,3 +4,5 @@ snapshots/*.bin
 snapshots/*.json
 tests/__pycache__/
 .DS_Store
+bytecode_scan.json
+program_ast.json

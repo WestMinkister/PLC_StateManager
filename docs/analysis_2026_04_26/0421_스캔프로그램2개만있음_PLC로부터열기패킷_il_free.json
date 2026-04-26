@@ -1,0 +1,76 @@
+{
+  "source": "/Users/kangminki/Desktop/Important/AI/SmartFactory/PLC_StateManager/docs/0421_스캔프로그램2개만있음_PLC로부터열기패킷.pcapng",
+  "grammar_version": "2026-04-23",
+  "mode": "il_free",
+  "programs": [
+    {
+      "index": 0,
+      "name": "Program_0",
+      "byte_range": [
+        0,
+        0
+      ],
+      "boundary_marker": "NO_BYTECODE_EVIDENCE",
+      "response_idx": null,
+      "token_count": 0,
+      "rung_count": 1,
+      "fb_count": 0,
+      "fb_indices": [],
+      "rungs": [
+        {
+          "index": 0,
+          "byte_range": [
+            0,
+            0
+          ],
+          "boundary_marker": "IL_SIGNATURE",
+          "instructions": [],
+          "instruction_count": 0,
+          "raw_bytes_len": 0,
+          "parse_quality": "unknown"
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "total_programs": 1,
+    "total_rungs": 1,
+    "total_instructions": 0,
+    "by_kind": {
+      "function_call": 0,
+      "timer": 0,
+      "counter": 0,
+      "contact": 0,
+      "coil": 0,
+      "system_flag": 0,
+      "logic_op": 0,
+      "pulse_modifier": 0,
+      "unknown": 0
+    },
+    "by_source": {
+      "bytecode": 0,
+      "il_fallback": 0
+    },
+    "parse_quality_distribution": {
+      "full": 0,
+      "il_fallback": 0,
+      "partial": 0,
+      "unknown": 1
+    },
+    "function_calls_labeled": 0,
+    "function_call_recall": "N/A (il-free)",
+    "unresolved_moves": 2,
+    "phase_b5_pending": [],
+    "unknown_count": 0,
+    "response_count": 234,
+    "total_token_count": 56,
+    "rung_boundary_markers": [
+      "RUNG_END_A",
+      "RUNG_END_B"
+    ],
+    "program_boundary_marker": "PROGRAM_END"
+  },
+  "warnings": [
+    "IL-free 모드: 프로그램 경계를 pcapng 자체의 response 단위로 추정. 함수 라벨 (TOF/TON/ADD 등) 은 rosetta.json 에 의존. Recall 은 IL 비교 없으므로 'N/A' 로 표시."
+  ]
+}

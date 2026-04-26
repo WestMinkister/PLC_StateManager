@@ -898,68 +898,112 @@ class ProgramASTBuilder:
         - rung 분할: FB_DEFINITION 위치를 anchor 로 그룹핑 (FB 사이 거리 기준).
           FB 가 0 개면 전체 토큰을 단일 rung 으로.
         - IL fallback 일체 호출하지 않음 (instruction 0개여도 0개 그대로 보고).
+
+        Phase B.8 enhancement:
+        - Collects PROGRAM_NAME tokens from all responses for logical program bundling
+        - Names same program tokens appearing in multiple responses under same name
+        - If PROGRAM_NAME tokens exist, uses them as program names instead of auto-numbering
+        - If no PROGRAM_NAME tokens, programs=[] (no auto-numbering fallback)
         """
         program_token_types = {'FB_DEFINITION', 'CONTACT_POS_A', 'CONTACT_POS_B', 'CONTACT_POS_C',
                                 'FX_FLAG', 'INSTR_LOAD', 'INSTR_NC_MOD', 'INSTR_PULSE'}
 
-        programs_list: List[Dict[str, Any]] = []
-        prog_idx = 0
+        # Phase B.8: Collect PROGRAM_NAME tokens from all responses
+        all_program_names = []  # list of {name, response_idx, is_first}
         for resp_idx, response in enumerate(self.responses):
             tokens = response.get('tokens', [])
-            program_tokens = [t for t in tokens if t.get('type') in program_token_types]
-            if not program_tokens:
-                continue
+            for t in tokens:
+                if t.get('type') == 'PROGRAM_NAME':
+                    all_program_names.append({
+                        'name': t.get('value'),
+                        'response_idx': resp_idx,
+                        'is_first': t.get('is_first'),
+                    })
 
-            # 정렬
-            program_tokens = sorted(program_tokens, key=lambda t: t.get('pos', 0))
-            # FB 위치 anchor
-            fb_positions = [t['pos'] for t in program_tokens if t.get('type') == 'FB_DEFINITION']
+        # Build programs list
+        programs_list: List[Dict[str, Any]] = []
 
-            # rung 분할: FB 가 N 개면 N 개 rung (각 FB 한 개 + 주변 토큰), FB 0 개면 1 rung
-            rungs: List[Dict[str, Any]] = []
-            if fb_positions:
-                # 각 FB 의 cell: prev FB ~ this FB ~ next FB 의 중간점 사이
-                for i, fb_pos in enumerate(fb_positions):
-                    prev_mid = (fb_positions[i-1] + fb_pos) // 2 if i > 0 else 0
-                    next_mid = (fb_pos + fb_positions[i+1]) // 2 if i+1 < len(fb_positions) else 10**9
-                    cell_tokens = [t for t in program_tokens if prev_mid <= t.get('pos', 0) < next_mid]
-                    cell_tokens_sorted = sorted(cell_tokens, key=lambda t: t.get('pos', 0))
-                    instrs = self.parse_rung(b'', cell_tokens_sorted)
-                    if cell_tokens_sorted:
-                        br = [cell_tokens_sorted[0]['pos'], cell_tokens_sorted[-1]['pos'] + 50]
-                    else:
-                        br = [0, 0]
+        # If PROGRAM_NAME tokens exist, use them as source of truth
+        if all_program_names:
+            # Logical program bundling: group by name
+            # But first, collect ALL program tokens from ALL responses (not just name responses)
+            # Then associate them to programs by bundling logic
+            name_to_first_idx = {}  # name -> first response_idx where name appears
+            for pn in all_program_names:
+                name = pn['name']
+                if name not in name_to_first_idx:
+                    name_to_first_idx[name] = pn['response_idx']
+
+            # For each unique program name, collect all program tokens from all responses
+            for prog_idx, program_name in enumerate(sorted(name_to_first_idx.keys())):
+                # Collect program tokens from ALL responses (not just the one containing PROGRAM_NAME)
+                # Heuristic: all responses are bundled into single programs list
+                # (in real PLC scenarios, all bytecode from same program is contiguous)
+                all_tokens = []
+                for resp_idx, response in enumerate(self.responses):
+                    tokens = response.get('tokens', [])
+                    program_tokens = [t for t in tokens if t.get('type') in program_token_types]
+                    # Only add tokens from responses that have program content
+                    if program_tokens:
+                        all_tokens.extend(program_tokens)
+
+                # Note: even if all_tokens is empty, PROGRAM_NAME passed grammar discriminator
+                # → this is a real program section, just without bytecode capture
+                # (capture timing difference or incomplete response).
+                # Create stub program with empty rungs (Phase B.8.2: extensible framework).
+
+                # 정렬
+                all_tokens = sorted(all_tokens, key=lambda t: t.get('pos', 0))
+                # FB 위치 anchor
+                fb_positions = [t['pos'] for t in all_tokens if t.get('type') == 'FB_DEFINITION']
+
+                # rung 분할: FB 가 N 개면 N 개 rung (각 FB 한 개 + 주변 토큰), FB 0 개면 1 rung
+                rungs: List[Dict[str, Any]] = []
+                if fb_positions:
+                    # 각 FB 의 cell: prev FB ~ this FB ~ next FB 의 중간점 사이
+                    for i, fb_pos in enumerate(fb_positions):
+                        prev_mid = (fb_positions[i-1] + fb_pos) // 2 if i > 0 else 0
+                        next_mid = (fb_pos + fb_positions[i+1]) // 2 if i+1 < len(fb_positions) else 10**9
+                        cell_tokens = [t for t in all_tokens if prev_mid <= t.get('pos', 0) < next_mid]
+                        cell_tokens_sorted = sorted(cell_tokens, key=lambda t: t.get('pos', 0))
+                        instrs = self.parse_rung(b'', cell_tokens_sorted)
+                        if cell_tokens_sorted:
+                            br = [cell_tokens_sorted[0]['pos'], cell_tokens_sorted[-1]['pos'] + 50]
+                        else:
+                            br = [0, 0]
+                        rungs.append({
+                            'index': i,
+                            'byte_range': br,
+                            'boundary_marker': 'FB_DEFINITION_BASED',
+                            'fb_count': 1,
+                            'instructions': instrs,
+                        })
+                else:
+                    # FB 가 없으면 전체 토큰을 단일 rung 으로
+                    instrs = self.parse_rung(b'', all_tokens)
+                    br = [all_tokens[0]['pos'], all_tokens[-1]['pos'] + 50] if all_tokens else [0, 0]
                     rungs.append({
-                        'index': i,
+                        'index': 0,
                         'byte_range': br,
-                        'boundary_marker': 'FB_DEFINITION_BASED',
-                        'fb_count': 1,
+                        'boundary_marker': 'NO_FB_GROUPING' if all_tokens else 'PROGRAM_NAME_ONLY',
+                        'fb_count': 0,
                         'instructions': instrs,
                     })
-            else:
-                # FB 가 없으면 전체 토큰을 단일 rung 으로
-                instrs = self.parse_rung(b'', program_tokens)
-                br = [program_tokens[0]['pos'], program_tokens[-1]['pos'] + 50]
-                rungs.append({
-                    'index': 0,
-                    'byte_range': br,
-                    'boundary_marker': 'NO_FB_GROUPING',
-                    'fb_count': 0,
-                    'instructions': instrs,
-                })
 
-            programs_list.append({
-                'index': prog_idx,
-                'name': f'Program_{prog_idx}',
-                'response_idx': resp_idx,
-                'byte_range': [program_tokens[0]['pos'], program_tokens[-1]['pos'] + 50],
-                'boundary_marker': 'IL_FREE_RESPONSE',
-                'fb_count': len(fb_positions),
-                'rung_count': len(rungs),
-                'rungs': rungs,
-                'token_count': len(program_tokens),
-            })
-            prog_idx += 1
+                programs_list.append({
+                    'index': prog_idx,
+                    'name': program_name,  # Use grammar-extracted name
+                    'byte_range': [all_tokens[0]['pos'], all_tokens[-1]['pos'] + 50] if all_tokens else [0, 0],
+                    'boundary_marker': 'IL_FREE_RESPONSE_WITH_PROGRAM_NAMES',
+                    'fb_count': len(fb_positions),
+                    'rung_count': len(rungs),
+                    'rungs': rungs,
+                    'token_count': len(all_tokens),
+                })
+        else:
+            # No PROGRAM_NAME tokens — programs = [] (no auto-numbering)
+            # This is normal for monitor/value-only pcapng
+            pass
 
         # 통계 집계
         total_rungs = sum(p['rung_count'] for p in programs_list)
@@ -987,11 +1031,13 @@ class ProgramASTBuilder:
             "RUNG_END/PROGRAM_END 마커는 모든 pcapng 에 0회 — bytecode 자체에 rung 경계 정보 없음.",
             "이 모드는 IL ground truth 없이 bytecode 만 본 결과. monitor/value-only "
             "pcapng (FB 없음) 은 program 0 개로 보고됨. 정상.",
+            "프로그램 이름은 protocol_grammar.json program_section 과 extract_program_names_from_payload() "
+            "로 추출됨 (하드코딩 키워드 검색 없음). PROGRAM_NAME 토큰이 없으면 programs=[] (자동번호 없음).",
         ]
 
         return {
             'source': self.source_path,
-            'grammar_version': '2026-04-26-il-free',
+            'grammar_version': '2026-04-26-il-free-with-program-names',
             'mode': 'il_free',
             'programs': programs_list,
             'stats': {
@@ -1005,6 +1051,7 @@ class ProgramASTBuilder:
                 'function_call_recall': 'N/A (il-free)',
                 'response_count': len(self.responses),
                 'total_token_count': total_tokens,
+                'program_names_source': 'grammar-extracted' if all_program_names else 'none',
             },
             'warnings': warnings_list,
         }

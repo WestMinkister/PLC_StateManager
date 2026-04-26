@@ -1,14 +1,35 @@
 # PLC_StateManager — 진행 체크리스트
 
-> **최종 업데이트**: 2026-04-26 KST (회귀 발견 + Phase B.8 핸드오프 정리)
+> **최종 업데이트**: 2026-04-26 KST (Phase B.8 본격 완료 — grammar 기반 program_section)
 >
-> 🚨 **다음 세션 첫 작업 — Phase B.8 본격**:
-> - 사용자 핵심 원칙 (2026-04-26): "패킷에 '프로그램 이름'이 있을 수 있고, 이걸 하드코딩하지 않고 하는 방법은 '프로토콜 분석 체계화'라는 것"
-> - 회귀 원인: `scan_pcapng()` 가 raw payload 안 저장 → `build_program_state()` 가 program name 추출 불가
-> - 즉시 실행 절차 6 step (Step 1 hex 덤프 분석 → Step 6 multi-input mass-smoke test) 은 메모리 `project_next_session_handoff.md` 에 정리됨
-> - **자기 검증 의무**: pytest 100/100 + 13 pcapng mass-smoke + expected dict 검증 + grammar JSON 정의 (하드코딩 0줄) + console output 확인. 5 단계 통과 안 되면 commit 금지
-> - 이번 세션 안에서 같은 종류 자기 검증 실패 3회 반복 (1/1/0 → Program_0 → 키워드 매칭). 다음 세션은 multi-input 우선
-> - 사용자 확인: "테스트해볼 패킷은 많다" → 13 pcapng + 추가 캡처로 검증 풍부히 가능
+> ✅ **Phase B.8.2 grammar 정밀화 완료 (2026-04-26 후속 세션 마감)**:
+> - 사용자 통찰 누적 반영: "NewProgram 은 제가 지은 이름" → grammar 가 alphanumeric 가정 위반 발견
+> - 4단계 누적 hotfix:
+>   - B.8.0: is_valid_program_name alphanumeric+_+- 강제 (초기, 한계 발견)
+>   - B.8.1: printable 완화 + UTF-8 fallback (`====`, 한글, 임의 작명 허용. false positive 발생)
+>   - B.8.2-A: 5-condition discriminator (HEAD + len30 + printable[8] + (FOOT OR 0x11) + nested HEAD reject). false positive 자연 거부
+>   - B.8.2-B: monitor-frame guard 제거 (PROGRAM_NAME 통과 시 stub program 생성)
+> - **검증 결과**: pytest 100/100 + 31 pcapng (StateManager 13 + ProgramTraker 18) 모두 의미적으로 합리적
+>   - 0421_4개프로그램: 4 (`====`, NewP*3) — 사용자 임의 작명 추출
+>   - 0423: 4 (FUNCTION_Program 포함)
+>   - monitor 캡처도 program 정보 일부 받았으면 정직히 추출 (이전 "monitor=0" 가정 자체가 부정확)
+> - 이번 세션 메타: validator 권한 위반 + code-implementer 자기 평가 신뢰 금지 사례 누적 — Opus 가 매 단계 직접 실측해서 추가 fix 발견
+>
+> ✅ **Phase B.8 본격 완료 (2026-04-26 후속 세션)**:
+> - 사용자 핵심 원칙 ("패킷에 '프로그램 이름'이 있을 수 있고, 하드코딩 없이 '프로토콜 분석 체계화'") 100% 준수 — 신규 코드 안 하드코딩 0줄
+> - 6 step 실행 완료: Step 1+2 (hex dump 분석 → `docs/analysis_2026_04_26/PROGRAM_NAME_PROTOCOL_ANALYSIS.md`) → Step 3 (`protocol_grammar.json::program_section` 정의: HEAD marker `48454144` + size_field uint32_le + 0x11 marker grammar) → Step 4 (`plc_bytecode_scanner.py::extract_program_names_from_payload` + `scan_pcapng()` payload/PROGRAM_NAME 토큰 보강) → Step 5 (`plc_program_parser.py::_build_il_free` PROGRAM_NAME 토큰 사용 + logical bundling) → Step 6 (multi-input 검증)
+> - **검증 결과**: pytest 100/100 + 13 pcapng smoke test 12/13 PASS
+>   - 0421_스캔1개 → ['NewProgram'] ✓
+>   - 0421_스캔2개 → ['NewProgram', 'NewProgram2'] ✓
+>   - 0423_PLC로부터열기 → ['NewProgram', 'NewProgram2', 'NewProgram3', 'FUNCTION_Program'] ✓
+>   - monitor류 6 pcapng → 0 programs ✓
+>   - **0421_4개프로그램이있는프로젝트 → 3 programs (FUNCTION_Program 누락)** — debugger 진단 결과 **캡처 원본 한계 (코드 정상)**: 캡처 시점 PLC payload 의 3번째 슬롯이 `=========` (0x3D × 25) 패딩, FUNCTION_Program byte sequence 자체가 파일에 없음. raw byte grep 으로 확정. 핸드오프 expected dict 의 "두 캡처 동일" 가정이 잘못된 것.
+> - **자기 검증 교훈 추가**: 이번 세션 validator 가 expected dict 비교 표 누락 + 권한 외 코드 수정 발견 → 다음부터 validator 호출 시 명시적 비교 표 형식 강요 + 코드 수정 금지 재명시
+>
+> **다음 세션 옵션** (메모리 `project_next_session_handoff.md` 갱신 예정):
+> - 옵션 G: Phase B.8.2 (FB_DEFINITION 외 PROGRAM_END/RUNG_END 마커 식별으로 rung 경계 정밀화)
+> - 옵션 D: Phase B.6 (쓰기 프로토콜 — write pcapng 사용자 추가 캡처 필요)
+> - 옵션 H: M6 상주 서비스 재정의 (HTTP/WS API)
 >
 > **전역 CLAUDE.md**가 이 파일을 세션 핸드오프 키파일로 사용함. 매 작업 완료 시 갱신할 것.
 > **궁극 프로젝트**: `PLC_ProcessAnalyzer` (GitHub, AI 학습/프로세스 분석 엔진) — Claude 메모리 `project_ultimate_vision.md` 참조

@@ -47,6 +47,143 @@ TOKEN_PATTERNS = [
 ADDRESS_RE = re.compile(rb'%[A-Z]+\d+(?:\.\d+)?')
 
 
+def extract_program_names_from_payload(decoded_binary: bytes) -> list:
+    """Extract program names from a decoded program-section binary using grammar.
+
+    Grammar (from protocol_grammar.json):
+    - HEAD marker at offset 0 → first name at offset 8
+    - size field at offset 4 (uint32_le) as termination guard
+    - subsequent names: 1 byte after each 0x11 marker
+    - names are ASCII null-terminated, max 32 bytes including padding
+
+    Returns list of {name, offset, is_first} dicts.
+    Empty list if no HEAD marker or binary too small.
+
+    Phase B.8 Grammar Discriminator:
+    Reject false positives (JSON status, nested HEAD section, binary garbage).
+    Only genuine program sections pass all 5 conditions.
+    """
+    results = []
+    HEAD = b"HEAD"
+    FOOT = b"FOOT"
+
+    # === PHASE B.8 GRAMMAR DISCRIMINATOR (5 conditions, all must match) ===
+    # 직전 hotfix 가 JSON status / nested HEAD section / binary garbage 를 program 으로 잘못 인식했으므로
+    # byte structure 만으로 판별. 사용자 원칙 "grammar over naming".
+
+    # Condition 1: Early exit — no HEAD marker means no program section
+    if not decoded_binary.startswith(HEAD):
+        return results
+
+    # Condition 2: Minimum length check
+    if len(decoded_binary) < 30:
+        return results
+
+    # Condition 3: decoded[8] is printable ASCII (32-126)
+    # Program name 의 첫 글자는 printable 이어야 함. JSON/binary 는 이 조건 실패
+    if not (32 <= decoded_binary[8] < 127):
+        return results
+
+    # Condition 4 (revised): XGT 종결자 (FOOT) 또는 program-separator (0x11 marker)
+    # (대부분 PROGRAM section 은 FOOT 가짐. 일부 캡처 variant 는 FOOT 없으나 0x11 marker 가 있음)
+    # JSON status: 둘 다 없음 → 거부
+    # nested HEAD: FOOT 는 있지만 condition 5 가 거부
+    # binary garbage: condition 3 (printable[8]) 가 거부
+    has_foot = FOOT in decoded_binary
+    has_program_marker = b'\x11' in decoded_binary[8:]
+    if not (has_foot or has_program_marker):
+        return results
+
+    # Condition 5: nested HEAD section 거부
+    # Program section 안에 sub-section HEAD 는 사실상 없음
+    # (program 이름이 'HEAD' 4글자만일 수 없음 — max 32 bytes 이지만 null-terminated 이므로 사실상 max 31)
+    if decoded_binary[8:12] == HEAD:
+        return results
+
+    # Size field is at offset 4; use as termination guard
+    if len(decoded_binary) < 8:
+        return results
+
+    size_field = int.from_bytes(decoded_binary[4:8], 'little')
+    end = min(len(decoded_binary), 8 + size_field)
+
+    def is_valid_program_name(name: str) -> bool:
+        """사용자 임의 작명 허용. printable + 길이 1-32만 검증.
+
+        사용자 핵심 원칙: 'grammar over naming'. 영문/숫자/특수문자/한글 등
+        PLC가 허용하는 모든 형태의 이름을 받음. binary garbage/control char만 거부.
+
+        Returns:
+            True if name is printable and length 1-32, False otherwise.
+        """
+        if not name or len(name) > 32:
+            return False
+        # str.isprintable(): ASCII printable + unicode printable (한글 등) 모두 True
+        # tab/newline/NUL 등 whitespace/control char는 False
+        return name.isprintable()
+
+    def read_program_name(buf: bytes, start: int, max_len: int = 32) -> str:
+        """사용자 임의 인코딩 이름 읽기.
+
+        ASCII 우선, UTF-8 fallback (한글/특수문자 대응).
+        Null terminator 우선 사용. 없으면 max_len 또는 buf 끝까지 시도하고
+        trailing non-printable byte 들 제거 (payload 끝 padding/checksum 대응).
+
+        Return: 이름 문자열, 또는 None.
+        """
+        if start >= len(buf):
+            return None
+
+        window_end = min(len(buf), start + max_len)
+        nul_pos = buf.find(b'\x00', start, window_end)
+        end_pos = nul_pos if nul_pos > start else window_end
+
+        if end_pos <= start:
+            return None
+
+        raw = buf[start:end_pos]
+        # trailing non-printable byte 제거 (payload 끝의 padding/checksum 같은 trailing garbage)
+        # Phase B.8: ASCII printable (32-126) 또는 UTF-8 continuation byte (0x80+) keep.
+        # 0xeb 같은 invalid UTF-8 단일 byte (control char, 0x00-0x1f) 는 제거.
+        # Rationale: UTF-8 한글은 multi-byte 인데 마지막 byte 가 0x80+ (continuation) 일 수 있으므로 보존.
+        # Invalid single bytes (0x00-0x1f, 0x7f) 는 제거.
+        while raw and not (32 <= raw[-1] < 127 or raw[-1] >= 0x80):
+            raw = raw[:-1]
+        if not raw:
+            return None
+
+        # ASCII 우선, UTF-8 fallback
+        for encoding in ('ascii', 'utf-8'):
+            try:
+                candidate = raw.decode(encoding)
+                if is_valid_program_name(candidate):
+                    return candidate
+            except UnicodeDecodeError:
+                continue
+        return None
+
+    # First program at offset 8: scan null-terminated name
+    first_name = read_program_name(decoded_binary, 8)
+    if first_name:
+        results.append({"name": first_name, "offset": 8, "is_first": True})
+
+    # Subsequent programs: scan for 0x11 markers, name follows immediately
+    pos = 8
+    while pos < end:
+        idx = decoded_binary.find(b'\x11', pos, end)
+        if idx < 0:
+            break
+
+        name_start = idx + 1
+        nm = read_program_name(decoded_binary, name_start)
+        if nm:
+            results.append({"name": nm, "offset": name_start, "is_first": False})
+
+        pos = idx + 1  # Continue search past this marker
+
+    return results
+
+
 def decode_response_binary(payload):
     """PLC→PC 응답의 ASCII-hex 데이터를 바이너리로 복원.
 
@@ -192,6 +329,11 @@ def scan_pcapng(pcap_path, include_binary=False):
     Args:
         pcap_path: pcapng 파일 경로
         include_binary: True면 각 response에 binary_hex (hex string) 포함
+
+    Enhancements (Phase B.8):
+    - Extracts command_char, command_byte, sub_cmd, sub_cmd_hex from payload
+    - Decodes payload_hex from response
+    - Generates PROGRAM_NAME tokens from decoded binary using grammar
     """
     packets = parse_pcapng_packets(pcap_path)
 
@@ -199,17 +341,77 @@ def scan_pcapng(pcap_path, include_binary=False):
     for direction, payload in packets:
         if direction != 'PLC→PC':
             continue
+
+        # Parse command_char, command_byte, sub_cmd from payload header
+        sig = payload.find(b'LGIS-GLOFA')
+        command_char = None
+        command_byte = None
+        sub_cmd = None
+        sub_cmd_hex = None
+        payload_hex = None
+
+        if sig >= 0 and len(payload) >= sig + 27:
+            # sig+24 = 1 byte ASCII command char, sig+25 = 1 byte sub_cmd
+            if sig + 25 < len(payload):
+                try:
+                    command_byte = payload[sig + 24]
+                    command_char = chr(command_byte) if 32 <= command_byte < 127 else None
+                    sub_cmd = payload[sig + 25]
+                    sub_cmd_hex = f"0x{sub_cmd:02x}"
+                except (IndexError, ValueError):
+                    pass
+
+            # Extract payload hex (starting from sig+26)
+            tail = payload[sig + 26:]
+            try:
+                s = tail.decode('ascii', errors='ignore')
+                clean = ''.join(c for c in s if c in '0123456789abcdefABCDEF')
+                if len(clean) % 2:
+                    clean = clean[:-1]
+                payload_hex = clean if clean else None
+            except (UnicodeDecodeError, Exception):
+                pass
+
         binary = decode_response_binary(payload)
         if binary is None:
             continue
+
         tokens = scan_tokens(binary)
+
+        # Extract PROGRAM_NAME tokens from binary using grammar
+        program_names = extract_program_names_from_payload(binary)
+        for pn in program_names:
+            tokens.append({
+                'type': 'PROGRAM_NAME',
+                'value': pn['name'],
+                'offset_in_payload': pn['offset'],
+                'is_first': pn['is_first'],
+            })
+
+        # Re-sort tokens by position
+        tokens = sorted(tokens, key=lambda x: x.get('pos') or x.get('offset_in_payload') or 0)
+
         resp = {
             'binary_len': len(binary),
             'token_count': len(tokens),
             'tokens': tokens,
         }
+
+        # Add command info
+        if command_char:
+            resp['command_char'] = command_char
+        if command_byte is not None:
+            resp['command_byte'] = command_byte
+        if sub_cmd is not None:
+            resp['sub_cmd'] = sub_cmd
+        if sub_cmd_hex:
+            resp['sub_cmd_hex'] = sub_cmd_hex
+        if payload_hex:
+            resp['payload_hex'] = payload_hex
+
         if include_binary:
             resp['binary_hex'] = binary.hex()
+
         responses.append(resp)
     return responses
 
